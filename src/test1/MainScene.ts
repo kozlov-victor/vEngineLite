@@ -13,9 +13,10 @@ export class MainScene extends Scene {
     override onPreloadStarted() {
         console.log('Preload started');
         this.app.assetManager
-            .add('lava', 'image', './assets/lava.png')
-            .add('tileset', 'image', './assets/tiles2.png')
-            .add('cat', 'image', './assets/cat.png')
+            .setBaseUrl('./src/test1/')
+            .add('lava', 'image', 'assets/lava.png')
+            .add('tileset', 'image', 'assets/tiles2.png')
+            .add('cat', 'image', 'assets/cat.png')
     }
 
     override onProgress(percents: number) {
