@@ -13,8 +13,15 @@ type CompleteCallback = () => void;
 export class AssetManager {
     private readonly cache = new Map<string, any>();
     private readonly manifest: AssetManifestItem[] = [];
+    private baseUrl = '';
+
+    public setBaseUrl(value: string) {
+        this.baseUrl = value;
+        return this;
+    }
 
     public add(key: string, type: AssetType, path: string): this {
+        path = this.baseUrl + path;
         this.manifest.push({ key, type, path });
         return this;
     }
