@@ -11,10 +11,11 @@ export class Particle extends Sprite {
         super();
         const size = 16;
         this.size.wh(size);
-        const color = Color.WHITE();
-        color.r = MathEx.randomInt(255);
-        color.g = MathEx.randomInt(255);
-        color.b = MathEx.randomInt(255);
+        const color = new Color(
+            MathEx.randomInt(255),
+            MathEx.randomInt(255),
+            MathEx.randomInt(255)
+        );
         this.textureInfo = {
             texture,
             rect: {

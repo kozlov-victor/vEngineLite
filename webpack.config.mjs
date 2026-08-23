@@ -1,6 +1,7 @@
 import * as path from 'path';
 import * as ESLintPlugin from 'eslint-webpack-plugin';
 import {fileURLToPath} from 'url';
+import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
 
 const MINIMIZE = false;
 
@@ -25,6 +26,7 @@ export default async (env = {})=>{
     const output = {};
 
     entry['index'] = './src/index.ts';
+    entry['editor'] = './src/editor/main.tsx';
     output.path = path.resolve('./out');
 
     output.filename = '[name].js';
@@ -55,6 +57,15 @@ export default async (env = {})=>{
                     test: /\.txt/,
                     use: [
                         {loader: "txt/txt-loader",options: {}},
+                    ]
+                },
+                {
+                    test: /\.tsx$/,
+                    enforce: 'pre',
+                    use: [
+                        {
+                            loader: "ts-engine-precompiler/tsx-precompiler.mjs"
+                        },
                     ]
                 },
                 {
@@ -90,6 +101,7 @@ export default async (env = {})=>{
             failOnError: true,
             extensions: ["ts", "tsx"],
         }),
+        new ImportCssPlugin({output: 'all.css'}),
         new WebpackDonePlugin(),
     ];
 

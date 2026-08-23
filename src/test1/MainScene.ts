@@ -1,22 +1,23 @@
 import {Scene} from "../vEngineLight/application/Scene";
 import {GLUtils} from "../vEngineLight/utils/GLUtils";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
-import {AminatedGameObject} from "./AminatedGameObject";
+import {AnimatedGameObject} from "./AnimatedGameObject";
 import {Particle} from "./Particle";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
+import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 
 export class MainScene extends Scene {
 
     private delta = 1;
+    private hero: AnimatedGameObject;
 
     override onPreloadStarted() {
-        console.log('Preload started');
         this.app.assetManager
             .setBaseUrl('./src/test1/')
             .add('lava', 'image', 'assets/lava.png')
             .add('tileset', 'image', 'assets/tiles2.png')
-            .add('cat', 'image', 'assets/cat.png')
+            .add('cat', 'image', 'assets/hero.png')
     }
 
     override onProgress(percents: number) {
@@ -26,8 +27,7 @@ export class MainScene extends Scene {
     override onReady() {
         super.onReady();
         const lava = this.app.assetManager.getImage('lava');
-        const lavaTexture =
-            GLUtils.createTextureFromImage(lava);
+        const lavaTexture = GLUtils.createTextureFromImage(lava);
         const tileMapImage = this.app.assetManager.getImage('tileset');
         const tileMapTexture = GLUtils.createTextureFromImage(tileMapImage);
 
@@ -55,10 +55,6 @@ export class MainScene extends Scene {
 
         this.addObject(tilemap);
 
-        const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
-        const animatedCat = new AminatedGameObject(catTexture);
-        this.addObject(animatedCat);
-
         const r = new Rectangle();
         r.color.rgba(255,0,0,255);
         r.size.wh(150,150);
@@ -69,6 +65,14 @@ export class MainScene extends Scene {
         ellipse.position.xy(120,120);
         ellipse.color.rgb(0,0,255);
         this.addObject(ellipse);
+
+        const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
+        const animatedCat = new AnimatedGameObject(catTexture);
+        this.addObject(animatedCat);
+
+
+        this.hero = animatedCat;
+
     }
 
     override onUpdate(time: number) {
@@ -77,6 +81,18 @@ export class MainScene extends Scene {
         // this.app.camera.transform.position.x += this.delta;
         if (this.app.camera.transform.position.x > 800 || this.app.camera.transform.position.x < -100) {
             this.delta*=-1;
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.UP)) {
+            this.hero.position.y-=1;
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.DOWN)) {
+            this.hero.position.y+=1;
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
+            this.hero.position.x-=1;
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
+            this.hero.position.x+=1;
         }
     }
 }

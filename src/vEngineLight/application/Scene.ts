@@ -1,13 +1,19 @@
 
 import {VEngineLiteApplication} from "./VEngineLiteApplication";
 import {Container} from "../gameObject/base/Container";
+import {KeyboardInputControl} from "../inputControl/KeyboardInputControl";
 
 
 export abstract class Scene {
 
+    public readonly input = {
+        keyboard: new KeyboardInputControl()
+    } as const
+
     private readonly objects:Container[] = [];
 
     constructor(protected readonly app: VEngineLiteApplication) {
+
     }
 
     public onPreloadStarted() {

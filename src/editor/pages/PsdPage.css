@@ -1,0 +1,15 @@
+
+.psd-frame {
+    display: inline-block;
+    border: 1px solid black;
+    margin: 5px;
+}
+
+.psd-frame.selected {
+    border: 1px solid #13bf00;
+}
+
+.psd-layer-name {
+    font-size: 9px;
+    user-select: none;
+}

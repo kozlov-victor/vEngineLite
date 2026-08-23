@@ -1,0 +1,23 @@
+
+* {
+    box-sizing: border-box;
+    font-family: sans-serif;
+}
+
+html, body ,div {
+    margin: 0;
+    padding: 0;
+    border: none;
+}
+
+html, body {
+    height: 100%;
+}
+
+#root {
+    height: 100%;
+}
+
+button, label, input[type='checkbox'] {
+    cursor: pointer;
+}

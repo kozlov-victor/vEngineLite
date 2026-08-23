@@ -6,12 +6,14 @@ import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Color} from "../vEngineLight/rendering/Color";
 import {Size} from "../vEngineLight/utils/Size";
 
-export class AminatedGameObject extends Sprite {
+export class AnimatedGameObject extends Sprite {
 
     private readonly player = new FrameAnimationPlayer();
 
     constructor(texture: Texture) {
         super();
+        this.scale.xy(1.3);
+        this.position.xy(200)
         this.textureInfo = {
             texture,
             rect: {
@@ -20,8 +22,9 @@ export class AminatedGameObject extends Sprite {
             },
             color: Color.WHITE(),
         };
-        const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 3, 2);
-        const anim = new FrameAnimation(this, frames, 1000);
+        const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 5, 1);
+        const walk = [frames[1], frames[2], frames[3], frames[4]];
+        const anim = new FrameAnimation(this, walk, 1000);
         this.player.play(anim);
     }
 
