@@ -10,19 +10,33 @@ export class KeyboardInputControl {
     private keyBuffer = new Set<string>();
 
     constructor() {
-        window.addEventListener(KEY_DOWN, (event: KeyboardEvent) => {
-            if (event.repeat) return;
-            this.keyBuffer.add(event.code);
-            const listeners = this.getListeners(KEY_DOWN,event.code);
-            if (!listeners) return;
-            for (const listener of listeners) listener();
-        });
-        window.addEventListener(KEY_UP, (event: KeyboardEvent) => {
-            this.keyBuffer.delete(event.code);
-            const listeners = this.getListeners(KEY_UP,event.code);
-            if (!listeners) return;
-            for (const listener of listeners) listener();
-        });
+        this.keyDownListener = this.keyDownListener.bind(this);
+        this.keyUpListener = this.keyUpListener.bind(this);
+    }
+
+    public start(): void {
+        window.addEventListener(KEY_DOWN, this.keyDownListener);
+        window.addEventListener(KEY_UP, this.keyUpListener);
+    }
+
+    public stop(): void {
+        window.removeEventListener(KEY_DOWN, this.keyDownListener);
+        window.removeEventListener(KEY_UP, this.keyUpListener);
+    }
+
+    private readonly keyDownListener = (event: KeyboardEvent)=> {
+        if (event.repeat) return;
+        this.keyBuffer.add(event.code);
+        const listeners = this.getListeners(KEY_DOWN,event.code);
+        if (!listeners) return;
+        for (const listener of listeners) listener();
+    }
+
+    private readonly keyUpListener = (event: KeyboardEvent)=> {
+        this.keyBuffer.delete(event.code);
+        const listeners = this.getListeners(KEY_UP,event.code);
+        if (!listeners) return;
+        for (const listener of listeners) listener();
     }
 
     private addListener(eventName: string,btn: string,callback: Callback) {

@@ -6,6 +6,7 @@ import {Size} from "../../utils/Size";
 import {MeshFactory} from "../../utils/MeshFactory";
 import {Triangle} from "../../types";
 import {RenderableContainer} from "../base/RenderableContainer";
+import {Scene} from "../../application/Scene";
 
 export class Ellipse extends RenderableContainer {
 
@@ -16,8 +17,8 @@ export class Ellipse extends RenderableContainer {
     private _radiusY: number;
     private dirty: boolean;
 
-    public constructor(radiusX: number, radiusY = radiusX) {
-        super();
+    public constructor(scene: Scene, radiusX: number, radiusY = radiusX) {
+        super(scene);
         this.radiusX = radiusX;
         this.radiusY = radiusY;
         this.textureInfo = {

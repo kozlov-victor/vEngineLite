@@ -6,6 +6,7 @@ import {Texture} from "../rendering/Texture";
 import {TextureInfo} from "../components/TextureInfo";
 import {Color} from "../rendering/Color";
 import {RenderableContainer} from "./base/RenderableContainer";
+import {Scene} from "../application/Scene";
 
 // Спрощена структура для зберігання даних тайла
 interface Tile {
@@ -24,13 +25,14 @@ export class TileMap extends RenderableContainer {
     private readonly worldTileMatrix = new Mat2d();
 
     constructor(
+        scene: Scene,
         data: number[],
         mapWidthInTiles: number,
         tilesetCols: number,
         tilesetRows: number,
         texture: Texture
     ) {
-        super();
+        super(scene);
         const tileWidth = Math.floor(texture.width / tilesetCols);
         const tileHeight = Math.floor(texture.height / tilesetRows);
 

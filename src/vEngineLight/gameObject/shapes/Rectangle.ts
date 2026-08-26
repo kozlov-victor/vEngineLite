@@ -4,13 +4,14 @@ import {Vector2} from "../../utils/Vector2";
 import {Size} from "../../utils/Size";
 import {RenderableContainer} from "../base/RenderableContainer";
 import {TriangleBatchRenderer} from "../../rendering/TriangleBatchRenderer";
+import {Scene} from "../../application/Scene";
 
 export class Rectangle extends RenderableContainer {
 
     public readonly color = Color.WHITE();
 
-    constructor() {
-        super();
+    constructor(scene: Scene) {
+        super(scene);
         this.textureInfo = {
             color: this.color,
             texture: GLUtils.getEmptyTexture(),

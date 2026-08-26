@@ -4,11 +4,12 @@ import {Vector2} from "../vEngineLight/utils/Vector2";
 import {MathEx} from "../vEngineLight/utils/MathEx";
 import {Color} from "../vEngineLight/rendering/Color";
 import {Size} from "../vEngineLight/utils/Size";
+import {Scene} from "../vEngineLight/application/Scene";
 
 export class Particle extends Sprite {
 
-    constructor(texture: Texture) {
-        super();
+    constructor(scene: Scene, texture: Texture) {
+        super(scene);
         const size = 16;
         this.size.wh(size);
         const color = new Color(

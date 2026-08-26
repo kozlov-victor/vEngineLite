@@ -32,6 +32,7 @@ export class MainScene extends Scene {
         const tileMapTexture = GLUtils.createTextureFromImage(tileMapImage);
 
         const tilemap = new TileMap(
+            this,
             [ // map data
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
                 1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
@@ -49,34 +50,32 @@ export class MainScene extends Scene {
 
         const NUM_SPRITES = 1000;
         for (let i = 0; i < NUM_SPRITES; i++) {
-            const p = new Particle(lavaTexture);
+            const p = new Particle(this,lavaTexture);
             this.addObject(p);
         }
 
         this.addObject(tilemap);
 
-        const r = new Rectangle();
+        const r = new Rectangle(this);
         r.color.rgba(255,0,0,255);
         r.size.wh(150,150);
         r.position.xy(120,60);
         this.addObject(r);
 
-        const ellipse = new Ellipse(26,12);
+        const ellipse = new Ellipse(this,26,12);
         ellipse.position.xy(120,120);
         ellipse.color.rgb(0,0,255);
         this.addObject(ellipse);
 
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
-        const animatedCat = new AnimatedGameObject(catTexture);
+        const animatedCat = new AnimatedGameObject(this,catTexture);
         this.addObject(animatedCat);
-
-
         this.hero = animatedCat;
 
     }
 
-    override onUpdate(time: number) {
-        super.onUpdate(time);
+    override onUpdate(dt: number) {
+        super.onUpdate(dt);
         // Рухаємо камеру для скролінгу
         // this.app.camera.transform.position.x += this.delta;
         if (this.app.camera.transform.position.x > 800 || this.app.camera.transform.position.x < -100) {

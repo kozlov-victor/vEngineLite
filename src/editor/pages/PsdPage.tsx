@@ -43,7 +43,6 @@ export class PsdPage extends BaseTsxComponent {
     private export() {
         const packer = new SpriteSheetPacker();
         const spriteSheet = packer.pack(this.header, this.layers);
-
         const spriteSheetRenderer = new SpriteSheetRenderer();
         const canvas = spriteSheetRenderer.render(this.header, this.layers, spriteSheet);
         canvas.toBlob(async (blob)=>{

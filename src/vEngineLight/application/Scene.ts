@@ -12,7 +12,7 @@ export abstract class Scene {
 
     private readonly objects:Container[] = [];
 
-    constructor(protected readonly app: VEngineLiteApplication) {
+    constructor(public readonly app: VEngineLiteApplication) {
 
     }
 
@@ -28,9 +28,20 @@ export abstract class Scene {
 
     }
 
-    public onUpdate(time: number) {
+    public onUpdate(dt: number) {
+
         for (const obj of this.objects) {
-            obj.update(time);
+            obj.update(dt);
+        }
+
+        const bodies = this.objects.filter(it=>it.body!==undefined); // todo
+        for (let i=0;i<bodies.length;i++) {
+            for (let j=i+1;j<bodies.length;j++) {
+                const a = bodies[i].body!;
+                const b = bodies[j].body!;
+                const collision = this.app.physics.detectCollision(a,b);
+                if (collision) this.app.physics.resolveCollision(a,b,collision);
+            }
         }
     }
 

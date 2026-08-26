@@ -12,22 +12,17 @@ export class SpriteSheetRenderer {
         const canvas =
             document.createElement("canvas");
 
-        canvas.width =
-            sheet.width;
+        canvas.width = sheet.width;
 
-        canvas.height =
-            sheet.height;
+        canvas.height = sheet.height;
 
-        const ctx =
-            canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d")!;
 
         for (let i = 0; i < layers.length; i++) {
 
-            const layer =
-                layers[i];
+            const layer = layers[i];
 
-            const frame =
-                sheet.frames[i];
+            const frame = sheet.frames[i];
 
             const imageData =
                 this.cropLayerToDocument(

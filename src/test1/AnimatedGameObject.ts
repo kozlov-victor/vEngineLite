@@ -5,15 +5,16 @@ import {FrameAnimationPlayer} from "../vEngineLight/animation/FrameAnimationPlay
 import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Color} from "../vEngineLight/rendering/Color";
 import {Size} from "../vEngineLight/utils/Size";
+import {Scene} from "../vEngineLight/application/Scene";
 
 export class AnimatedGameObject extends Sprite {
 
     private readonly player = new FrameAnimationPlayer();
 
-    constructor(texture: Texture) {
-        super();
-        this.scale.xy(1.3);
-        this.position.xy(200)
+    constructor(scene: Scene, texture: Texture) {
+        super(scene);
+        this.scale.xy(1);
+        this.position.xy(200,250);
         this.textureInfo = {
             texture,
             rect: {
@@ -24,12 +25,13 @@ export class AnimatedGameObject extends Sprite {
         };
         const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 5, 1);
         const walk = [frames[1], frames[2], frames[3], frames[4]];
-        const anim = new FrameAnimation(this, walk, 1000);
+        const anim = new FrameAnimation(this, walk, 800);
         this.player.play(anim);
     }
 
-    public override update(time: number) {
-        super.update(time);
+    public override update(dt:number) {
+        super.update(dt);
+        const time = this.scene.app.getTime();
         this.player.update(time);
     }
 
