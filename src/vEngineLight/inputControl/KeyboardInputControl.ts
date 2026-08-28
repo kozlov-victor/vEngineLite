@@ -1,17 +1,33 @@
+import {IUpdateable} from "../types";
+
 type Callback = ()=>void;
 
 const KEY_DOWN = 'keydown';
 const KEY_UP = 'keyup';
 
+const JUST_PRESSED = 0;
+const PRESSED = 1;
+const JUST_RELEASED = 2;
 
-export class KeyboardInputControl {
+export class KeyboardInputControl implements IUpdateable {
 
     private listeners: Map<string, Map<string,Callback[]>> = new Map();
-    private keyBuffer = new Set<string>();
+    private keyBuffer = new Map<string,number>();
 
     constructor() {
         this.keyDownListener = this.keyDownListener.bind(this);
         this.keyUpListener = this.keyUpListener.bind(this);
+    }
+
+    public update(dt: number): void {
+        this.keyBuffer.forEach((value, key) => {
+            if (value==JUST_PRESSED) {
+                this.keyBuffer.set(key, PRESSED);
+            }
+            else if (value===JUST_RELEASED) {
+                this.keyBuffer.delete(key);
+            }
+        });
     }
 
     public start(): void {
@@ -26,14 +42,14 @@ export class KeyboardInputControl {
 
     private readonly keyDownListener = (event: KeyboardEvent)=> {
         if (event.repeat) return;
-        this.keyBuffer.add(event.code);
+        this.keyBuffer.set(event.code,JUST_PRESSED);
         const listeners = this.getListeners(KEY_DOWN,event.code);
         if (!listeners) return;
         for (const listener of listeners) listener();
     }
 
     private readonly keyUpListener = (event: KeyboardEvent)=> {
-        this.keyBuffer.delete(event.code);
+        this.keyBuffer.set(event.code, JUST_RELEASED);
         const listeners = this.getListeners(KEY_UP,event.code);
         if (!listeners) return;
         for (const listener of listeners) listener();
@@ -79,7 +95,23 @@ export class KeyboardInputControl {
     }
 
     public isPressed(btn: string) {
-        return this.keyBuffer.has(btn);
+        if(!this.keyBuffer.has(btn)) return false;
+        const state = this.keyBuffer.get(btn);
+        return state===JUST_PRESSED || state===PRESSED;
+    }
+
+    public justPressed(btn: string) {
+        return this.keyBuffer.get(btn)===JUST_PRESSED;
+    }
+
+    public justReleased(btn: string) {
+        return this.keyBuffer.get(btn)===JUST_RELEASED;
+    }
+
+    public isReleased(btn: string) {
+        if(!this.keyBuffer.has(btn)) return false;
+        const state = this.keyBuffer.get(btn);
+        return state===JUST_RELEASED;
     }
 
 }

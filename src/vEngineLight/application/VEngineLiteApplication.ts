@@ -46,7 +46,7 @@ export class VEngineLiteApplication {
                 this.accumulator >= this.FIXED_STEP &&
                 stepCount < this.MAX_STEPS
                 ) {
-                this.scene.onUpdate(this.FIXED_STEP);
+                this.onNextUpdate(this.FIXED_STEP);
 
                 this.accumulator -= this.FIXED_STEP;
                 stepCount++;
@@ -60,6 +60,11 @@ export class VEngineLiteApplication {
         };
         this.lastTime = performance.now();
         requestAnimationFrame(step);
+    }
+
+    private onNextUpdate(dt: number) {
+        this.scene.onUpdate(this.FIXED_STEP);
+        this.scene.input.keyboard.update(dt);
     }
 
     public runScene(scene: Scene) {

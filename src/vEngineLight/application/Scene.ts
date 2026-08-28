@@ -2,6 +2,7 @@
 import {VEngineLiteApplication} from "./VEngineLiteApplication";
 import {Container} from "../gameObject/base/Container";
 import {KeyboardInputControl} from "../inputControl/KeyboardInputControl";
+import {BodyType} from "../physics/ArcadePhysics";
 
 
 export abstract class Scene {
@@ -34,13 +35,85 @@ export abstract class Scene {
             obj.update(dt);
         }
 
-        const bodies = this.objects.filter(it=>it.body!==undefined); // todo
-        for (let i=0;i<bodies.length;i++) {
-            for (let j=i+1;j<bodies.length;j++) {
-                const a = bodies[i].body!;
-                const b = bodies[j].body!;
-                const collision = this.app.physics.detectCollision(a,b);
-                if (collision) this.app.physics.resolveCollision(a,b,collision);
+        const bodies = this.objects
+            .filter(it => it.body !== undefined)
+            .map(it => it.body!);
+
+
+        // ---------------------------------------
+        // 1. Carry by previous support
+        // ---------------------------------------
+
+        for (const body of bodies) {
+
+            if (
+                body.type === BodyType.DYNAMIC &&
+                body.support?.type === BodyType.KINEMATIC
+            ) {
+                body.position.x +=
+                    body.support.frameMovement.x;
+
+                body.position.y +=
+                    body.support.frameMovement.y;
+            }
+        }
+
+
+        // ---------------------------------------
+        // 2. Забуваємо support попереднього кадру
+        // ---------------------------------------
+
+        for (const body of bodies) {
+            body.support = undefined;
+        }
+
+
+        // ---------------------------------------
+        // 3. Collision solver
+        // ---------------------------------------
+
+        const SOLVER_ITERATIONS = 10;
+
+        for (
+            let iteration = 0;
+            iteration < SOLVER_ITERATIONS;
+            iteration++
+        ) {
+            for (let i = 0; i < bodies.length; i++) {
+                for (let j = i + 1; j < bodies.length; j++) {
+
+                    const a = bodies[i];
+                    const b = bodies[j];
+
+                    const collision =
+                        this.app.physics.detectCollision(a, b);
+
+                    if (!collision) {
+                        continue;
+                    }
+
+                    this.app.physics.resolveCollision(
+                        a,
+                        b,
+                        collision
+                    );
+
+
+                    // ---------------------------------------
+                    // Визначаємо support на останній ітерації
+                    // ---------------------------------------
+
+                    if (
+                        iteration ===
+                        SOLVER_ITERATIONS - 1
+                    ) {
+                        this.app.physics.resolveSupport(
+                            a,
+                            b,
+                            collision
+                        );
+                    }
+                }
             }
         }
     }

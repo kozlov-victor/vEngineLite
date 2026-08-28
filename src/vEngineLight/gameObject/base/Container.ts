@@ -3,8 +3,9 @@ import {Size} from "../../utils/Size";
 import {TriangleBatchRenderer} from "../../rendering/TriangleBatchRenderer";
 import {RigidBody} from "../../physics/ArcadePhysics";
 import {Scene} from "../../application/Scene";
+import {IUpdateable} from "../../types";
 
-export class Container {
+export class Container implements IUpdateable {
 
     public body?: RigidBody;
     protected readonly transform = new Transform();
@@ -31,9 +32,7 @@ export class Container {
 
     public update(dt: number): void {
         if (this.body) {
-            this.scene.app.physics.applyGravity(this.body, dt);
-            this.body.position.x+=this.body.velocity.x * dt / 1000;
-            this.body.position.y+=this.body.velocity.y * dt / 1000;
+            this.scene.app.physics.integratePhysics(this.body, dt);
         }
     }
 

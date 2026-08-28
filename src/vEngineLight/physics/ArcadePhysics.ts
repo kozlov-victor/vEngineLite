@@ -6,16 +6,26 @@ interface Collision {
     depth: number;
 }
 
+export enum BodyType {
+    STATIC,
+    DYNAMIC,
+    KINEMATIC
+}
+
+
 export interface RigidBody {
     readonly position: Vector2;
     readonly size: Size;
     readonly velocity: Vector2;
-    static: boolean;
+    readonly frameMovement: Vector2;
+    support?: RigidBody;
+    type: BodyType;
+    mass: number;
 }
 
 export class ArcadePhysics {
 
-    public readonly gravity = 300; // px/s²
+    public gravity = 300; // px/s²
 
     public detectCollision(
         a: RigidBody,
@@ -99,9 +109,71 @@ export class ArcadePhysics {
         }
     }
 
-    public applyGravity(body: RigidBody, dt: number) {
-        if (body.static) return;
-        body.velocity.y += this.gravity * dt / 1000;
+    public integratePhysics(body: RigidBody, dt: number) {
+
+        const seconds = dt / 1000;
+        body.frameMovement.xy(0, 0);
+
+        if (body.type === BodyType.STATIC) {
+            return;
+        }
+
+        // Gravity тільки для dynamic
+        if (body.type === BodyType.DYNAMIC) {
+            body.velocity.y +=
+                this.gravity * seconds;
+        }
+
+        // І dynamic, і kinematic рухаються
+        const dx =
+            body.velocity.x * seconds;
+
+        const dy =
+            body.velocity.y * seconds;
+
+        body.position.x += dx;
+        body.position.y += dy;
+
+        body.frameMovement.xy(dx, dy);
+    }
+
+    public resolveSupport(
+        a: RigidBody,
+        b: RigidBody,
+        collision: Collision
+    ) {
+        const { normal } = collision;
+
+        // A стоїть на B
+        if (
+            normal.y === -1 &&
+            a.type === BodyType.DYNAMIC
+        ) {
+            a.support = b;
+        }
+
+        // B стоїть на A
+        if (
+            normal.y === 1 &&
+            b.type === BodyType.DYNAMIC
+        ) {
+            b.support = a;
+        }
+    }
+
+    private getInverseMass(body: RigidBody): number {
+
+        if (body.type !== BodyType.DYNAMIC) {
+            return 0;
+        }
+
+        if (body.mass <= 0) {
+            throw new Error(
+                'Dynamic rigid body must have mass > 0'
+            );
+        }
+
+        return 1 / body.mass;
     }
 
     public resolveCollision(
@@ -111,111 +183,90 @@ export class ArcadePhysics {
     ) {
         const { normal, depth } = collision;
 
-        // ---------------------------------------
-        // 1. Обидва статичні
-        // ---------------------------------------
+        const invMassA = this.getInverseMass(a);
+        const invMassB = this.getInverseMass(b);
 
-        // Нерухомі об'єкти не треба виправляти.
-        if (a.static && b.static) {
+        const invMassSum = invMassA + invMassB;
+
+        // Обидва static
+        if (invMassSum === 0) {
             return;
         }
 
 
         // ---------------------------------------
-        // 2. Корекція позиції
+        // 1. Position correction
         // ---------------------------------------
 
-        if (a.static) {
+        const SLOP = 0.001;
+        const PERCENT = 1.0;
 
-            // A нерухомий, тому рухаємо тільки B.
-            b.position.x -= normal.x * depth;
-            b.position.y -= normal.y * depth;
+        const correctionDepth =
+            Math.max(depth - SLOP, 0) * PERCENT;
 
-        } else if (b.static) {
+        const correction =
+            correctionDepth / invMassSum;
 
-            // B нерухомий, тому рухаємо тільки A.
-            a.position.x += normal.x * depth;
-            a.position.y += normal.y * depth;
+        a.position.x +=
+            normal.x * correction * invMassA;
 
-        } else {
+        a.position.y +=
+            normal.y * correction * invMassA;
 
-            // Обидва рухомі.
-            // Розділяємо correction між ними.
-            const halfDepth = depth * 0.5;
+        b.position.x -=
+            normal.x * correction * invMassB;
 
-            a.position.x += normal.x * halfDepth;
-            a.position.y += normal.y * halfDepth;
-
-            b.position.x -= normal.x * halfDepth;
-            b.position.y -= normal.y * halfDepth;
-        }
+        b.position.y -=
+            normal.y * correction * invMassB;
 
 
         // ---------------------------------------
-        // 3. Корекція швидкості
+        // 2. Relative velocity
         // ---------------------------------------
 
-        if (a.static) {
-            this.resolveVelocityIntoSurface(b, normal);
-        } else if (b.static) {
-            this.resolveVelocityIntoSurface(a, normal);
-        } else {
-            // Обидва рухаються.
-            this.resolveDynamicVelocities(a, b, normal);
-        }
-    }
-
-    private resolveVelocityIntoSurface(
-        body: RigidBody,
-        normal: Vector2
-    ) {
-        // Проекція швидкості на нормаль.
-        const velocityNormal =
-            body.velocity.x * normal.x +
-            body.velocity.y * normal.y;
-
-        // Якщо velocityNormal < 0,
-        // тіло рухається в поверхню.
-        if (velocityNormal < 0) {
-
-            body.velocity.x -=
-                normal.x * velocityNormal;
-
-            body.velocity.y -=
-                normal.y * velocityNormal;
-        }
-    }
-
-    private resolveDynamicVelocities(
-        a: RigidBody,
-        b: RigidBody,
-        normal: Vector2
-    ) {
-        // Відносна швидкість A відносно B.
         const relativeVelocityX =
             a.velocity.x - b.velocity.x;
 
         const relativeVelocityY =
             a.velocity.y - b.velocity.y;
 
-        // Швидкість зближення вздовж нормалі.
-        const velocityNormal =
+        const velocityAlongNormal =
             relativeVelocityX * normal.x +
             relativeVelocityY * normal.y;
 
-        // Об'єкти вже розходяться.
-        if (velocityNormal >= 0)
+
+        // Якщо тіла вже розходяться —
+        // нічого робити не треба.
+        if (velocityAlongNormal >= 0) {
             return;
+        }
 
-        // Для найпростішої моделі
-        // ділимо імпульс порівну.
-        const impulse = -velocityNormal * 0.5;
 
-        a.velocity.x += normal.x * impulse;
-        a.velocity.y += normal.y * impulse;
+        // ---------------------------------------
+        // 3. Collision impulse
+        // ---------------------------------------
 
-        b.velocity.x -= normal.x * impulse;
-        b.velocity.y -= normal.y * impulse;
+        const impulseMagnitude =
+            -velocityAlongNormal / invMassSum;
+
+        const impulseX =
+            normal.x * impulseMagnitude;
+
+        const impulseY =
+            normal.y * impulseMagnitude;
+
+
+        a.velocity.x +=
+            impulseX * invMassA;
+
+        a.velocity.y +=
+            impulseY * invMassA;
+
+        b.velocity.x -=
+            impulseX * invMassB;
+
+        b.velocity.y -=
+            impulseY * invMassB;
     }
 
 }

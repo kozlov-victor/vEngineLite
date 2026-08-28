@@ -21,3 +21,7 @@ export interface Triangle {
     v2: Vertex;
     v3: Vertex;
 }
+
+export interface IUpdateable {
+    update(dt:number):void;
+}
