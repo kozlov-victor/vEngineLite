@@ -1,9 +1,9 @@
 import {Transform} from "../../components/Transform";
 import {Size} from "../../utils/Size";
 import {TriangleBatchRenderer} from "../../rendering/TriangleBatchRenderer";
-import {RigidBody} from "../../physics/ArcadePhysics";
 import {Scene} from "../../application/Scene";
 import {IUpdateable} from "../../types";
+import {RigidBody} from "../../physics/IPhysics";
 
 export class Container implements IUpdateable {
 
@@ -32,10 +32,9 @@ export class Container implements IUpdateable {
 
     public update(dt: number): void {
         if (this.body) {
-            this.scene.app.physics.integratePhysics(this.body, dt);
+            this.scene.app.physics.updateBody(this.body, dt);
         }
     }
-
 
     // public addChild
 

@@ -1,35 +1,153 @@
 import {Vector2} from "../utils/Vector2";
 import {Size} from "../utils/Size";
+import {IPhysics, RigidBody} from "./IPhysics";
 
 interface Collision {
     normal: Vector2;
     depth: number;
 }
 
-export enum BodyType {
+export enum ArcadeRigidBodyType {
     STATIC,
     DYNAMIC,
     KINEMATIC
 }
 
-
-export interface RigidBody {
-    readonly position: Vector2;
-    readonly size: Size;
-    readonly velocity: Vector2;
-    readonly frameMovement: Vector2;
-    support?: RigidBody;
-    type: BodyType;
+class ArcadeRigidBody extends RigidBody {
+    readonly id: number;
+    type: ArcadeRigidBodyType;
+    readonly frameMovement = new Vector2();
+    support?: ArcadeRigidBody;
     mass: number;
+    friction: number; // px/s²
+
+    constructor(params: ArcadeRigidBodyParams, id: number) {
+        super(params.position,params.size,params.velocity ?? new Vector2());
+        this.id = id;
+        this.type = params.type;
+        this.mass = params.mass || 1;
+        this.friction = params.friction ?? 800;
+    }
+
+    public onGround() {
+        return this.support !== undefined;
+    }
+
+    public jump(v0: number) {
+        this.velocity.y = v0;
+        this.support = undefined;
+    }
+
+}
+export type {ArcadeRigidBody}
+
+
+export interface ArcadeRigidBodyParams {
+    position: Vector2;
+    size: Size;
+    velocity?: Vector2;
+    type: ArcadeRigidBodyType,
+    mass?: number;
+    friction?: number; // px/s²
 }
 
-export class ArcadePhysics {
+export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigidBody> {
 
-    public gravity = 300; // px/s²
+    public gravity = 300;
 
-    public detectCollision(
-        a: RigidBody,
-        b: RigidBody
+    private nextId = 0;
+
+    public createRigidBody(params: ArcadeRigidBodyParams): ArcadeRigidBody {
+        return new ArcadeRigidBody(params,this.nextId++);
+    }
+
+    public updateBody(body: RigidBody, dt: number): void {
+        this.integratePhysics(body as ArcadeRigidBody, dt);
+    }
+
+    public updateWorld(rigidBodies: RigidBody[], dt: number): void {
+
+        const bodies = rigidBodies as ArcadeRigidBody[];
+        // ---------------------------------------
+        // 1. Carry by previous support
+        // ---------------------------------------
+
+        for (const body of bodies) {
+
+            if (
+                body.type === ArcadeRigidBodyType.DYNAMIC &&
+                body.support?.type === ArcadeRigidBodyType.KINEMATIC
+            ) {
+                body.position.x +=
+                    body.support.frameMovement.x;
+
+                body.position.y +=
+                    body.support.frameMovement.y;
+            }
+        }
+
+
+        // ---------------------------------------
+        // 2. Забуваємо support попереднього кадру
+        // ---------------------------------------
+
+        for (const body of bodies) {
+            body.support = undefined;
+        }
+
+
+        // ---------------------------------------
+        // 3. Collision solver
+        // ---------------------------------------
+
+        const SOLVER_ITERATIONS = 10;
+
+        for (
+            let iteration = 0;
+            iteration < SOLVER_ITERATIONS;
+            iteration++
+        ) {
+            for (let i = 0; i < bodies.length; i++) {
+                for (let j = i + 1; j < bodies.length; j++) {
+
+                    const a = bodies[i];
+                    const b = bodies[j];
+
+                    const collision =
+                        this.detectCollision(a, b);
+
+                    if (!collision) {
+                        continue;
+                    }
+
+                    this.resolveCollision(a,b,collision);
+
+                    // ---------------------------------------
+                    // Визначаємо support на останній ітерації
+                    // ---------------------------------------
+
+                    if (
+                        iteration ===
+                        SOLVER_ITERATIONS - 1
+                    ) {
+                        this.resolveSupport(
+                            a,
+                            b,
+                            collision
+                        );
+                    }
+                }
+            }
+        }
+
+        for (const body of bodies) {
+            this.applyFriction(body, dt);
+        }
+    }
+
+    private detectCollision(
+        a: ArcadeRigidBody,
+        b: ArcadeRigidBody
     ): Collision | null {
 
         // Межі першого об'єкта
@@ -43,7 +161,6 @@ export class ArcadePhysics {
         const bRight  = b.position.x + b.size.w;
         const bTop    = b.position.y;
         const bBottom = b.position.y + b.size.h;
-
 
         // ---------------------------------------
         // Перевіряємо, чи є перетин
@@ -109,17 +226,17 @@ export class ArcadePhysics {
         }
     }
 
-    public integratePhysics(body: RigidBody, dt: number) {
+    private integratePhysics(body: ArcadeRigidBody, dt: number) {
 
         const seconds = dt / 1000;
         body.frameMovement.xy(0, 0);
 
-        if (body.type === BodyType.STATIC) {
+        if (body.type === ArcadeRigidBodyType.STATIC) {
             return;
         }
 
         // Gravity тільки для dynamic
-        if (body.type === BodyType.DYNAMIC) {
+        if (body.type === ArcadeRigidBodyType.DYNAMIC) {
             body.velocity.y +=
                 this.gravity * seconds;
         }
@@ -137,9 +254,9 @@ export class ArcadePhysics {
         body.frameMovement.xy(dx, dy);
     }
 
-    public resolveSupport(
-        a: RigidBody,
-        b: RigidBody,
+    private resolveSupport(
+        a: ArcadeRigidBody,
+        b: ArcadeRigidBody,
         collision: Collision
     ) {
         const { normal } = collision;
@@ -147,7 +264,7 @@ export class ArcadePhysics {
         // A стоїть на B
         if (
             normal.y === -1 &&
-            a.type === BodyType.DYNAMIC
+            a.type === ArcadeRigidBodyType.DYNAMIC
         ) {
             a.support = b;
         }
@@ -155,15 +272,44 @@ export class ArcadePhysics {
         // B стоїть на A
         if (
             normal.y === 1 &&
-            b.type === BodyType.DYNAMIC
+            b.type === ArcadeRigidBodyType.DYNAMIC
         ) {
             b.support = a;
         }
     }
 
-    private getInverseMass(body: RigidBody): number {
+    public applyFriction(body: ArcadeRigidBody, dt: number) {
+        if (body.type !== ArcadeRigidBodyType.DYNAMIC) {
+            return;
+        }
 
-        if (body.type !== BodyType.DYNAMIC) {
+        if (!body.support) {
+            return;
+        }
+
+        const seconds = dt / 1000;
+
+        const frictionDelta =
+            body.friction * seconds;
+
+        if (body.velocity.x > 0) {
+            body.velocity.x =
+                Math.max(
+                    0,
+                    body.velocity.x - frictionDelta
+                );
+        } else if (body.velocity.x < 0) {
+            body.velocity.x =
+                Math.min(
+                    0,
+                    body.velocity.x + frictionDelta
+                );
+        }
+    }
+
+    private getInverseMass(body: ArcadeRigidBody): number {
+
+        if (body.type !== ArcadeRigidBodyType.DYNAMIC) {
             return 0;
         }
 
@@ -176,9 +322,9 @@ export class ArcadePhysics {
         return 1 / body.mass;
     }
 
-    public resolveCollision(
-        a: RigidBody,
-        b: RigidBody,
+    private resolveCollision(
+        a: ArcadeRigidBody,
+        b: ArcadeRigidBody,
         collision: Collision
     ) {
         const { normal, depth } = collision;

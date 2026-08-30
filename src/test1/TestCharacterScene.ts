@@ -5,7 +5,7 @@ import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {MathEx} from "../vEngineLight/utils/MathEx";
-import {BodyType} from "../vEngineLight/physics/ArcadePhysics";
+import {ArcadeRigidBody, ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -21,18 +21,13 @@ export class TestCharacterScene extends Scene {
     override onReady() {
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const animatedCat = new AnimatedGameObject(this,catTexture);
-        (window as any).hero = animatedCat;
         this.addObject(animatedCat);
-        animatedCat.body = {
+        animatedCat.body = this.app.physics.createRigidBody({
+            type: ArcadeRigidBodyType.DYNAMIC,
             position: animatedCat.position,
             size: animatedCat.size,
-            type: BodyType.DYNAMIC,
-            velocity: new Vector2(),
-            mass: 1,
-            frameMovement: new Vector2(),
-        };
+        });
         this.hero = animatedCat;
-
 
         {
             const platform = new Rectangle(this);
@@ -40,14 +35,11 @@ export class TestCharacterScene extends Scene {
             platform.size.wh(400,50);
             platform.position.xy(100,450);
             platform.color.rgb(120,0,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
+                type: ArcadeRigidBodyType.STATIC,
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.STATIC,
-                mass: 1,
-                velocity: new Vector2(),
-                frameMovement: new Vector2(),
-            }
+            });
         }
 
         {
@@ -56,15 +48,11 @@ export class TestCharacterScene extends Scene {
             platform.size.wh(50,50);
             platform.position.xy(230,250);
             platform.color.rgb(120,0,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.DYNAMIC,
-                mass: 1,
-                velocity: new Vector2(),
-                frameMovement: new Vector2(),
-            };
-            (platform.body as any).name = 'box';
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
         }
 
         {
@@ -73,14 +61,11 @@ export class TestCharacterScene extends Scene {
             platform.size.wh(50,30);
             platform.position.xy(310,210);
             platform.color.rgb(120,0,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.DYNAMIC,
-                velocity: new Vector2(),
-                frameMovement: new Vector2(),
-                mass: 1,
-            }
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
         }
 
         {
@@ -89,14 +74,12 @@ export class TestCharacterScene extends Scene {
             platform.size.wh(50,30);
             platform.position.xy(310,210);
             platform.color.rgb(120,0,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.KINEMATIC,
+                type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(10,0),
-                mass: 1,
-                frameMovement: new Vector2(),
-            }
+            });
         }
 
         {
@@ -105,57 +88,52 @@ export class TestCharacterScene extends Scene {
             platform.size.wh(50,30);
             platform.position.xy(90,210);
             platform.color.rgb(0,233,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.KINEMATIC,
+                type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,-10),
-                mass: 1,
-                frameMovement: new Vector2(),
-            }
+            });
         }
 
         this.input.keyboard.onKeyDown(KeyboardKey.Z, ()=>{
             const platform = new Rectangle(this);
             this.addObject(platform);
             platform.size.wh(50,30);
-            platform.position.xy(MathEx.randomInt(300),MathEx.randomInt(50));
+            platform.position.xy(MathEx.randomInt(800),MathEx.randomInt(50));
             platform.color.rgb(120,0,0);
-            platform.body = {
+            platform.body = this.app.physics.createRigidBody({
                 position: platform.position,
                 size: platform.size,
-                type: BodyType.DYNAMIC,
-                velocity: new Vector2(),
-                mass: 1,
-                frameMovement: new Vector2(),
-            }
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
         });
-
     }
 
 
     override onUpdate(dt: number) {
         super.onUpdate(dt);
-        if (this.input.keyboard.justPressed(KeyboardKey.RIGHT)) {
-            this.hero.body!.velocity.x+=100;
+
+        const heroRigidBody = this.hero.body as ArcadeRigidBody;
+        if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
+            heroRigidBody.velocity.x=100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
-            this.hero.body!.velocity.x = 0;
+            heroRigidBody.velocity.x = 0;
         }
 
-        if (this.input.keyboard.justPressed(KeyboardKey.LEFT)) {
-            this.hero.body!.velocity.x-=100;
+        if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
+            heroRigidBody.velocity.x=-100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
-            this.hero.body!.velocity.x = 0;
+            heroRigidBody.velocity.x = 0;
         }
 
         if (
             this.input.keyboard.isPressed(KeyboardKey.SPACE) &&
-            this.hero.body!.support !== undefined
+            heroRigidBody.onGround()
         ) {
-            this.hero.body!.velocity.y = -350;
-            this.hero.body!.support = undefined;
+            heroRigidBody.jump(-350);
         }
 
     }
