@@ -5,6 +5,7 @@ export class FrameAnimationPlayer {
     private currentAnimation: FrameAnimation|undefined;
 
     public play(fa: FrameAnimation) {
+        if (fa===this.currentAnimation) return;
         fa.reset();
         this.currentAnimation = fa;
     }

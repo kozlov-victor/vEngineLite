@@ -10,6 +10,8 @@ import {Scene} from "../vEngineLight/application/Scene";
 export class AnimatedGameObject extends Sprite {
 
     private readonly player = new FrameAnimationPlayer();
+    private readonly walkAnimation:FrameAnimation;
+    private readonly idleAnimation:FrameAnimation;
 
     constructor(scene: Scene, texture: Texture) {
         super(scene);
@@ -24,15 +26,22 @@ export class AnimatedGameObject extends Sprite {
             color: Color.WHITE(),
         };
         const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 5, 1);
-        const walk = [frames[1], frames[2], frames[3], frames[4]];
-        const anim = new FrameAnimation(this, walk, 800);
-        this.player.play(anim);
+        this.walkAnimation = new FrameAnimation(this, [frames[1], frames[2], frames[3], frames[4]], 800);
+        this.idleAnimation = new FrameAnimation(this, [frames[0]], 800);
     }
 
     public override update(dt:number) {
         super.update(dt);
         const time = this.scene.app.getTime();
         this.player.update(time);
+    }
+
+    public walk() {
+        this.player.play(this.walkAnimation);
+    }
+
+    public idle() {
+        this.player.play(this.idleAnimation);
     }
 
 }

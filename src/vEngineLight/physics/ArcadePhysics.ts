@@ -1,6 +1,6 @@
 import {Vector2} from "../utils/Vector2";
-import {Size} from "../utils/Size";
-import {IPhysics, RigidBody} from "./IPhysics";
+import {IPhysics, IRigidBodyParams, RigidBody} from "./IPhysics";
+import {IFrame} from "../types";
 
 interface Collision {
     normal: Vector2;
@@ -22,7 +22,7 @@ class ArcadeRigidBody extends RigidBody {
     friction: number; // px/s²
 
     constructor(params: ArcadeRigidBodyParams, id: number) {
-        super(params.position,params.size,params.velocity ?? new Vector2());
+        super(params.target, params.rect,params.velocity ?? new Vector2());
         this.id = id;
         this.type = params.type;
         this.mass = params.mass || 1;
@@ -42,9 +42,8 @@ class ArcadeRigidBody extends RigidBody {
 export type {ArcadeRigidBody}
 
 
-export interface ArcadeRigidBodyParams {
-    position: Vector2;
-    size: Size;
+export interface ArcadeRigidBodyParams extends IRigidBodyParams {
+    rect?: IFrame;
     velocity?: Vector2;
     type: ArcadeRigidBodyType,
     mass?: number;
@@ -78,10 +77,10 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
                 body.type === ArcadeRigidBodyType.DYNAMIC &&
                 body.support?.type === ArcadeRigidBodyType.KINEMATIC
             ) {
-                body.position.x +=
+                body.target.position.x +=
                     body.support.frameMovement.x;
 
-                body.position.y +=
+                body.target.position.y +=
                     body.support.frameMovement.y;
             }
         }
@@ -151,16 +150,18 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
     ): Collision | null {
 
         // Межі першого об'єкта
-        const aLeft   = a.position.x;
-        const aRight  = a.position.x + a.size.w;
-        const aTop    = a.position.y;
-        const aBottom = a.position.y + a.size.h;
+        const aPos    = a.target.position;
+        const aLeft   = aPos.x + a.rect.x;
+        const aRight  = aLeft + a.rect.width;
+        const aTop    = aPos.y + a.rect.y;
+        const aBottom = aTop + a.rect.height;
 
         // Межі другого об'єкта
-        const bLeft   = b.position.x;
-        const bRight  = b.position.x + b.size.w;
-        const bTop    = b.position.y;
-        const bBottom = b.position.y + b.size.h;
+        const bPos = b.target.position;
+        const bLeft   = bPos.x + b.rect.x;
+        const bRight  = bLeft + b.rect.width;
+        const bTop    = bPos.y + b.rect.y;
+        const bBottom = bTop + b.rect.height;
 
         // ---------------------------------------
         // Перевіряємо, чи є перетин
@@ -188,21 +189,17 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // Якщо по X проникнення менше,
         // значить розсувати об'єкти треба по X.
         if (overlapX < overlapY) {
-
             // A знаходиться лівіше B
-            if (a.position.x < b.position.x) {
-
+            if (aPos.x < bPos.x) {
                 return {
                     normal: new Vector2(-1, 0),
                     depth: overlapX
-                };
-
+                }
             } else {
-
                 return {
                     normal: new Vector2(1, 0), // todo cache
                     depth: overlapX
-                };
+                }
             }
         }
 
@@ -210,19 +207,16 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // Інакше розсуваємо по Y.
 
         // A знаходиться вище B
-        if (a.position.y < b.position.y) {
-
+        if (aPos.y < bPos.y) {
             return {
                 normal: new Vector2(0, -1),
                 depth: overlapY
-            };
-
+            }
         } else {
-
             return {
                 normal: new Vector2(0, 1),
                 depth: overlapY
-            };
+            }
         }
     }
 
@@ -248,8 +242,8 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         const dy =
             body.velocity.y * seconds;
 
-        body.position.x += dx;
-        body.position.y += dy;
+        body.target.position.x += dx;
+        body.target.position.y += dy;
 
         body.frameMovement.xy(dx, dy);
     }
@@ -353,16 +347,16 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         const correction =
             correctionDepth / invMassSum;
 
-        a.position.x +=
+        a.target.position.x +=
             normal.x * correction * invMassA;
 
-        a.position.y +=
+        a.target.position.y +=
             normal.y * correction * invMassA;
 
-        b.position.x -=
+        b.target.position.x -=
             normal.x * correction * invMassB;
 
-        b.position.y -=
+        b.target.position.y -=
             normal.y * correction * invMassB;
 
 
