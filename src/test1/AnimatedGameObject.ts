@@ -25,9 +25,9 @@ export class AnimatedGameObject extends Sprite {
             },
             color: Color.WHITE(),
         };
-        const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 5, 1);
-        this.walkAnimation = new FrameAnimation(this, [frames[1], frames[2], frames[3], frames[4]], 800);
-        this.idleAnimation = new FrameAnimation(this, [frames[0]], 800);
+        const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 6, 1);
+        this.walkAnimation = new FrameAnimation(this, [frames[2], frames[3], frames[4], frames[5]], 800);
+        this.idleAnimation = new FrameAnimation(this, [frames[0],frames[1]], 1600);
     }
 
     public override update(dt:number) {

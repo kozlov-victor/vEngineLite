@@ -55,6 +55,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
     public gravity = 300;
 
     private nextId = 0;
+    private readonly carried  = new Set<number>();
 
     public createRigidBody(params: ArcadeRigidBodyParams): ArcadeRigidBody {
         return new ArcadeRigidBody(params,this.nextId++);
@@ -67,24 +68,20 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
     public updateWorld(rigidBodies: RigidBody[], dt: number): void {
 
         const bodies = rigidBodies as ArcadeRigidBody[];
+
         // ---------------------------------------
-        // 1. Carry by previous support
+        // 1. Carry through support chain
         // ---------------------------------------
+
+        const carried = this.carried;
+        carried.clear();
 
         for (const body of bodies) {
-
-            if (
-                body.type === ArcadeRigidBodyType.DYNAMIC &&
-                body.support?.type === ArcadeRigidBodyType.KINEMATIC
-            ) {
-                body.target.position.x +=
-                    body.support.frameMovement.x;
-
-                body.target.position.y +=
-                    body.support.frameMovement.y;
-            }
+            this.applySupportMovement(
+                body,
+                carried
+            );
         }
-
 
         // ---------------------------------------
         // 2. Забуваємо support попереднього кадру
@@ -407,6 +404,48 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         b.velocity.y -=
             impulseY * invMassB;
+    }
+
+    private applySupportMovement(
+        body: ArcadeRigidBody,
+        carried: Set<number>
+    ) {
+        if (body.type !== ArcadeRigidBodyType.DYNAMIC) {
+            return;
+        }
+
+        if (!body.support) {
+            return;
+        }
+
+        if (carried.has(body.id)) {
+            return;
+        }
+
+        // Захист від циклів.
+        carried.add(body.id);
+
+        // Спочатку переносимо support,
+        // щоб його frameMovement вже містив
+        // успадкований рух нижчих support'ів.
+        this.applySupportMovement(
+            body.support,
+            carried
+        );
+
+        const dx =
+            body.support.frameMovement.x;
+
+        const dy =
+            body.support.frameMovement.y;
+
+        body.target.position.x += dx;
+        body.target.position.y += dy;
+
+        // Успадкований рух стає частиною
+        // frameMovement цього body.
+        body.frameMovement.x += dx;
+        body.frameMovement.y += dy;
     }
 
 }
