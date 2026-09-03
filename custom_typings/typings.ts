@@ -1,3 +1,5 @@
+declare const BUILD_ID:number;
+
 declare module "*.jpg" {
     const value: string;
     export = value;

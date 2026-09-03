@@ -1,3 +1,4 @@
+import {UrlLoader} from "./UrlLoader";
 
 type AssetType = 'image' | 'audio' | 'json'|'text';
 
@@ -30,7 +31,9 @@ export class AssetManager {
         return this.get<HTMLImageElement>(key,'image');
     }
 
-    // --- Загальний метод тепер приватний ---
+    public getJson<T>(key: string) {
+        return this.get<T>(key,'json');
+    }
 
     private get<T>(key:string, type: AssetType): T {
         const manifestItem = this.manifest.find(item => item.key === key);
@@ -64,6 +67,13 @@ export class AssetManager {
                 case 'image':
                     loadPromise = this.loadImage(item.path);
                     break;
+                case 'json':
+                    loadPromise =
+                        this.loadJson(item.path,n=>{
+                            const progress = (loadedCount + n) / totalAssets;
+                            onProgress?.(progress);
+                        });
+                    break;
                 default:
                     throw new Error(`Unknown asset type: ${item.type}`);
             }
@@ -89,7 +99,13 @@ export class AssetManager {
             // img.onprogress = (e)=>{
             //     console.log(e);
             // }
-            img.src = path;
+            img.src = UrlLoader.addUrlParameter(path,'BUILD_ID',BUILD_ID);
         });
     }
+
+    private loadJson<T>(path: string,onProgress?:(n:number)=>void): Promise<T> {
+        const loader = new UrlLoader();
+        return loader.load(path,"json",onProgress);
+    }
+
 }

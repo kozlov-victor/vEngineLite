@@ -1,5 +1,5 @@
 import {Sprite} from "../gameObject/Sprite";
-import {IFrame} from "../types";
+import {IFrame, SpriteSheet} from "../types";
 
 export class FrameAnimation {
 
@@ -18,6 +18,14 @@ export class FrameAnimation {
             }
         }
         return frames;
+    }
+
+    public static spriteSheetFramesByName(spriteSheet: SpriteSheet, names: string[]) {
+        const result:IFrame[] = [];
+        for (const f of spriteSheet.frames) {
+            if (names.includes(f.name)) result.push({x:f.x, y:f.y, width:f.width, height:f.height});
+        }
+        return result;
     }
 
     constructor(private readonly gameObject: Sprite, private readonly frames: IFrame[], duration: number, private readonly loops = Infinity, startFrameIndex = 0 ) {

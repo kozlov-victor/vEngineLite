@@ -12,6 +12,7 @@ import {SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
 @DI.CSS('PsdPage.css')
 export class PsdPage extends BaseTsxComponent {
 
+    private fileName: string;
     private layers: PsdLayer[] = [];
     private header: PsdHeader;
     private selected:PsdLayer[] = [];
@@ -20,6 +21,7 @@ export class PsdPage extends BaseTsxComponent {
     private async openPsd() {
         const file = await Files.openFile(['psd']);
         if (!file.file) return;
+        this.fileName = file.file.name.replace('.psd','');
         const arrayBuffer = await file.file.arrayBuffer();
         const parser = new PsdParser(new BinaryReader(new Uint8Array(arrayBuffer)));
         const psd = parser.parse();
@@ -40,13 +42,16 @@ export class PsdPage extends BaseTsxComponent {
     }
 
     @Reactive.Method()
-    private export() {
+    private async export() {
         const packer = new SpriteSheetPacker();
         const spriteSheet = packer.pack(this.header, this.layers);
+
+        await Files.saveToFile(JSON.stringify(spriteSheet,undefined,4),`${this.fileName}.json`);
+
         const spriteSheetRenderer = new SpriteSheetRenderer();
         const canvas = spriteSheetRenderer.render(this.header, this.layers, spriteSheet);
         canvas.toBlob(async (blob)=>{
-            if (blob) await Files.saveToFile(blob, 'spritesheet.png');
+            if (blob) await Files.saveToFile(blob, `${this.fileName}.png`);
         },'image/png');
     }
 

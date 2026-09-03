@@ -6,14 +6,16 @@ import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Color} from "../vEngineLight/rendering/Color";
 import {Size} from "../vEngineLight/utils/Size";
 import {Scene} from "../vEngineLight/application/Scene";
+import {SpriteSheet} from "../vEngineLight/types";
 
 export class AnimatedGameObject extends Sprite {
 
     private readonly player = new FrameAnimationPlayer();
     private readonly walkAnimation:FrameAnimation;
     private readonly idleAnimation:FrameAnimation;
+    private readonly fallAnimation:FrameAnimation;
 
-    constructor(scene: Scene, texture: Texture) {
+    constructor(scene: Scene, texture: Texture, spriteSheet: SpriteSheet) {
         super(scene);
         this.scale.xy(1);
         this.position.xy(200,250);
@@ -25,9 +27,24 @@ export class AnimatedGameObject extends Sprite {
             },
             color: Color.WHITE(),
         };
-        const frames = FrameAnimation.framesFromRegularSpriteSheet(texture.width, texture.height, 6, 1);
-        this.walkAnimation = new FrameAnimation(this, [frames[2], frames[3], frames[4], frames[5]], 800);
-        this.idleAnimation = new FrameAnimation(this, [frames[0],frames[1]], 1600);
+        this.walkAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['step1','step2','step3','step4']),
+                800
+            );
+        this.idleAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['idle1','idle2']),
+                1600
+            );
+        this.fallAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['fall1','fall2']),
+                800
+            );
     }
 
     public override update(dt:number) {
@@ -42,6 +59,10 @@ export class AnimatedGameObject extends Sprite {
 
     public idle() {
         this.player.play(this.idleAnimation);
+    }
+
+    public fall() {
+        this.player.play(this.fallAnimation);
     }
 
 }

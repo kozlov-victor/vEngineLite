@@ -1,5 +1,5 @@
 import {PsdHeader, PsdLayer} from "../psd/PsdParser";
-import {SpriteSheet} from "./SpriteSheetPacker";
+import {SpriteSheet} from "../../vEngineLight/types";
 
 export class SpriteSheetRenderer {
 

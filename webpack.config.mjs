@@ -1,5 +1,6 @@
 import * as path from 'path';
 import * as ESLintPlugin from 'eslint-webpack-plugin';
+import * as webpack from 'webpack';
 import {fileURLToPath} from 'url';
 import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
 
@@ -94,6 +95,9 @@ export default async (env = {})=>{
     };
 
     config.plugins = [
+        new webpack.default.DefinePlugin({
+            BUILD_ID: webpack.default.DefinePlugin.runtimeValue(() => new Date().getTime()),
+        }),
         new ESLintPlugin.default({
             context: '../',
             emitError: true,

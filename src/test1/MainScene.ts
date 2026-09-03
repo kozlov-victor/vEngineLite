@@ -6,6 +6,7 @@ import {Particle} from "./Particle";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
+import {SpriteSheet} from "../vEngineLight/types";
 
 export class MainScene extends Scene {
 
@@ -18,6 +19,7 @@ export class MainScene extends Scene {
             .add('lava', 'image', 'assets/lava.png')
             .add('tileset', 'image', 'assets/tiles2.png')
             .add('cat', 'image', 'assets/hero.png')
+            .add('cat-sprite-sheet', 'image', 'assets/hero.json')
     }
 
     override onProgress(percents: number) {
@@ -68,7 +70,8 @@ export class MainScene extends Scene {
         this.addObject(ellipse);
 
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
-        const animatedCat = new AnimatedGameObject(this,catTexture);
+        const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
+        const animatedCat = new AnimatedGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
         this.hero = animatedCat;
 

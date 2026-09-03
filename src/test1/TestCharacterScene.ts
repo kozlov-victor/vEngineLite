@@ -6,6 +6,7 @@ import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {MathEx} from "../vEngineLight/utils/MathEx";
 import {ArcadeRigidBody, ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
+import {SpriteSheet} from "../vEngineLight/types";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -16,11 +17,18 @@ export class TestCharacterScene extends Scene {
             .add('lava', 'image', 'assets/lava.png')
             .add('tileset', 'image', 'assets/tiles2.png')
             .add('cat', 'image', 'assets/hero.png')
+            .add('cat-sprite-sheet', 'json', 'assets/hero.json');
+    }
+
+    override onProgress(percents: number) {
+        super.onProgress(percents);
+        console.log(percents);
     }
 
     override onReady() {
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
-        const animatedCat = new AnimatedGameObject(this,catTexture);
+        const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
+        const animatedCat = new AnimatedGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
         animatedCat.body = this.app.physics.createRigidBody({
             type: ArcadeRigidBodyType.DYNAMIC,
@@ -93,6 +101,19 @@ export class TestCharacterScene extends Scene {
             });
         }
 
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(100,200);
+            platform.color.rgb(0,233,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.KINEMATIC,
+                velocity: new Vector2(0,10),
+            });
+        }
+
         this.input.keyboard.onKeyDown(KeyboardKey.Z, ()=>{
             const platform = new Rectangle(this);
             this.addObject(platform);
@@ -116,9 +137,6 @@ export class TestCharacterScene extends Scene {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;
             heroRigidBody.velocity.x=100;
-            if (heroRigidBody.onGround()) {
-                this.hero.walk();
-            }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
             heroRigidBody.velocity.x = 0;
@@ -129,13 +147,9 @@ export class TestCharacterScene extends Scene {
             this.hero.scale.x = -1;
             this.hero.pivot.x = 64;
             heroRigidBody.velocity.x=-100;
-            if (heroRigidBody.onGround()) {
-                this.hero.walk();
-            }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
             heroRigidBody.velocity.x = 0;
-            this.hero.idle();
         }
 
         if (
@@ -143,6 +157,18 @@ export class TestCharacterScene extends Scene {
             heroRigidBody.onGround()
         ) {
             heroRigidBody.jump(-350);
+        }
+
+        if (heroRigidBody.onGround()) {
+            if (heroRigidBody.velocity.x!==0) {
+                this.hero.walk();
+            }
+            else {
+                this.hero.idle();
+            }
+        }
+        else {
+            this.hero.fall();
         }
 
     }

@@ -1,21 +1,6 @@
 import {PsdHeader, PsdLayer} from "../psd/PsdParser";
+import {IFrame, SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
 
-export interface SpriteFrame {
-    name: string;
-
-    x: number;
-    y: number;
-
-    width: number;
-    height: number;
-}
-
-export interface SpriteSheet {
-    width: number;
-    height: number;
-
-    frames: SpriteFrame[];
-}
 
 export class SpriteSheetPacker {
 

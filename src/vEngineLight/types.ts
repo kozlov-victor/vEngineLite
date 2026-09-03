@@ -10,6 +10,16 @@ export interface IFrame {
     height: number;
 }
 
+export interface SpriteFrame extends IFrame {
+    name: string;
+}
+
+export interface SpriteSheet {
+    width: number;
+    height: number;
+    frames: SpriteFrame[];
+}
+
 export interface Vertex {
     position: n2;
     textCoord: n2;
