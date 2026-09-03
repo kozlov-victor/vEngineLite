@@ -1,0 +1,62 @@
+{
+    "width": 512,
+    "height": 64,
+    "frames": [
+        {
+            "name": "fall1",
+            "x": 0,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "fall2",
+            "x": 64,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "idle1",
+            "x": 128,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "idle2",
+            "x": 192,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "step1",
+            "x": 256,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "step2",
+            "x": 320,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "step3",
+            "x": 384,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        },
+        {
+            "name": "step4",
+            "x": 448,
+            "y": 0,
+            "width": 64,
+            "height": 64
+        }
+    ]
+}
