@@ -1,12 +1,10 @@
 import {PsdHeader, PsdLayer} from "../psd/PsdParser";
-import {SpriteSheet} from "../../vEngineLight/types";
+import {IPackedSpriteSheet} from "./SpriteSheetPacker";
 
 export class SpriteSheetRenderer {
 
     public render(
-        header: PsdHeader,
-        layers: PsdLayer[],
-        sheet: SpriteSheet
+       sheet: IPackedSpriteSheet,
     ): HTMLCanvasElement {
 
         const canvas =
@@ -18,15 +16,14 @@ export class SpriteSheetRenderer {
 
         const ctx = canvas.getContext("2d")!;
 
-        for (let i = 0; i < layers.length; i++) {
-
-            const layer = layers[i];
+        for (let i = 0; i < sheet.frames.length; i++) {
 
             const frame = sheet.frames[i];
+            const layer = frame.layer;
 
             const imageData =
                 this.cropLayerToDocument(
-                    header,
+                    frame.psd.header,
                     layer
                 );
 

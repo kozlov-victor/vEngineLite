@@ -37,6 +37,7 @@ export class TestCharacterScene extends Scene {
                 x: 25, y: 2, width: 15, height: 62,
             }
         });
+        //this.app.camera.transform = animatedCat.transform;
         this.hero = animatedCat;
 
         {

@@ -1,6 +1,7 @@
 import {Vector2} from "../utils/Vector2";
 import {IPhysics, IRigidBodyParams, RigidBody} from "./IPhysics";
 import {IFrame} from "../types";
+import {UniformGrid} from "./UniformGrid";
 
 interface Collision {
     normal: Vector2;
@@ -56,18 +57,24 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
     private nextId = 0;
     private readonly carried  = new Set<number>();
+    private readonly uniformGrid = new UniformGrid(128);
+    private allRigidBodies: ArcadeRigidBody[] = [];
 
     public createRigidBody(params: ArcadeRigidBodyParams): ArcadeRigidBody {
         return new ArcadeRigidBody(params,this.nextId++);
     }
 
     public updateBody(body: RigidBody, dt: number): void {
-        this.integratePhysics(body as ArcadeRigidBody, dt);
+        const arcadeRigidBody = body as ArcadeRigidBody;
+        this.integratePhysics(arcadeRigidBody, dt);
+        this.allRigidBodies.push(arcadeRigidBody);
     }
 
-    public updateWorld(rigidBodies: RigidBody[], dt: number): void {
+    public prepareWorld(dt: number): void {
+        this.allRigidBodies.length = 0;
+    }
 
-        const bodies = rigidBodies as ArcadeRigidBody[];
+    public updateWorld(dt: number): void {
 
         // ---------------------------------------
         // 1. Carry through support chain
@@ -75,12 +82,10 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         const carried = this.carried;
         carried.clear();
+        const bodies = this.allRigidBodies;
 
         for (const body of bodies) {
-            this.applySupportMovement(
-                body,
-                carried
-            );
+            this.applySupportMovement(body,carried);
         }
 
         // ---------------------------------------
@@ -96,6 +101,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // 3. Collision solver
         // ---------------------------------------
 
+        const pairs = this.uniformGrid.getPotentialPairs(bodies);
         const SOLVER_ITERATIONS = 10;
 
         for (
@@ -103,35 +109,20 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
             iteration < SOLVER_ITERATIONS;
             iteration++
         ) {
-            for (let i = 0; i < bodies.length; i++) {
-                for (let j = i + 1; j < bodies.length; j++) {
+            for (const [a, b] of pairs) {
+                const collision = this.detectCollision(a, b);
+                if (!collision) continue;
 
-                    const a = bodies[i];
-                    const b = bodies[j];
+                this.resolveCollision(a,b,collision);
 
-                    const collision =
-                        this.detectCollision(a, b);
+                // ---------------------------------------
+                // Визначаємо support на останній ітерації
+                // ---------------------------------------
 
-                    if (!collision) {
-                        continue;
-                    }
-
-                    this.resolveCollision(a,b,collision);
-
-                    // ---------------------------------------
-                    // Визначаємо support на останній ітерації
-                    // ---------------------------------------
-
-                    if (
-                        iteration ===
-                        SOLVER_ITERATIONS - 1
-                    ) {
-                        this.resolveSupport(
-                            a,
-                            b,
-                            collision
-                        );
-                    }
+                if (
+                    iteration === SOLVER_ITERATIONS - 1
+                ) {
+                    this.resolveSupport(a,b,collision);
                 }
             }
         }
@@ -141,10 +132,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         }
     }
 
-    private detectCollision(
-        a: ArcadeRigidBody,
-        b: ArcadeRigidBody
-    ): Collision | null {
+    private detectCollision(a: ArcadeRigidBody, b: ArcadeRigidBody): Collision | null {
 
         // Межі першого об'єкта
         const aPos    = a.target.position;
@@ -177,7 +165,6 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         if (overlapX <= 0 || overlapY <= 0) {
             return null;
         }
-
 
         // ---------------------------------------
         // Вибираємо вісь найменшого проникнення

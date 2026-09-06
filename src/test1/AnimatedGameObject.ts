@@ -30,19 +30,19 @@ export class AnimatedGameObject extends Sprite {
         this.walkAnimation =
             new FrameAnimation(
                 this,
-                FrameAnimation.spriteSheetFramesByName(spriteSheet,['step1','step2','step3','step4']),
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_step1','hero_step2','hero_step3','hero_step4']),
                 800
             );
         this.idleAnimation =
             new FrameAnimation(
                 this,
-                FrameAnimation.spriteSheetFramesByName(spriteSheet,['idle1','idle2']),
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_idle1','hero_idle2']),
                 1600
             );
         this.fallAnimation =
             new FrameAnimation(
                 this,
-                FrameAnimation.spriteSheetFramesByName(spriteSheet,['fall1','fall2']),
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_fall1','hero_fall2']),
                 800
             );
     }

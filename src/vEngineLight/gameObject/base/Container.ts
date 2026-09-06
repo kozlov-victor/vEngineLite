@@ -8,7 +8,7 @@ import {RigidBody} from "../../physics/IPhysics";
 export class Container implements IUpdateable {
 
     public body?: RigidBody;
-    protected readonly transform = new Transform();
+    public readonly transform = new Transform();
 
     public readonly size = new Size();
     public readonly position = this.transform.position;

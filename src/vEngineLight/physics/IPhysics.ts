@@ -29,5 +29,6 @@ export abstract class RigidBody {
 export interface IPhysics<T,U extends RigidBody> {
     createRigidBody(params: T): U;
     updateBody(body: U, dt: number): void;
-    updateWorld(bodies: U[], dt: number): void;
+    prepareWorld(dt: number): void;
+    updateWorld(dt: number): void;
 }

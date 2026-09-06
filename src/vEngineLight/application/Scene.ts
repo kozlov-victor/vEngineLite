@@ -29,15 +29,13 @@ export abstract class Scene {
 
     public onUpdate(dt: number) {
 
+        this.app.physics.prepareWorld(dt);
+
         for (const obj of this.objects) {
             obj.update(dt);
         }
 
-        const bodies = this.objects
-            .filter(it => it.body !== undefined)
-            .map(it => it.body!);
-
-        this.app.physics.updateWorld(bodies, dt);
+        this.app.physics.updateWorld(dt);
 
     }
 

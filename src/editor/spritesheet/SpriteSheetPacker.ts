@@ -1,90 +1,61 @@
-import {PsdHeader, PsdLayer} from "../psd/PsdParser";
-import {IFrame, SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
+import {Psd, PsdLayer} from "../psd/PsdParser";
+import {SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
+import {TexturePacker} from "./TexturePacker";
 
+export interface IPackedLayerInfo extends SpriteFrame{
+    layer: PsdLayer,
+    psd: Psd;
+}
+
+export interface IPackedSpriteSheet extends SpriteSheet {
+    width: number;
+    height: number;
+    frames:IPackedLayerInfo[];
+}
 
 export class SpriteSheetPacker {
 
-    constructor(
-        private readonly padding = 0,
-        private readonly maxWidth = 2048
-    ) {
-    }
+    public pack(psd: Psd): IPackedSpriteSheet {
 
-    public pack(
-        header: PsdHeader,
-        layers: PsdLayer[]
-    ): SpriteSheet {
-
-        const frames: SpriteFrame[] = [];
-
-        let x = this.padding;
-        let y = this.padding;
-
-        let rowHeight = 0;
-
-        let sheetWidth = 0;
-        let sheetHeight = 0;
-
-        for (const layer of layers) {
-
-            const width =
-                header.width;
-
-            const height =
-                header.height;
-
-            // Переносимо sprite
-            // на наступний рядок.
-            if (
-                x + width + this.padding >
-                this.maxWidth
-            ) {
-                x = this.padding;
-
-                y +=
-                    rowHeight +
-                    this.padding;
-
-                rowHeight = 0;
-            }
-
+        const frames:IPackedLayerInfo[] = [];
+        for (const layer of psd.layers) {
             frames.push({
+                x: 0,
+                y: 0,
+                width: psd.header.width,
+                height: psd.header.height,
                 name: layer.name,
-
-                x,
-                y,
-
-                width,
-                height
-            });
-
-            x +=
-                width +
-                this.padding;
-
-            rowHeight =
-                Math.max(
-                    rowHeight,
-                    height
-                );
-
-            sheetWidth =
-                Math.max(
-                    sheetWidth,
-                    x
-                );
-
-            sheetHeight =
-                Math.max(
-                    sheetHeight,
-                    y + height + this.padding
-                );
+                layer,
+                psd
+            })
         }
 
+        const texturePacker = new TexturePacker(frames);
+        const result = texturePacker.pack();
+
         return {
-            width: sheetWidth,
-            height: sheetHeight,
+            width: result.width,
+            height: result.height,
             frames
         };
     }
+
+    public asRegularSpriteSheet(packed: IPackedSpriteSheet): SpriteSheet {
+        const frames:SpriteFrame[] = [];
+        for (const packedFrame of packed.frames) {
+            frames.push({
+                name: `${packedFrame.psd.name}_${packedFrame.name}`,
+                width: packedFrame.width,
+                height: packedFrame.height,
+                x: packedFrame.x,
+                y: packedFrame.y
+            })
+        }
+        return {
+            width: packed.width,
+            height: packed.height,
+            frames
+        };
+    }
+
 }

@@ -29,14 +29,21 @@ export interface PsdLayer {
     pixels: Uint8Array;
 }
 
+export interface Psd {
+    name: string;
+    header: PsdHeader;
+    layers: PsdLayer[];
+}
+
 export class PsdParser {
 
     constructor(
+        private readonly name: string,
         private readonly reader: BinaryReader
     ) {
     }
 
-    public parse(): {header:PsdHeader,layers:PsdLayer[]} {
+    public parse(): Psd {
 
         const header = this.readPsdHeader();
 
@@ -70,7 +77,8 @@ export class PsdParser {
 
         // Layer and Mask Information
         const layers = this.readLayerAndMaskInfo();
-        return {header, layers};
+        const name = this.name.replace('.psd','');
+        return {name, header, layers};
     }
 
     private readPsdHeader(): PsdHeader {

@@ -1,62 +1,62 @@
 {
-    "width": 512,
-    "height": 64,
+    "width": 256,
+    "height": 128,
     "frames": [
         {
-            "name": "fall1",
+            "name": "hero_step4",
+            "width": 64,
+            "height": 64,
             "x": 0,
-            "y": 0,
-            "width": 64,
-            "height": 64
+            "y": 0
         },
         {
-            "name": "fall2",
+            "name": "hero_step3",
+            "width": 64,
+            "height": 64,
             "x": 64,
-            "y": 0,
-            "width": 64,
-            "height": 64
+            "y": 0
         },
         {
-            "name": "idle1",
+            "name": "hero_step2",
+            "width": 64,
+            "height": 64,
             "x": 128,
-            "y": 0,
-            "width": 64,
-            "height": 64
+            "y": 0
         },
         {
-            "name": "idle2",
+            "name": "hero_step1",
+            "width": 64,
+            "height": 64,
             "x": 192,
-            "y": 0,
-            "width": 64,
-            "height": 64
+            "y": 0
         },
         {
-            "name": "step1",
-            "x": 256,
-            "y": 0,
+            "name": "hero_idle2",
             "width": 64,
-            "height": 64
+            "height": 64,
+            "x": 0,
+            "y": 64
         },
         {
-            "name": "step2",
-            "x": 320,
-            "y": 0,
+            "name": "hero_idle1",
             "width": 64,
-            "height": 64
+            "height": 64,
+            "x": 64,
+            "y": 64
         },
         {
-            "name": "step3",
-            "x": 384,
-            "y": 0,
+            "name": "hero_fall2",
             "width": 64,
-            "height": 64
+            "height": 64,
+            "x": 128,
+            "y": 64
         },
         {
-            "name": "step4",
-            "x": 448,
-            "y": 0,
+            "name": "hero_fall1",
             "width": 64,
-            "height": 64
+            "height": 64,
+            "x": 192,
+            "y": 64
         }
     ]
 }

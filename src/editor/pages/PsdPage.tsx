@@ -2,7 +2,7 @@ import {BaseTsxComponent} from "@engine/renderable/tsx/base/baseTsxComponent";
 import {VEngineTsxFactory} from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 import {Reactive} from "@engine/renderable/tsx/decorator/reactive";
 import {Files} from "../services/files";
-import {PsdHeader, PsdLayer, PsdParser} from "../psd/PsdParser";
+import {Psd, PsdLayer, PsdParser} from "../psd/PsdParser";
 import {BinaryReader} from "../psd/BinaryReader";
 import {DI} from "@engine/core/ioc";
 import {PsdLayerComponent} from "./PsdLayerComponent";
@@ -12,23 +12,17 @@ import {SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
 @DI.CSS('PsdPage.css')
 export class PsdPage extends BaseTsxComponent {
 
-    private fileName: string;
-    private layers: PsdLayer[] = [];
-    private header: PsdHeader;
+    private psd: Psd;
     private selected:PsdLayer[] = [];
 
     @Reactive.Method()
     private async openPsd() {
-        const file = await Files.openFile(['psd']);
-        if (!file.file) return;
-        this.fileName = file.file.name.replace('.psd','');
-        const arrayBuffer = await file.file.arrayBuffer();
-        const parser = new PsdParser(new BinaryReader(new Uint8Array(arrayBuffer)));
-        const psd = parser.parse();
-        console.log(psd);
-        this.header = psd.header;
-        this.layers = psd.layers;
-        this.selected = [...this.layers];
+        const fileHandler = await Files.openFile(['psd']);
+        if (!fileHandler.file) return;
+        const arrayBuffer = await fileHandler.file.arrayBuffer();
+        const parser = new PsdParser(fileHandler.file.name, new BinaryReader(new Uint8Array(arrayBuffer)));
+        this.psd = parser.parse();
+        this.selected = [...this.psd.layers];
     }
 
     @Reactive.Method()
@@ -44,14 +38,14 @@ export class PsdPage extends BaseTsxComponent {
     @Reactive.Method()
     private async export() {
         const packer = new SpriteSheetPacker();
-        const spriteSheet = packer.pack(this.header, this.layers);
+        const spriteSheet = packer.pack(this.psd);
 
-        await Files.saveToFile(JSON.stringify(spriteSheet,undefined,4),`${this.fileName}.json`);
+        await Files.saveToFile(JSON.stringify(packer.asRegularSpriteSheet(spriteSheet),undefined,4),`${this.psd.name}.json`);
 
         const spriteSheetRenderer = new SpriteSheetRenderer();
-        const canvas = spriteSheetRenderer.render(this.header, this.layers, spriteSheet);
+        const canvas = spriteSheetRenderer.render(spriteSheet);
         canvas.toBlob(async (blob)=>{
-            if (blob) await Files.saveToFile(blob, `${this.fileName}.png`);
+            if (blob) await Files.saveToFile(blob, `${this.psd.name}.png`);
         },'image/png');
     }
 
@@ -63,12 +57,12 @@ export class PsdPage extends BaseTsxComponent {
                 </div>
                 <div>
                     {
-                        this.layers.map((l, i) =>
+                        this.psd && this.psd.layers.map((l, i) =>
                             <div
                                 onclick={_=>this.toggleSelection(l)}
                                 classNames={{'psd-frame':true, selected:this.selected.includes(l)}} key={i}>
                                 <PsdLayerComponent
-                                    header={this.header}
+                                    header={this.psd.header}
                                     trackBy={`_${i}`}
                                     layer={l}
                                 />
@@ -79,7 +73,7 @@ export class PsdPage extends BaseTsxComponent {
                         )
                     }
 
-                    {this.layers.length>0 &&
+                    {this.psd && this.psd.layers.length>0 &&
                         <div>
                             <button onclick={this.export}>Експорт</button>
                         </div>
