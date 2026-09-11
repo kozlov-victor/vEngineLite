@@ -22,8 +22,12 @@ export class FrameAnimation {
 
     public static spriteSheetFramesByName(spriteSheet: SpriteSheet, names: string[]) {
         const result:IFrame[] = [];
-        for (const f of spriteSheet.frames) {
-            if (names.includes(f.name)) result.push({x:f.x, y:f.y, width:f.width, height:f.height});
+        for (const name of names) {
+            const f = spriteSheet.frames.find(frame => frame.name === name);
+            if (!f) {
+                throw new Error(`Cannot find frame by name: ${name}`);
+            }
+            result.push({x:f.x, y:f.y, width:f.width, height:f.height});
         }
         return result;
     }

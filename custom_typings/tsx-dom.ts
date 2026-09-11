@@ -117,8 +117,11 @@ declare namespace JSX {
         section: TCommonElement<HTMLElement>;
         select:
             ICommonElement<HTMLSelectElement> &
-            Partial<Omit<HTMLSelectElement, 'style' | 'onchange'>> &
-            { onchange: (e: Event & { target: HTMLSelectElement }) => void };
+            Partial<Omit<HTMLSelectElement, 'style'|'onchange'|'oninput'|'click'>> &
+            {
+                onchange?: (e: Event & { target: HTMLSelectElement }) => void,
+                oninput?: (e: Event & { target: HTMLSelectElement }) => void,
+            };
         small: TCommonElement<HTMLElement>;
         source: TCommonElement<HTMLSourceElement>;
         span: TCommonElement<HTMLSpanElement>;
@@ -131,7 +134,13 @@ declare namespace JSX {
         template: TCommonElement<HTMLTemplateElement>;
         tbody: TCommonElement<HTMLTableSectionElement>;
         td: TCommonElement<HTMLTableCellElement>;
-        textarea: TCommonElement<HTMLTextAreaElement>;
+        textarea:
+            ICommonElement<HTMLTextAreaElement> &
+            Partial<Omit<HTMLTextAreaElement, 'style'|'onchange'|'oninput'|'click'>> &
+            {
+                onchange?: (e: Event & { target: HTMLTextAreaElement }) => void,
+                oninput?: (e: Event & { target: HTMLTextAreaElement }) => void,
+            };
         tfoot: TCommonElement<HTMLTableSectionElement>;
         th: TCommonElement<HTMLTableCellElement>;
         thead: TCommonElement<HTMLTableSectionElement>;

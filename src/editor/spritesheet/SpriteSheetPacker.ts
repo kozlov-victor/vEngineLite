@@ -15,8 +15,7 @@ export interface IPackedSpriteSheet extends SpriteSheet {
 
 export class SpriteSheetPacker {
 
-    public pack(psd: Psd): IPackedSpriteSheet {
-
+    private createFrames(psd: Psd) {
         const frames:IPackedLayerInfo[] = [];
         for (const layer of psd.layers) {
             frames.push({
@@ -29,6 +28,13 @@ export class SpriteSheetPacker {
                 psd
             })
         }
+        return frames;
+    }
+
+
+    public packSpriteSheet(psd: Psd): IPackedSpriteSheet {
+
+        const frames = this.createFrames(psd);
 
         const texturePacker = new TexturePacker(frames);
         const result = texturePacker.pack();
@@ -38,6 +44,30 @@ export class SpriteSheetPacker {
             height: result.height,
             frames
         };
+    }
+
+    public packTileMap(psd: Psd, cols: number): IPackedSpriteSheet {
+        const frames = this.createFrames(psd);
+        let x = 0;
+        let y = 0;
+        let currY = y;
+        for (const frame of frames) {
+            frame.x = x * psd.header.width;
+            frame.y = y * psd.header.height;
+            currY = y;
+            x++;
+            if (x===cols) {
+                x=0;
+                y++;
+            }
+        }
+        const width = cols * psd.header.width;
+        const height = currY * psd.header.height + psd.header.height;
+        return {
+            width,
+            height,
+            frames
+        }
     }
 
     public asRegularSpriteSheet(packed: IPackedSpriteSheet): SpriteSheet {
