@@ -1,3 +1,5 @@
+import {Size} from "./utils/Size";
+import {Vector2} from "./utils/Vector2";
 
 export type n9 = [number, number, number, number, number, number, number, number, number];
 export type n2 = [number, number];
@@ -34,4 +36,9 @@ export interface Triangle {
 
 export interface IUpdateable {
     update(dt:number):void;
+}
+
+export interface IGeometry {
+    size:Size;
+    position:Vector2
 }

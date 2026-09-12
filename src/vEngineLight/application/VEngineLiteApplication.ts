@@ -10,7 +10,7 @@ export class VEngineLiteApplication {
     public readonly fpsCounter = new FpsCounter();
     public readonly renderer: TriangleBatchRenderer;
     public readonly assetManager = new AssetManager();
-    public readonly camera = new Camera();
+    public readonly camera = new Camera(this);
     public readonly physics = new ArcadePhysics();
     private scene: Scene;
     private running  = false;

@@ -7,6 +7,9 @@ import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {MathEx} from "../vEngineLight/utils/MathEx";
 import {ArcadeRigidBody, ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
 import {SpriteSheet} from "../vEngineLight/types";
+import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
+import {TileMap} from "../vEngineLight/gameObject/TileMap";
+import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFollowStrategy";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -14,8 +17,8 @@ export class TestCharacterScene extends Scene {
     override onPreloadStarted() {
         this.app.assetManager
             .setBaseUrl('./src/test1/')
-            .add('lava', 'image', 'assets/lava.png')
-            .add('tileset', 'image', 'assets/tiles2.png')
+            .add('tileset', 'image', 'assets/tiles.png')
+            .add('tilemap', 'json', 'assets/map.json')
             .add('cat', 'image', 'assets/hero.png')
             .add('cat-sprite-sheet', 'json', 'assets/hero.json');
     }
@@ -37,7 +40,16 @@ export class TestCharacterScene extends Scene {
                 x: 25, y: 2, width: 15, height: 62,
             }
         });
-        //this.app.camera.transform = animatedCat.transform;
+
+        this.app.camera.followTarget = animatedCat;
+
+        this.app.camera.followStrategy =
+            new LookAheadFollowStrategy(
+                100,
+                6,
+                4
+            );
+
         this.hero = animatedCat;
 
         {
@@ -114,6 +126,18 @@ export class TestCharacterScene extends Scene {
                 velocity: new Vector2(0,10),
             });
         }
+
+        const tileTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('tileset'));
+        const tiledData = TileMaps.fromTiledTileMap(
+            this.app.assetManager.getJson('tilemap'),
+            'Tile Layer 1','tiles'
+        );
+        const tileMap = new TileMap(
+            this,tiledData.data,tiledData.mapWidthInTiles,
+            tiledData.tilesetCols,tiledData.tilesetRows,
+            tileTexture
+        );
+        this.addObject(tileMap);
 
         this.input.keyboard.onKeyDown(KeyboardKey.Z, ()=>{
             const platform = new Rectangle(this);

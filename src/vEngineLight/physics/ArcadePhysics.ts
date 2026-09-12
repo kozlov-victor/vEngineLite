@@ -14,6 +14,8 @@ export enum ArcadeRigidBodyType {
     KINEMATIC
 }
 
+export type {ArcadeRigidBody}
+
 class ArcadeRigidBody extends RigidBody {
     readonly id: number;
     type: ArcadeRigidBodyType;
@@ -40,7 +42,6 @@ class ArcadeRigidBody extends RigidBody {
     }
 
 }
-export type {ArcadeRigidBody}
 
 
 export interface ArcadeRigidBodyParams extends IRigidBodyParams {

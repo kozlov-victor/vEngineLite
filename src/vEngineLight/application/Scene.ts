@@ -36,6 +36,7 @@ export abstract class Scene {
         }
 
         this.app.physics.updateWorld(dt);
+        this.app.camera.update(dt);
 
     }
 

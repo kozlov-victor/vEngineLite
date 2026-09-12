@@ -7,11 +7,15 @@ import {TextureInfo} from "../components/TextureInfo";
 import {Color} from "../rendering/Color";
 import {RenderableContainer} from "./base/RenderableContainer";
 import {Scene} from "../application/Scene";
+import {RigidBody} from "../physics/IPhysics";
+import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
+import {IGeometry} from "../types";
 
 // Спрощена структура для зберігання даних тайла
-interface Tile {
-    position: Vector2;
-    uv: Vector2;
+interface Tile extends IGeometry {
+    readonly size: Size;
+    readonly position: Vector2;
+    readonly uv: Vector2;
 }
 
 export class TileMap extends RenderableContainer {
@@ -19,6 +23,7 @@ export class TileMap extends RenderableContainer {
     private readonly tiles: Tile[] = [];
     private readonly spriteRenderer: TextureInfo;
     private readonly tileSize: Size;
+    private readonly bodies:RigidBody[] = [];
 
     // Матриці для розрахунків, щоб не створювати їх у циклі render
     private readonly localTileMatrix = new Mat2d();
@@ -51,7 +56,7 @@ export class TileMap extends RenderableContainer {
             if (tileIndex === 0) continue; // Припускаємо, що 0 - це порожній тайл
             tileIndex--; // рахунок саміх тайлів також починається з 0
 
-            this.tiles.push({
+            const tile:Tile = {
                 position: new Vector2(
                     (i % mapWidthInTiles) * tileWidth,
                     Math.floor(i / mapWidthInTiles) * tileHeight
@@ -60,7 +65,26 @@ export class TileMap extends RenderableContainer {
                     (tileIndex % tilesetCols) * tileWidth,
                     Math.floor(tileIndex / tilesetCols) * tileHeight
                 ),
-            });
+                size: this.tileSize,
+            };
+
+            this.tiles.push(tile);
+
+            this.bodies.push(
+                this.scene.app.physics.createRigidBody({
+                    type: ArcadeRigidBodyType.STATIC,
+                    target: tile
+                })
+            )
+
+        }
+    }
+
+
+    override update(dt: number) {
+        super.update(dt);
+        for (const body of this.bodies) {
+            this.scene.app.physics.updateBody(body, dt);
         }
     }
 

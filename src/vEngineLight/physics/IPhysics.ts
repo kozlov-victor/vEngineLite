@@ -1,18 +1,18 @@
 import {Vector2} from "../utils/Vector2";
-import {Container} from "../gameObject/base/Container";
-import {IFrame} from "../types";
+import {IFrame, IGeometry} from "../types";
+import {Size} from "../utils/Size";
 
 export interface IRigidBodyParams {
-    target: Container;
+    target: IGeometry;
 }
 
 export abstract class RigidBody {
 
-    public readonly target: Container;
+    public readonly target: {size:Size,position:Vector2};
     public readonly rect: IFrame;
     public readonly velocity: Vector2;
 
-    protected constructor(target: Container, rect: IFrame | undefined, velocity: Vector2) {
+    protected constructor(target: IGeometry, rect: IFrame | undefined, velocity: Vector2) {
         if (!rect) {
             rect = {
                 x: 0, y: 0,
