@@ -85,4 +85,8 @@ export class VEngineLiteApplication {
         return this.lastTime;
     }
 
+    public getCurrentScene() {
+        return this.scene;
+    }
+
 }

@@ -10,10 +10,10 @@ export class HardFollowStrategy implements CameraFollowStrategy {
         target: Container,
         dt: number
     ) {
-        camera.transform.position.x =
+        camera.position.x =
             target.position.x;
 
-        camera.transform.position.y =
+        camera.position.y =
             target.position.y;
     }
 }

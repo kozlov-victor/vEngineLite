@@ -26,13 +26,13 @@ export class Particle extends Sprite {
             color
         };
         //this.transform.position.xy(MathEx.randomInt(this.app.width),MathEx.randomInt(this.app.height));
-        this.transform.position.xy(MathEx.randomInt(600),MathEx.randomInt(600));
-        this.transform.pivot.xy(size / 2, size / 2);
+        this.position.xy(MathEx.randomInt(600),MathEx.randomInt(600));
+        this.pivot.xy(size / 2, size / 2);
     }
 
     public override update(time: number) {
         super.update(time);
-        this.transform.rotation += 0.01;
+        this.rotation += 0.01;
     }
 
 }

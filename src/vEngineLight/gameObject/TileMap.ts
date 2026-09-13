@@ -54,6 +54,7 @@ export class TileMap extends RenderableContainer {
 
         this.createTiles(data, mapWidthInTiles, tilesetCols, tileWidth, tileHeight);
         this.createMergedCollisionBodies(data, mapWidthInTiles, mapHeightInTiles, tileWidth, tileHeight);
+        this.size.wh(mapWidthInTiles * tileWidth, mapHeightInTiles * tileHeight)
     }
 
 
@@ -66,7 +67,7 @@ export class TileMap extends RenderableContainer {
 
     public override render(renderer: TriangleBatchRenderer) {
         // 1. Отримуємо світову матрицю для всієї карти ОДИН РАЗ
-        const tilemapWorldMatrix = this.transform.getWorldMatrix();
+        const tilemapWorldMatrix = this.getWorldMatrix();
 
         for (const tile of this.tiles) {
             // 2. Створюємо локальну матрицю для тайла (без створення нових об'єктів)

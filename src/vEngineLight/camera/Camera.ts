@@ -7,13 +7,20 @@ import {VEngineLiteApplication} from "../application/VEngineLiteApplication";
 export class Camera implements IUpdateable {
     // Камера - це просто GameObject.
     // В майбутньому тут можуть бути налаштування проекції, кольору фону і т.д.
-    public transform = new Transform();
+    private transform = new Transform();
+
+    public readonly position = this.transform.position;
+    public readonly scale = this.transform.scale;
 
     public followTarget?: Container;
     public followStrategy?: CameraFollowStrategy;
 
 
     constructor(public readonly app: VEngineLiteApplication) {
+    }
+
+    public getWorldMatrix() {
+        return this.transform.getWorldMatrix();
     }
 
     public update(dt: number) {

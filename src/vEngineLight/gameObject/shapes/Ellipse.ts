@@ -57,7 +57,7 @@ export class Ellipse extends RenderableContainer {
     override render(renderer: TriangleBatchRenderer) {
         this.checkDirty();
         for (const triangle of this.mash) {
-            renderer.batchTriangle(triangle, this.textureInfo.texture, this.transform.getWorldMatrix())
+            renderer.batchTriangle(triangle, this.textureInfo.texture, this.getWorldMatrix())
         }
     }
 

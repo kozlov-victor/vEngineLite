@@ -27,7 +27,7 @@ export class Rectangle extends RenderableContainer {
         renderer.batchSprite(
             this.size,
             this.textureInfo,
-            this.transform.getWorldMatrix()
+            this.getWorldMatrix()
         );
     }
 

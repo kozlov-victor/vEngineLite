@@ -20,16 +20,16 @@ export class SmoothFollowStrategy implements CameraFollowStrategy {
                 -this.smoothing * seconds
             );
 
-        camera.transform.position.x +=
+        camera.position.x +=
             (
                 target.position.x -
-                camera.transform.position.x
+                camera.position.x
             ) * alpha;
 
-        camera.transform.position.y +=
+        camera.position.y +=
             (
                 target.position.y -
-                camera.transform.position.y
+                camera.position.y
             ) * alpha;
     }
 }

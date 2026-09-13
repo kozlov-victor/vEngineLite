@@ -139,6 +139,8 @@ export class TestCharacterScene extends Scene {
         );
         this.addObject(tileMap);
 
+        this.calculateBounds();
+
         this.input.keyboard.onKeyDown(KeyboardKey.Z, ()=>{
             const platform = new Rectangle(this);
             this.addObject(platform);

@@ -1,10 +1,12 @@
 import {VEngineLiteApplication} from "./VEngineLiteApplication";
 import {Container} from "../gameObject/base/Container";
 import {KeyboardInputControl} from "../inputControl/KeyboardInputControl";
+import {Size} from "../utils/Size";
 
 
 export abstract class Scene {
 
+    public readonly size = new Size(this.app.width,this.app.height);
     public readonly input = {
         keyboard: new KeyboardInputControl()
     } as const
@@ -13,6 +15,13 @@ export abstract class Scene {
 
     constructor(public readonly app: VEngineLiteApplication) {
 
+    }
+
+    public calculateBounds() {
+        this.size.wh(
+            Math.max(...this.objects.map(it=>it.position.x+it.size.w)),
+            Math.max(...this.objects.map(it=>it.position.y+it.size.h))
+        );
     }
 
     public onPreloadStarted() {

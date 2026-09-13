@@ -45,12 +45,12 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
 
 
         const targetX =
-            target.transform.position.x +
+            target.position.x +
             this.lookAheadX -
             camera.app.width / 2;
 
         const targetY =
-            target.transform.position.y -
+            target.position.y -
             camera.app.height / 2;
 
         const cameraAlpha =
@@ -58,18 +58,29 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
                 -this.cameraSmoothing * seconds
             );
 
-        camera.transform.position.x +=
+        const bounds = camera.app.getCurrentScene().size;
+        const screenWidth = camera.app.width;
+        const screenHeight = camera.app.height;
+
+        let posX = camera.position.x +
             (
                 targetX -
-                camera.transform.position.x
+                camera.position.x
             ) * cameraAlpha;
 
-        camera.transform.position.y +=
+        let posY = camera.position.y +
             (
                 targetY -
-                camera.transform.position.y
+                camera.position.y
             ) * cameraAlpha;
 
+        if (posX<0) posX = 0;
+        if (posY<0) posY = 0;
+
+        if (posX>bounds.w - screenWidth) posX = bounds.w - screenWidth;
+        if (posY>bounds.h - screenHeight) posY = bounds.h - screenHeight;
+
+        camera.position.xy(posX, posY);
 
     }
 }

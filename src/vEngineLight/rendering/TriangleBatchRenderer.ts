@@ -241,7 +241,7 @@ export class TriangleBatchRenderer {
         const gl = GLUtils.getContext();
 
         if (this.camera) {
-            const cameraMatrix = this.camera.transform.getWorldMatrix();
+            const cameraMatrix = this.camera.getWorldMatrix();
             cameraMatrix.invert(this.viewMatrix);
             this.projMatrix.multiply(this.viewMatrix, this.viewProjMatrix);
         } else {

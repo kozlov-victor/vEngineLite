@@ -81,7 +81,7 @@ export class MainScene extends Scene {
         super.onUpdate(dt);
         // Рухаємо камеру для скролінгу
         // this.app.camera.transform.position.x += this.delta;
-        if (this.app.camera.transform.position.x > 800 || this.app.camera.transform.position.x < -100) {
+        if (this.app.camera.position.x > 800 || this.app.camera.position.x < -100) {
             this.delta*=-1;
         }
         if (this.input.keyboard.isPressed(KeyboardKey.UP)) {

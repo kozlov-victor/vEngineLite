@@ -7,8 +7,8 @@ import {RigidBody} from "../../physics/IPhysics";
 
 export class Container implements IUpdateable, IGeometry {
 
+    private readonly transform = new Transform();
     public body?: RigidBody;
-    public readonly transform = new Transform();
 
     public readonly size = new Size();
     public readonly position = this.transform.position;
@@ -26,6 +26,10 @@ export class Container implements IUpdateable, IGeometry {
 
     get rotation() {
         return this.transform.rotation;
+    }
+
+    public getWorldMatrix() {
+        return this.transform.getWorldMatrix();
     }
 
     public enterFrame(renderer: TriangleBatchRenderer) {}
