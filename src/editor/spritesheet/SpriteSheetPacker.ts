@@ -2,7 +2,7 @@ import {Psd, PsdLayer} from "../psd/PsdParser";
 import {SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
 import {TexturePacker} from "./TexturePacker";
 
-export interface IPackedLayerInfo extends SpriteFrame{
+export interface IPackedLayerInfo extends SpriteFrame {
     layer: PsdLayer,
     psd: Psd;
 }
@@ -10,19 +10,20 @@ export interface IPackedLayerInfo extends SpriteFrame{
 export interface IPackedSpriteSheet extends SpriteSheet {
     width: number;
     height: number;
+    padding: number;
     frames:IPackedLayerInfo[];
 }
 
 export class SpriteSheetPacker {
 
-    private createFrames(psd: Psd) {
+    private createFrames(psd: Psd,padding: number) {
         const frames:IPackedLayerInfo[] = [];
         for (const layer of psd.layers) {
             frames.push({
                 x: 0,
                 y: 0,
-                width: psd.header.width,
-                height: psd.header.height,
+                width: psd.header.width + padding,
+                height: psd.header.height + padding,
                 name: layer.name,
                 layer,
                 psd
@@ -32,9 +33,9 @@ export class SpriteSheetPacker {
     }
 
 
-    public packSpriteSheet(psd: Psd): IPackedSpriteSheet {
+    public packSpriteSheet(psd: Psd, padding = 1): IPackedSpriteSheet {
 
-        const frames = this.createFrames(psd);
+        const frames = this.createFrames(psd,padding);
 
         const texturePacker = new TexturePacker(frames);
         const result = texturePacker.pack();
@@ -42,12 +43,12 @@ export class SpriteSheetPacker {
         return {
             width: result.width,
             height: result.height,
-            frames
+            frames, padding
         };
     }
 
-    public packTileMap(psd: Psd, cols: number): IPackedSpriteSheet {
-        const frames = this.createFrames(psd);
+    public packTileMap(psd: Psd, cols: number, padding = 0): IPackedSpriteSheet {
+        const frames = this.createFrames(psd,padding);
         let x = 0;
         let y = 0;
         let currY = y;
@@ -66,7 +67,8 @@ export class SpriteSheetPacker {
         return {
             width,
             height,
-            frames
+            frames,
+            padding
         }
     }
 
@@ -75,8 +77,8 @@ export class SpriteSheetPacker {
         for (const packedFrame of packed.frames) {
             frames.push({
                 name: `${packedFrame.psd.name}_${packedFrame.name}`,
-                width: packedFrame.width,
-                height: packedFrame.height,
+                width: packedFrame.width - packed.padding,
+                height: packedFrame.height - packed.padding,
                 x: packedFrame.x,
                 y: packedFrame.y
             })

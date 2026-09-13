@@ -2,10 +2,10 @@ import {Transform} from "../../components/Transform";
 import {Size} from "../../utils/Size";
 import {TriangleBatchRenderer} from "../../rendering/TriangleBatchRenderer";
 import {Scene} from "../../application/Scene";
-import {IGeometry, IUpdateable} from "../../types";
+import {IGeometry, ITransformable, IUpdateable} from "../../types";
 import {RigidBody} from "../../physics/IPhysics";
 
-export class Container implements IUpdateable, IGeometry {
+export class Container implements IUpdateable, IGeometry, ITransformable {
 
     private readonly transform = new Transform();
     public body?: RigidBody;

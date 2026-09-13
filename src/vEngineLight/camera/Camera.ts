@@ -1,16 +1,16 @@
 import {Transform} from "../components/Transform";
-import {IUpdateable} from "../types";
+import {ITransformable, IUpdateable} from "../types";
 import {CameraFollowStrategy} from "./follow/CameraFollowStrategy";
 import {Container} from "../gameObject/base/Container";
 import {VEngineLiteApplication} from "../application/VEngineLiteApplication";
 
-export class Camera implements IUpdateable {
-    // Камера - це просто GameObject.
-    // В майбутньому тут можуть бути налаштування проекції, кольору фону і т.д.
+export class Camera implements IUpdateable, ITransformable {
+
     private transform = new Transform();
 
     public readonly position = this.transform.position;
     public readonly scale = this.transform.scale;
+    public readonly pivot = this.transform.pivot;
 
     public followTarget?: Container;
     public followStrategy?: CameraFollowStrategy;

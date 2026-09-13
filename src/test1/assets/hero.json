@@ -1,6 +1,6 @@
 {
     "width": 256,
-    "height": 128,
+    "height": 256,
     "frames": [
         {
             "name": "hero_step4",
@@ -13,50 +13,50 @@
             "name": "hero_step3",
             "width": 64,
             "height": 64,
-            "x": 64,
+            "x": 65,
             "y": 0
         },
         {
             "name": "hero_step2",
             "width": 64,
             "height": 64,
-            "x": 128,
+            "x": 130,
             "y": 0
         },
         {
             "name": "hero_step1",
             "width": 64,
             "height": 64,
-            "x": 192,
-            "y": 0
+            "x": 0,
+            "y": 65
         },
         {
             "name": "hero_idle2",
             "width": 64,
             "height": 64,
-            "x": 0,
-            "y": 64
+            "x": 65,
+            "y": 65
         },
         {
             "name": "hero_idle1",
             "width": 64,
             "height": 64,
-            "x": 64,
-            "y": 64
+            "x": 130,
+            "y": 65
         },
         {
             "name": "hero_fall2",
             "width": 64,
             "height": 64,
-            "x": 128,
-            "y": 64
+            "x": 0,
+            "y": 130
         },
         {
             "name": "hero_fall1",
             "width": 64,
             "height": 64,
-            "x": 192,
-            "y": 64
+            "x": 65,
+            "y": 130
         }
     ]
 }

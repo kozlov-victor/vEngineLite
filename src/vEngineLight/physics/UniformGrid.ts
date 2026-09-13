@@ -45,6 +45,12 @@ export class UniformGrid {
                         continue;
                     }
 
+                    const canCollide =
+                        (a.collisionGroup.bitMask & b.collideWithGroups.bitMask)!==0 ||
+                        (a.collideWithGroups.bitMask & b.collisionGroup.bitMask)!==0;
+
+                    if (!canCollide) continue;
+
                     const pairKey = this.getPairKey(a, b);
 
                     if (pairKeys.has(pairKey)) {

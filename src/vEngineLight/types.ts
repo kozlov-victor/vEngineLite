@@ -1,5 +1,6 @@
 import {Size} from "./utils/Size";
 import {Vector2} from "./utils/Vector2";
+import {Mat2d} from "./utils/Mat2d";
 
 export type n9 = [number, number, number, number, number, number, number, number, number];
 export type n2 = [number, number];
@@ -41,4 +42,11 @@ export interface IUpdateable {
 export interface IGeometry {
     size:Size;
     position:Vector2
+}
+
+export interface ITransformable {
+    position: Vector2;
+    scale: Vector2;
+    pivot: Vector2;
+    getWorldMatrix():Mat2d;
 }

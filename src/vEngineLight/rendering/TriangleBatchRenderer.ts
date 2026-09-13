@@ -5,6 +5,7 @@ import {Texture} from "./Texture";
 import {TextureInfo} from "../components/TextureInfo";
 import {n2, n9, Triangle, Vertex} from "../types";
 import {Mat2d} from "../utils/Mat2d";
+import {Color} from "./Color";
 
 
 
@@ -229,10 +230,11 @@ export class TriangleBatchRenderer {
         this.batchTriangle(t,textureInfo.texture,worldMatrix);
     }
 
-    public clearRenderBuffer() {
+    public clearRenderBuffer(color: Color) {
         const gl = GLUtils.getContext();
+        const normColor = color.getNormalized();
         gl.viewport(0, 0, this.width, this.height);
-        gl.clearColor(0, 0, 0, 0);
+        gl.clearColor(normColor[0], normColor[1], normColor[2], normColor[3]);
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
 

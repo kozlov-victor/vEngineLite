@@ -19,7 +19,7 @@ export class MainScene extends Scene {
             .add('lava', 'image', 'assets/lava.png')
             .add('tileset', 'image', 'assets/tiles2.png')
             .add('cat', 'image', 'assets/hero.png')
-            .add('cat-sprite-sheet', 'image', 'assets/hero.json')
+            .add('cat-sprite-sheet', 'json', 'assets/hero.json')
     }
 
     override onProgress(percents: number) {

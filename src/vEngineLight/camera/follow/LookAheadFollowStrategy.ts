@@ -80,7 +80,7 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
         if (posX>bounds.w - screenWidth) posX = bounds.w - screenWidth;
         if (posY>bounds.h - screenHeight) posY = bounds.h - screenHeight;
 
-        camera.position.xy(posX, posY);
+        camera.position.xy(Math.round(posX), Math.round(posY));
 
     }
 }

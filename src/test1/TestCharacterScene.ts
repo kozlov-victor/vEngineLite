@@ -10,9 +10,16 @@ import {SpriteSheet} from "../vEngineLight/types";
 import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
 import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFollowStrategy";
+import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
+
+
+    constructor(app: VEngineLiteApplication) {
+        super(app);
+        this.bgColor.rgb(122,122,122);
+    }
 
     override onPreloadStarted() {
         this.app.assetManager
@@ -145,7 +152,7 @@ export class TestCharacterScene extends Scene {
             const platform = new Rectangle(this);
             this.addObject(platform);
             platform.size.wh(50,30);
-            platform.position.xy(MathEx.randomInt(800),MathEx.randomInt(50));
+            platform.position.xy(MathEx.randomInt(this.size.w),MathEx.randomInt(50));
             platform.color.rgb(120,0,0);
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
