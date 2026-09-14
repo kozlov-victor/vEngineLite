@@ -23,8 +23,6 @@ const customTransformerPlugin = (transformers)=>{
                     code = await transformer.transform(code,build,args);
                 }
 
-                code = code.replaceAll('BUILD_ID',`${new Date().getTime()}`);
-
                 return {
                     contents: code,
                     loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts'
@@ -52,6 +50,9 @@ const ctx = await esbuild.context({
     outdir: 'out',
     format: 'iife',
     sourcemap: true,
+    define: {
+        BUILD_ID: JSON.stringify(`${new Date().getTime()}`),
+    },
     plugins: [
         customTransformerPlugin([
             new ImportCssPlugin({output: 'editor/all.css'}),
