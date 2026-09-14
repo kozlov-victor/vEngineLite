@@ -18,6 +18,41 @@ export class Color {
         return new Color(255,255,255,255);
     }
 
+    public static BLACK() {
+        return new Color(0,0,0,255);
+    }
+
+    public static fromCssColor(hex:string):Color {
+        // Remove leading # if present
+        const cleaned = hex.replace(/^#/, '');
+
+        // Validate format length
+        if (![3, 4, 6, 8].includes(cleaned.length)) {
+            throw new Error('Invalid hex color format');
+        }
+
+        let r, g, b, a = 255;
+
+        if (cleaned.length === 3 || cleaned.length === 4) {
+            // 3 or 4 digit shorthand format (e.g., "f00" -> "ff0000")
+            r = parseInt(cleaned[0] + cleaned[0], 16);
+            g = parseInt(cleaned[1] + cleaned[1], 16);
+            b = parseInt(cleaned[2] + cleaned[2], 16);
+            if (cleaned.length === 4) {
+                a = parseInt(cleaned[3] + cleaned[3], 16);
+            }
+        } else {
+            // 6 or 8 digit full format (e.g., "ff0000")
+            r = parseInt(cleaned.substring(0, 2), 16);
+            g = parseInt(cleaned.substring(2, 4), 16);
+            b = parseInt(cleaned.substring(4, 6), 16);
+            if (cleaned.length === 8) {
+                a = parseInt(cleaned.substring(6, 8), 16);
+            }
+        }
+        return new Color(r, g, b, a);
+    }
+
     set r(val: number) {
         this.dirty = this.dirty || val!==this._r;
         this._r = val;

@@ -63,7 +63,7 @@ export class VEngineLiteApplication {
     }
 
     private onNextUpdate(dt: number) {
-        this.scene.onUpdate(this.FIXED_STEP);
+        this.scene.onUpdate(dt);
         this.scene.input.keyboard.update(dt);
     }
 
