@@ -7,6 +7,7 @@ import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {SpriteSheet} from "../vEngineLight/types";
+import {ColorPerVertexRectangle} from "../vEngineLight/gameObject/shapes/ColorPerVertexRectangle";
 
 export class MainScene extends Scene {
 
@@ -74,6 +75,15 @@ export class MainScene extends Scene {
         const animatedCat = new AnimatedGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
         this.hero = animatedCat;
+
+        const gradient = new ColorPerVertexRectangle(this);
+        gradient.colorA.fromCssColor('#ac4949');
+        gradient.colorB.fromCssColor('#ac4949');
+        gradient.colorC.fromCssColor('#759c3b');
+        gradient.colorD.fromCssColor('#759c3b');
+        gradient.size.wh(200,300);
+        gradient.position.xy(200,10);
+        this.addObject(gradient);
 
     }
 

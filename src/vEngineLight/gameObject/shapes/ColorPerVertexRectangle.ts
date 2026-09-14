@@ -54,17 +54,30 @@ export class ColorPerVertexRectangle extends RenderableContainer {
     constructor(scene: Scene) {
         super(scene);
         this.texture = GLUtils.getEmptyTexture();
+        this.applyChanges();
+        this.colorA.onChange(()=>this.applyChanges());
+        this.colorB.onChange(()=>this.applyChanges());
+        this.colorC.onChange(()=>this.applyChanges());
+        this.colorD.onChange(()=>this.applyChanges());
+        this.size.onChange(()=>this.applyChanges());
     }
 
     render(renderer: TriangleBatchRenderer): void {
 
-        this.b.position[0] = this.size.w;
-        this.c.position[0] = this.size.w;
-        this.c.position[1] = this.size.w;
-        this.d.position[1] = this.size.h;
-
         renderer.batchTriangle(this.triangle1, this.texture, this.getWorldMatrix());
         renderer.batchTriangle(this.triangle2, this.texture, this.getWorldMatrix());
+    }
+
+    private applyChanges() {
+        this.b.position[0] = this.size.w;
+        this.c.position[0] = this.size.w;
+        this.c.position[1] = this.size.h;
+        this.d.position[1] = this.size.h;
+
+        this.a.colorTint = this.colorA.getNormalized();
+        this.b.colorTint = this.colorB.getNormalized();
+        this.c.colorTint = this.colorC.getNormalized();
+        this.d.colorTint = this.colorD.getNormalized();
     }
 
 }

@@ -1,15 +1,18 @@
+import {ObservableEntity} from "./ObservableEntity";
 
-export class Size {
+export class Size extends ObservableEntity {
     protected _w: number;
     protected _h: number;
 
     constructor(w = 0, h = w) {
+        super();
         this._w = w;
         this._h = h;
     }
 
     set w(val: number) {
         this._w = val;
+        this.notifyChange();
     }
 
     get w() {
@@ -18,6 +21,7 @@ export class Size {
 
     set h(val: number) {
         this._h = val;
+        this.notifyChange();
     }
 
     get h() {
@@ -27,6 +31,7 @@ export class Size {
     wh(width: number, height = width) {
         this._w = width;
         this._h = height;
+        this.notifyChange();
     }
 
 }

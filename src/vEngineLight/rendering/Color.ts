@@ -1,7 +1,8 @@
 import {n4} from "../types";
+import {ObservableEntity} from "../utils/ObservableEntity";
 
 
-export class Color {
+export class Color extends ObservableEntity {
     private _r: number;
     private _g: number;
     private _b: number;
@@ -11,6 +12,7 @@ export class Color {
     private readonly normalized:n4 = [0,0,0,0];
 
     constructor(r: number, g: number, b: number, a = 255) {
+        super();
         this.rgba(r, g, b, a);
     }
 
@@ -22,7 +24,7 @@ export class Color {
         return new Color(0,0,0,255);
     }
 
-    public static fromCssColor(hex:string):Color {
+    public fromCssColor(hex:string) {
         // Remove leading # if present
         const cleaned = hex.replace(/^#/, '');
 
@@ -50,12 +52,16 @@ export class Color {
                 a = parseInt(cleaned.substring(6, 8), 16);
             }
         }
-        return new Color(r, g, b, a);
+        this.r = r;
+        this.g = g;
+        this.b = b;
+        this.a = a;
     }
 
     set r(val: number) {
         this.dirty = this.dirty || val!==this._r;
         this._r = val;
+        this.notifyChange();
     }
 
     get r() { return this._r; }
@@ -63,6 +69,7 @@ export class Color {
     set g(val: number) {
         this.dirty = this.dirty || val!==this._r;
         this._g = val;
+        this.notifyChange();
     }
 
     get g() { return this._g; }
@@ -70,6 +77,7 @@ export class Color {
     set b(val: number) {
         this.dirty = this.dirty || val!==this._r;
         this._b = val;
+        this.notifyChange();
     }
 
     get b() { return this._b; }
@@ -77,6 +85,7 @@ export class Color {
     set a(val: number) {
         this.dirty = this.dirty || val!==this._r;
         this._a = val;
+        this.notifyChange();
     }
 
     get a() { return this._a; }
