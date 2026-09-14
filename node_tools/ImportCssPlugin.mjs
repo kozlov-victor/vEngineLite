@@ -1,176 +1,214 @@
-import ts  from "typescript";
-import fs from "fs/promises";
-import path from "path";
+import fs from 'node:fs/promises';
+import path from 'node:path';
 
 export class ImportCssPlugin {
-    constructor(options = {}) {
-        this.decoratorName = options.decoratorName || "CSS";
-        this.output = options.output || "bundle.css";
 
-        this.cache = new Map(); // file -> parsed css paths
-        this.cssCache = new Map(); // cssPath -> content
+    constructor(params) {
+        this.output = params.output;
     }
 
-    async exists(p) {
-        try {
-            await fs.stat(p);
-            return true;
-        } catch {
-            return false;
-        }
+    async onBuildStarted(build) {
+        this.fileContents = [];
     }
 
-    apply(compiler) {
-        compiler.hooks.thisCompilation.tap("ImportCssPlugin", (compilation) => {
+    async onBuildFinished(build) {
+        const finalCss = this.fileContents.join('\n');
 
-            compilation.hooks.processAssets.tapPromise(
-                {
-                    name: "ImportCssPlugin",
-                    stage: compiler.webpack.Compilation.PROCESS_ASSETS_STAGE_ADDITIONAL
-                },
-                async () => {
+        const outdir = build.initialOptions.outdir;
 
-                    const cssSet = new Set();
-                    const modulesToCheck = new Set();
-
-                    // --- modules ---
-                    for (const module of compilation.modules) {
-                        if (module.resource && module.resource.endsWith(".ts") || module.resource?.endsWith(".tsx")) {
-                            let source;
-                            try {
-                                source = module.originalSource()?.source()?.toString();
-                            } catch {
-                                continue;
-                            }
-
-                            if (source) {
-                                modulesToCheck.add({
-                                    file: module.resource,
-                                    source
-                                });
-                            }
-                        }
-                    }
-
-                    // --- entry files ---
-                    const entryFiles = this._extractEntryFiles(compilation.options.entry);
-                    for (const entryPath of entryFiles) {
-                        const abs = path.resolve(compiler.context, entryPath);
-                        if (await this.exists(abs)) {
-                            modulesToCheck.add({
-                                file: abs,
-                                source: await fs.readFile(abs, "utf8")
-                            });
-                        }
-                    }
-
-                    // --- parse each file ---
-                    for (const { file, source } of modulesToCheck) {
-
-                        let cssPaths;
-
-                        if (this.cache.has(file)) {
-                            cssPaths = this.cache.get(file);
-                        } else {
-                            cssPaths = this._extractCssFromAst(source);
-                            this.cache.set(file, cssPaths);
-                        }
-
-                        const dir = path.dirname(file);
-
-                        for (const rel of cssPaths) {
-                            const abs = path.resolve(dir, rel);
-
-                            if (await this.exists(abs)) {
-                                compilation.fileDependencies.add(abs);
-                                cssSet.add(abs);
-                            } else {
-                                compilation.errors.push(
-                                    new Error(`ImportCssPlugin: CSS not found: ${abs}`)
-                                );
-                            }
-                        }
-                    }
-
-                    // --- read CSS (with cache) ---
-                    const cssContents = [];
-
-                    for (const cssPath of cssSet) {
-                        let content;
-
-                        if (this.cssCache.has(cssPath)) {
-                            content = this.cssCache.get(cssPath);
-                        } else {
-                            content = await fs.readFile(cssPath, "utf8");
-                            this.cssCache.set(cssPath, content);
-                        }
-
-                        cssContents.push(content);
-                    }
-
-                    const finalCss = cssContents.join("\n");
-
-                    const { RawSource } = compiler.webpack.sources;
-                    compilation.emitAsset(this.output, new RawSource(finalCss));
-                }
+        if (!outdir) {
+            throw new Error(
+                'ImportCssPlugin: "outdir" is required'
             );
-        });
-    }
-
-    _extractCssFromAst(source) {
-        const result = [];
-
-        const sf = ts.createSourceFile(
-            "temp.ts",
-            source,
-            ts.ScriptTarget.Latest,
-            true
-        );
-
-        function visit(node) {
-            // шукаємо DI.CSS(...)
-            if (
-                ts.isCallExpression(node) &&
-                ts.isPropertyAccessExpression(node.expression)
-            ) {
-                const obj = node.expression.expression;
-                const prop = node.expression.name;
-
-                if (
-                    ts.isIdentifier(obj) &&
-                    obj.text === "DI" &&
-                    prop.text === "CSS"
-                ) {
-                    const arg = node.arguments[0];
-
-                    // тільки string literal
-                    if (arg && ts.isStringLiteral(arg)) {
-                        result.push(arg.text);
-                    }
-                    else {
-
-                    }
-                }
-            }
-
-            ts.forEachChild(node, visit);
         }
 
-        visit(sf);
-
-        return result;
+        const outputPath = path.resolve(outdir,this.output);
+        await fs.mkdir(path.dirname(outputPath),{ recursive: true });
+        await fs.writeFile(outputPath,finalCss,'utf8');
     }
 
-    _extractEntryFiles(entry) {
-        if (typeof entry === "string") return [entry];
-        if (Array.isArray(entry)) return entry;
-        if (typeof entry === "object") {
-            let result = [];
-            for (const key of Object.keys(entry)) {
-                result = result.concat(this._extractEntryFiles(entry[key]));
-            }
-            return result;
+    async transform(code,build,args) {
+        const cssPaths = extractCssPaths(code,'CSS');
+        for (const relativePath of cssPaths) {
+            const cssPath = path.resolve(
+                path.dirname(args.path),
+                relativePath
+            );
+
+            let source = await fs.readFile(cssPath,'utf8');
+
+            this.fileContents.push(source);
         }
-        return [];
+
+        return code;
     }
+
+
+}
+
+// export function ImportCssPlugin(
+//     options = {}
+// ) {
+//     const decoratorName = options.decoratorName ?? 'CSS';
+//     const output = options.output ?? 'bundle.css';
+//
+//     const cssFiles = new Set();
+//
+//     {
+//
+//         // ------------------------------------------------------------
+//         // Знаходимо DI.CSS(...) у кожному TS/TSX файлі
+//         // ------------------------------------------------------------
+//
+//         build.onLoad(
+//             { filter: /\.(ts|tsx)$/ },
+//             async (args) => {
+//                 const source = await fs.readFile(args.path, 'utf8');
+//
+//                 const cssPaths = extractCssPaths(
+//                     source,
+//                     decoratorName
+//                 );
+//
+//                 const watchFiles = [];
+//
+//                 for (const relativePath of cssPaths) {
+//                     const cssPath = path.resolve(
+//                         path.dirname(args.path),
+//                         relativePath
+//                     );
+//
+//                     try {
+//                         await fs.access(cssPath);
+//
+//                         cssFiles.add(cssPath);
+//                         watchFiles.push(cssPath);
+//                     } catch {
+//                         throw new Error(
+//                             `ImportCssPlugin: CSS not found: ${cssPath}`
+//                         );
+//                     }
+//                 }
+//
+//                 const finalCss = contents.join('\n');
+//
+//                 const outdir = build.initialOptions.outdir;
+//
+//                 if (!outdir) {
+//                     throw new Error(
+//                         'ImportCssPlugin: "outdir" is required'
+//                     );
+//                 }
+//
+//                 const outputPath = path.resolve(
+//                     outdir,
+//                     output
+//                 );
+//
+//                 await fs.mkdir(
+//                     path.dirname(outputPath),
+//                     { recursive: true }
+//                 );
+//
+//                 await fs.writeFile(
+//                     outputPath,
+//                     finalCss,
+//                     'utf8'
+//                 );
+//
+//                 console.log(
+//                     `[CSS] ${outputPath}`
+//                 );
+//
+//                 return source;
+//             }
+//         );
+//
+//         // ------------------------------------------------------------
+//         // Після успішної збірки генеруємо bundle.css
+//         // ------------------------------------------------------------
+//
+//         build.onEnd(async (result) => {
+//
+//             if (result.errors.length > 0) {
+//                 return;
+//             }
+//
+//             const contents = [];
+//
+//             for (const cssPath of cssFiles) {
+//                 const css = await fs.readFile(cssPath, 'utf8');
+//                 contents.push(css);
+//             }
+//
+//             const finalCss = contents.join('\n');
+//
+//             const outdir = build.initialOptions.outdir;
+//
+//             if (!outdir) {
+//                 throw new Error(
+//                     'ImportCssPlugin: "outdir" is required'
+//                 );
+//             }
+//
+//             const outputPath = path.resolve(
+//                 outdir,
+//                 output
+//             );
+//
+//             await fs.mkdir(
+//                 path.dirname(outputPath),
+//                 { recursive: true }
+//             );
+//
+//             await fs.writeFile(
+//                 outputPath,
+//                 finalCss,
+//                 'utf8'
+//             );
+//
+//             console.log(
+//                 `[CSS] ${outputPath}`
+//             );
+//         });
+//     }
+// }
+
+
+// ============================================================================
+// CSS extractor
+// ============================================================================
+
+function extractCssPaths(source, decoratorName) {
+
+    const result = [];
+
+    /*
+     * Шукаємо:
+     *
+     * @DI.CSS('./main.css')
+     *
+     * і взагалі:
+     *
+     * DI.CSS('./main.css')
+     */
+
+    const escapedName = escapeRegExp(decoratorName);
+
+    const regex = new RegExp(
+        `\\bDI\\.${escapedName}\\s*\\(\\s*(['"])(.*?)\\1\\s*\\)`,
+        'g'
+    );
+
+    let match;
+
+    while ((match = regex.exec(source)) !== null) {
+        result.push(match[2]);
+    }
+
+    return result;
+}
+
+function escapeRegExp(value) {
+    return value.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }

@@ -6,8 +6,6 @@ interface IElementFactoryItem {
     data?: any;
 }
 
-
-
 @DI.Injectable()
 export class Router {
 

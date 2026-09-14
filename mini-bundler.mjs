@@ -1,53 +1,63 @@
 import * as esbuild from 'esbuild';
-import swc from '@swc/core';
 import fs from 'node:fs/promises';
+import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
+import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mjs';
 
 // 1. Кастомний плагін трансформації
-const customTransformerPlugin = {
-    name: 'custom-transformer',
-    setup(build) {
-        // Обробка файлів перед збіркою
-        build.onLoad({ filter: /\.(ts|tsx|js|jsx)$/ }, async (args) => {
-            const code = await fs.readFile(args.path, 'utf8');
+const customTransformerPlugin = (transformers)=>{
+    return {
+        name: 'custom-transformer',
+        setup(build) {
 
-            // Кастомна трансформація через SWC
-            const transformed = await swc.transform(code, {
-                filename: args.path,
-                jsc: {
-                    parser: { syntax: 'typescript', tsx: true },
-                    target: 'es2022'
+            build.onStart(async () => {
+                console.log('Збірка розпочалася...');
+                for (const transformer of transformers) {
+                    await transformer.onBuildStarted(build);
                 }
             });
 
-            return {
-                contents: transformed.code,
-                loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts'
-            };
-        });
+            build.onLoad({ filter: /\.(ts|tsx)$/ }, async (args) => {
+                let code = await fs.readFile(args.path, 'utf8');
 
-        // Логування стану збірки в консоль
-        build.onStart(() => {
-            console.log('⏳ Збірка розпочалася...');
-        });
+                for (const transformer of transformers) {
+                    code = await transformer.transform(code,build,args);
+                }
 
-        build.onEnd((result) => {
-            if (result.errors.length > 0) {
-                console.error('Помилка збірки:', result.errors);
-            } else {
-                console.log(`[${new Date().toLocaleTimeString()}] Бандл успішно оновлено!`);
-            }
-        });
+                code = code.replaceAll('BUILD_ID',`${new Date().getTime()}`);
+
+                return {
+                    contents: code,
+                    loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts'
+                };
+            });
+
+            build.onEnd(async (result) => {
+                if (result.errors.length > 0) {
+                    console.error('Помилка збірки:', result.errors);
+                } else {
+                    for (const transformer of transformers) {
+                        await transformer.onBuildFinished(build);
+                    }
+                    console.log(`[${new Date().toLocaleTimeString()}] Бандл успішно оновлено!`);
+                }
+            });
+        }
     }
 };
 
 // 2. Створюємо контекст збірки
 const ctx = await esbuild.context({
-    entryPoints: ['src/index.ts'],
+    entryPoints: ['src/index.ts','src/editor/main.tsx'],
     bundle: true,
-    outfile: 'dist/bundle.js',
-    format: 'esm',
+    outdir: 'out',
+    format: 'iife',
     sourcemap: true,
-    plugins: [customTransformerPlugin]
+    plugins: [
+        customTransformerPlugin([
+            new ImportCssPlugin({output: 'editor/all.css'}),
+            new TsxIdTransformerPlugin(),
+        ])
+    ]
 });
 
 // 3. Запускаємо режим Watch

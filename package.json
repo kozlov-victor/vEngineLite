@@ -3,22 +3,16 @@
     "sideEffects": [],
     "version": "0.1.0",
     "devDependencies": {
-        "@types/node": "24.10.1",
-        "@typescript-eslint/eslint-plugin": "8.54.0",
-        "@typescript-eslint/parser": "8.54.0",
-        "eslint": "8.57.1",
-        "eslint-webpack-plugin": "5.0.2"
+        "@swc/core": "^1.16.2",
+        "@types/node": "26.5.1",
+        "esbuild": "^0.28.2"
     },
     "dependencies": {
-        "terser-webpack-plugin": "5.3.15",
-        "ts-loader": "9.5.4",
         "tslib": "2.8.1",
-        "typescript": "5.9.3",
-        "webpack": "5.103.0",
-        "webpack-cli": "6.0.1"
+        "typescript": "7.0.2"
     },
     "scripts": {
-        "start": "node --inspect node_modules/webpack/bin/webpack.js --env debug=true -w"
+        "start": "node mini-bundler.mjs"
     },
     "main": ""
 }
