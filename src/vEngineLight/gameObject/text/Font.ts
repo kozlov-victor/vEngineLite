@@ -23,6 +23,20 @@ export interface FontContext {
     readonly chars: Record<string, CharInfo>;
 }
 
+export const LAT_CHARS =
+    'AaBbCcDdEeFfGgHhIiJjKkLlMmNnOoPpQqRrSsTtUuVvWwXxYyZz';
+
+export const STANDARD_SYMBOLS =
+    '1234567890 ' +
+    '"!`?\'.,;:()[]{}<>|/@\\^$-%+=#_&~*';
+
+
+export const CYR_CHARS =
+    'АаБбВвГгДдЕеЁёЖжЗзИиЙйКкЛлМмНн' +
+    'ОоПпРрСсТтУуФфХхЦцЧчШшЩщ' +
+    'ЫыЬьЪъЭэЮюЯя' +
+    'ЇїІіЄєҐґ';
+
 export class Font {
 
     private readonly firstSymbol: string;
@@ -40,8 +54,7 @@ export class Font {
     }
 
     public static fromCss(options: FontCreateOptions): Font {
-        const chars = options.chars ??
-            "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789 !?.,:;+-*/()[]{}<>";
+        const chars = options.chars ?? LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS;
 
         const padding = options.padding ?? 2;
         const spacing = options.spacing ?? 2;

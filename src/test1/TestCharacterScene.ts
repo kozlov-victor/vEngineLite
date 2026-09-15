@@ -149,9 +149,9 @@ export class TestCharacterScene extends Scene {
         this.addObject(tileMap);
 
         {
-            const font = Font.fromCss({font:'16px Arial'});
+            const font = Font.fromCss({font:'25px Arial'});
             const textLabel = new TextLabel(this,font);
-            textLabel.setText('Hello World');
+            textLabel.setText('Hello World, це демо!');
             textLabel.position.xy(200,200);
             textLabel.color.fromCssColor('#45d800');
             this.addObject(textLabel);
