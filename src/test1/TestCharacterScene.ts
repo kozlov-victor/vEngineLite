@@ -11,6 +11,8 @@ import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
 import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFollowStrategy";
 import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
+import {Font} from "../vEngineLight/gameObject/text/Font";
+import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -145,6 +147,15 @@ export class TestCharacterScene extends Scene {
             tileTexture
         );
         this.addObject(tileMap);
+
+        {
+            const font = Font.fromCss({font:'16px Arial'});
+            const textLabel = new TextLabel(this,font);
+            textLabel.setText('Hello World');
+            textLabel.position.xy(200,200);
+            textLabel.color.fromCssColor('#45d800');
+            this.addObject(textLabel);
+        }
 
         this.calculateBounds();
 

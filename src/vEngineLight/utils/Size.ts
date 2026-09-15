@@ -34,4 +34,8 @@ export class Size extends ObservableEntity {
         this.notifyChange();
     }
 
+    from(other:Size) {
+        this.wh(other.w, other.h);
+    }
+
 }

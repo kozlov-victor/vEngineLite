@@ -106,7 +106,11 @@ export class TriangleBatchRenderer {
 
     private createVertexBuffer() {
         const gl = GLUtils.getContext();
-        this.vertexBuffer = gl.createBuffer();
+        const vertexBuffer = gl.createBuffer();
+        if (!vertexBuffer) {
+            throw new Error(`failed to create vertex buffer`);
+        }
+        this.vertexBuffer = vertexBuffer;
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, this.vertexData.byteLength, gl.DYNAMIC_DRAW);
     }
@@ -174,7 +178,7 @@ export class TriangleBatchRenderer {
         this.currentTriangle++;
     }
 
-    public batchSprite(size: Size, textureInfo: TextureInfo, worldMatrix: Mat2d) {
+    public batchSprite(size: Size, textureInfo: TextureInfo, worldMatrix: Mat2d, x = 0, y = 0) {
 
         const uv = textureInfo.rect.uv;
         const objWidth = size.w, objHeight = size.h;
@@ -189,20 +193,20 @@ export class TriangleBatchRenderer {
         const t = this.triangle;
         // triangle 1
         // v1
-        t.v1.position[0] = 0;
-        t.v1.position[1] = 0;
+        t.v1.position[0] = x;
+        t.v1.position[1] = y;
         t.v1.textCoord[0] = u;
         t.v1.textCoord[1] = v;
         t.v1.colorTint = colNorm;
         // v2
-        t.v2.position[0] = objWidth;
-        t.v2.position[1] = 0;
+        t.v2.position[0] = x + objWidth;
+        t.v2.position[1] = y;
         t.v2.textCoord[0] = u + texFrameWidth;
         t.v2.textCoord[1] = v;
         t.v2.colorTint = colNorm;
         // v3
-        t.v3.position[0] = 0;
-        t.v3.position[1] = objHeight;
+        t.v3.position[0] = x;
+        t.v3.position[1] = y + objHeight;
         t.v3.textCoord[0] = u;
         t.v3.textCoord[1] = v + texFrameHeight;
         t.v3.colorTint = colNorm;
@@ -210,20 +214,20 @@ export class TriangleBatchRenderer {
 
         // triangle 2
         // v1
-        t.v1.position[0] = 0;
-        t.v1.position[1] = objHeight;
+        t.v1.position[0] = x;
+        t.v1.position[1] = y + objHeight;
         t.v1.textCoord[0] = u;
         t.v1.textCoord[1] = v + texFrameHeight;
         //t.v1.colorTint = colNorm;
         // v2
-        t.v2.position[0] = objWidth;
-        t.v2.position[1] = 0;
+        t.v2.position[0] = x + objWidth;
+        t.v2.position[1] = y;
         t.v2.textCoord[0] = u + texFrameWidth;
         t.v2.textCoord[1] = v;
         //t.v2.colorTint = colNorm;
         // v3
-        t.v3.position[0] = objWidth;
-        t.v3.position[1] = objHeight;
+        t.v3.position[0] = x + objWidth;
+        t.v3.position[1] = y + objHeight;
         t.v3.textCoord[0] = u + texFrameWidth;
         t.v3.textCoord[1] = v + texFrameHeight;
         //t.v3.colorTint = colNorm;

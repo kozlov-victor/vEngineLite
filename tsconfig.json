@@ -2,7 +2,7 @@
     "compilerOptions": {
         "module": "esnext",
         "moduleResolution": "node",
-        "target": "ES5",
+        "target": "ES6",
         "experimentalDecorators": false,
         "emitDecoratorMetadata": false,
         "useDefineForClassFields": false,

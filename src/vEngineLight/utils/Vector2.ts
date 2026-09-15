@@ -47,4 +47,8 @@ export class Vector2 {
     public uv(u: number, v = u) {
         this.xy(u, v);
     }
+
+    public from(other:Vector2) {
+        this.xy(other.x, other.y);
+    }
 }

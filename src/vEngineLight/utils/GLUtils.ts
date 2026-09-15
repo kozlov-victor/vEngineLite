@@ -33,6 +33,7 @@ export class GLUtils {
     public static createProgram(vertexShader: WebGLShader, fragmentShader: WebGLShader): WebGLProgram {
         const gl = this.gl;
         const program = gl.createProgram();
+        if (!program) throw new Error(`failed to create program`);
         gl.attachShader(program, vertexShader);
         gl.attachShader(program, fragmentShader);
         gl.linkProgram(program);
@@ -54,9 +55,12 @@ export class GLUtils {
         gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
     }
 
-    public static createTextureFromImage(image: HTMLImageElement) {
+    public static createTextureFromImage(image: HTMLImageElement|HTMLCanvasElement|HTMLVideoElement) {
         const gl = this.gl;
         const texture = gl.createTexture();
+        if (!texture) {
+            throw new Error(`failed to create texture`);
+        }
         gl.bindTexture(gl.TEXTURE_2D, texture);
         gl.texImage2D(
             gl.TEXTURE_2D,     // target
@@ -64,7 +68,7 @@ export class GLUtils {
             gl.RGBA,           // internal format
             gl.RGBA,           // format
             gl.UNSIGNED_BYTE,  // type
-            image              // source (HTMLImageElement)
+            image              // source (HTMLElement)
         );
         this.setTextureFilters();
         gl.bindTexture(gl.TEXTURE_2D, null);
@@ -74,6 +78,9 @@ export class GLUtils {
     public static createColoredTexture(r: number, g: number, b: number, a = 255) {
         const gl = this.gl;
         const texture = gl.createTexture();
+        if (!texture) {
+            throw new Error(`failed to create texture`);
+        }
         gl.bindTexture(gl.TEXTURE_2D, texture);
 
         const width = 1;

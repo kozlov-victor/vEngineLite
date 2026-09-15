@@ -4,7 +4,7 @@ import {Color} from "../rendering/Color";
 import {Size} from "../utils/Size";
 
 export interface TextureInfo {
-    readonly texture: Texture;
+    texture: Texture;
     readonly rect: {
         readonly uv: Vector2;
         readonly size: Size;
