@@ -10,6 +10,7 @@ export interface FontCreateOptions {
     readonly padding?: number;
     readonly spacing?: number;
     readonly lineHeight?: number;
+    readonly atlasWidth?: number;
 }
 
 export interface CharInfo {
@@ -58,6 +59,7 @@ export class Font {
 
         const padding = options.padding ?? 2;
         const spacing = options.spacing ?? 2;
+        const atlasWidth = options.atlasWidth ?? 256;
 
         const canvas = document.createElement("canvas");
         const ctx = canvas.getContext("2d")!;
@@ -83,41 +85,80 @@ export class Font {
         const lineHeight =
             options.lineHeight ?? ascent + descent;
 
-        const atlasWidth =
-            metrics.reduce(
-                (width, m) => width + m.width + spacing,
-                0
-            ) + padding * 2;
+        const cellHeight = lineHeight + spacing;
 
-        const atlasHeight = lineHeight + padding * 2;
+        /*
+         * Pack glyphs into rows.
+         */
+        const positions: {
+            ch: string;
+            x: number;
+            y: number;
+            advance: number;
+            width: number;
+        }[] = [];
+
+        let x = padding;
+        let y = padding;
+
+        for (const m of metrics) {
+            if (
+                x + m.width + padding > atlasWidth &&
+                x > padding
+            ) {
+                x = padding;
+                y += cellHeight;
+            }
+
+            positions.push({
+                ch: m.ch,
+                x,
+                y,
+                advance: m.advance,
+                width: m.width,
+            });
+
+            x += m.width + spacing;
+        }
+
+        const atlasHeight =
+            y + lineHeight + padding;
 
         canvas.width = atlasWidth;
         canvas.height = atlasHeight;
 
+        /*
+         * Canvas size reset clears the context state.
+         */
         ctx.font = options.font;
         ctx.textBaseline = "alphabetic";
         ctx.clearRect(0, 0, atlasWidth, atlasHeight);
-        ctx.fillStyle = 'white';
+        ctx.fillStyle = "white";
 
-        const charsInfoPartial: Record<
-            string,
-            Omit<CharInfo, "texture">
-        > = {};
+        const charsInfoPartial: Record<string,Omit<CharInfo, "texture">> = {};
 
-        let x = padding;
+        for (const position of positions) {
 
-        for (const m of metrics) {
-            const y = padding + ascent;
+            const baseline =
+                position.y + ascent;
 
-            ctx.fillText(m.ch, x, y);
+            ctx.fillText(
+                position.ch,
+                position.x,
+                baseline
+            );
 
-            charsInfoPartial[m.ch] = {
-                pos: new Vector2(x, padding),
-                size: new Size(m.width, lineHeight),
-                advance: m.advance,
+            charsInfoPartial[position.ch] = {
+                pos: new Vector2(
+                    position.x,
+                    position.y
+                ),
+                size: new Size(
+                    position.width,
+                    lineHeight
+                ),
+                advance: position.advance,
             };
-
-            x += m.width + spacing;
         }
 
         const texture = GLUtils.createTextureFromImage(canvas);
