@@ -131,6 +131,8 @@ export class TriangleBatchRenderer {
         gl.enable(gl.BLEND);
         gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
 
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
+
         const float32Size = 4;
         const stride = TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX * float32Size;
 

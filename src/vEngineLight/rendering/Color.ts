@@ -56,6 +56,15 @@ export class Color extends ObservableEntity {
         this.g = g;
         this.b = b;
         this.a = a;
+        return this;
+    }
+
+    public toCssColor() {
+        const r = this.r.toString(16).padStart(2, '0');
+        const g = this.g.toString(16).padStart(2, '0');
+        const b = this.b.toString(16).padStart(2, '0');
+        const a = this.a.toString(16).padStart(2, '0');
+        return `#${r}${g}${b}${a}`;
     }
 
     set r(val: number) {

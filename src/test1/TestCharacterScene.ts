@@ -13,6 +13,7 @@ import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFo
 import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
 import {Font} from "../vEngineLight/gameObject/text/Font";
 import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
+import {Color} from "../vEngineLight/rendering/Color";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -149,11 +150,11 @@ export class TestCharacterScene extends Scene {
         this.addObject(tileMap);
 
         {
-            const font = Font.fromCss({font:'35px Arial'});
+            const font = Font.fromCss({fontFamily:'Arial',fontSize: 35, fillColor:Color.WHITE().fromCssColor('#45d800')});
             const textLabel = new TextLabel(this,font);
             textLabel.setText('Hello World, це демо!');
             textLabel.position.xy(200,200);
-            textLabel.color.fromCssColor('#45d800');
+            //textLabel.color.fromCssColor('#45d800');
             this.addObject(textLabel);
         }
 

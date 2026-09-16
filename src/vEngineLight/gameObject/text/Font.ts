@@ -2,15 +2,19 @@ import {Texture} from "../../rendering/Texture";
 import {Vector2} from "../../utils/Vector2";
 import {Size} from "../../utils/Size";
 import {GLUtils} from "../../utils/GLUtils";
+import {Color} from "../../rendering/Color";
 
 export interface FontCreateOptions {
-    // [style] [variant] [weight] [size] [line-height] [family]  bold italic 10px Arial
-    readonly font: string;
+    readonly fontFamily?: string;
+    readonly bold?: boolean;
+    readonly italic?: boolean;
+    readonly fontSize?: number;
     readonly chars?: string;
     readonly padding?: number;
     readonly spacing?: number;
     readonly lineHeight?: number;
     readonly atlasWidth?: number;
+    readonly fillColor?: Color;
 }
 
 export interface CharInfo {
@@ -62,9 +66,17 @@ export class Font {
         const atlasWidth = options.atlasWidth ?? 256;
 
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d")!;
+        const ctx = canvas.getContext("2d",{alpha:true})!;
 
-        ctx.font = options.font;
+        const fontSegments:string[] = [];
+        // [style] [variant] [weight] [size] [line-height] [family]  bold italic 10px Arial
+        if (options.bold) fontSegments.push('bold');
+        if (options.italic) fontSegments.push('italic');
+        fontSegments.push(`${options.fontSize ?? 14}px`);
+        fontSegments.push(options.fontFamily ?? 'Arial');
+        const fontStyle = fontSegments.join(' ')
+
+        ctx.font = fontStyle;
         ctx.textBaseline = "alphabetic";
 
         const metrics = [...chars].map(ch => {
@@ -127,13 +139,17 @@ export class Font {
         canvas.width = atlasWidth;
         canvas.height = atlasHeight;
 
-        /*
-         * Canvas size reset clears the context state.
-         */
-        ctx.font = options.font;
+
+        ctx.font = fontStyle;
         ctx.textBaseline = "alphabetic";
+        ctx.fillStyle = 'green';
         ctx.clearRect(0, 0, atlasWidth, atlasHeight);
-        ctx.fillStyle = "white";
+
+        // ctx.fillStyle = 'green';
+        // ctx.fillRect(0, 0, atlasWidth, atlasHeight);
+
+        const fillColor = options.fillColor ?? Color.WHITE();
+        ctx.fillStyle = fillColor.toCssColor();
 
         const charsInfoPartial: Record<string,Omit<CharInfo, "texture">> = {};
 
@@ -161,6 +177,20 @@ export class Font {
             };
         }
 
+        const imageData = ctx.getImageData(
+            0, 0,
+            canvas.width,
+            canvas.height
+        );
+
+        const data = imageData.data;
+        for (let i = 0; i < data.length; i += 4) {
+            data[i] = fillColor.r;
+            data[i + 1] = fillColor.g;
+            data[i + 2] = fillColor.b;
+        }
+        ctx.putImageData(imageData, 0, 0);
+
         const texture = GLUtils.createTextureFromImage(canvas);
 
         const charsInfo: Record<string, CharInfo> = {};
@@ -171,6 +201,8 @@ export class Font {
                 texture,
             };
         }
+
+        document.body.appendChild(canvas);
 
         return new Font({
             chars: charsInfo,
