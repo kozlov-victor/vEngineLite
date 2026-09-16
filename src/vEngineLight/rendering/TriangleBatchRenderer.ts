@@ -85,11 +85,20 @@ export class TriangleBatchRenderer {
             uniform sampler2D u_image;
 
             void main() {
-                gl_FragColor = texture2D(u_image, v_texCoord) * v_colorTint;
+                vec4 texColor = texture2D(u_image, v_texCoord);
+                gl_FragColor = vec4(
+                    texColor.rgb * v_colorTint.rgb * v_colorTint.a,
+                    texColor.a * v_colorTint.a
+                );
             }
         `;
 
         const gl = GLUtils.getContext();
+
+        gl.enable(gl.BLEND);
+        gl.blendFunc(gl.ONE, gl.ONE_MINUS_SRC_ALPHA);
+        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, true);
+
         const vertexShader = GLUtils.createShader(gl.VERTEX_SHADER, vertexShaderSource);
         const fragmentShader = GLUtils.createShader(gl.FRAGMENT_SHADER, fragmentShaderSource);
         this.program = GLUtils.createProgram(vertexShader, fragmentShader);
@@ -127,11 +136,6 @@ export class TriangleBatchRenderer {
         const gl = GLUtils.getContext();
         gl.useProgram(this.program);
         gl.bindBuffer(gl.ARRAY_BUFFER, this.vertexBuffer);
-
-        gl.enable(gl.BLEND);
-        gl.blendFunc(gl.SRC_ALPHA, gl.ONE_MINUS_SRC_ALPHA);
-
-        gl.pixelStorei(gl.UNPACK_PREMULTIPLY_ALPHA_WEBGL, false);
 
         const float32Size = 4;
         const stride = TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX * float32Size;
@@ -256,7 +260,7 @@ export class TriangleBatchRenderer {
             this.viewProjMatrix.copyFrom(this.projMatrix);
         }
 
-        gl.uniformMatrix3fv(this.viewProjectionUniformLocation, false, this.viewProjMatrix.toMat3Vec(this.mat3));
+        gl.uniformMatrix3fv(this.viewProjectionUniformLocation, false, this.viewProjMatrix.toN9(this.mat3));
         gl.uniform2f(this.textureSizeUniformLocation, this.currentTexture.width, this.currentTexture.height);
         gl.bindTexture(gl.TEXTURE_2D, this.currentTexture.glTexture);
 

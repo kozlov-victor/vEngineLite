@@ -35,13 +35,21 @@ export class TextLabel extends RenderableContainer {
     render(renderer: TriangleBatchRenderer) {
         let x = 0;
         const y = 0;
+        const worldMatrix = this.getWorldMatrix();
+
         for (const ch of this.text) {
             const charInfo = this.font.getCharInfo(ch);
             this.textureInfo.texture = charInfo.texture;
             this.textureInfo.rect.uv.from(charInfo.pos);
             this.textureInfo.rect.size.from(charInfo.size);
             this.charSize.from(charInfo.size);
-            renderer.batchSprite(this.charSize, this.textureInfo, this.getWorldMatrix(), x , y);
+            renderer.batchSprite(
+                this.charSize,
+                this.textureInfo,
+                worldMatrix,
+                x + charInfo.offsetX,
+                y + charInfo.offsetY
+            );
             x += charInfo.advance;
         }
     }

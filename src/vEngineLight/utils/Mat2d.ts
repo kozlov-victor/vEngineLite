@@ -85,7 +85,8 @@ export class Mat2d {
 
         let det = a * d - b * c;
         if (!det) {
-            return null;
+            console.error(this);
+            throw new Error(`can not invert the matrix`);
         }
         det = 1.0 / det;
         out.from(
@@ -114,7 +115,7 @@ export class Mat2d {
         );
     }
 
-    public toMat3Vec(out :n9 = [0,0,0,0,0,0,0,0,0]): n9 {
+    public toN9(out :n9 = [0,0,0,0,0,0,0,0,0]): n9 {
         const a = this.values[0];
         const b = this.values[1];
         const c = this.values[2];

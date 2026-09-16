@@ -22,6 +22,8 @@ export interface CharInfo {
     readonly pos: Vector2;
     readonly size: Size;
     readonly advance: number;
+    readonly offsetX: number;
+    readonly offsetY: number;
 }
 
 export interface FontContext {
@@ -59,153 +61,240 @@ export class Font {
     }
 
     public static fromCss(options: FontCreateOptions): Font {
-        const chars = options.chars ?? LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS;
 
-        const padding = options.padding ?? 2;
-        const spacing = options.spacing ?? 2;
-        const atlasWidth = options.atlasWidth ?? 256;
+        const chars = [
+            ...new Set(
+                options.chars ??
+                LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS
+            )
+        ];
 
+        const padding = Math.max(
+            0,
+            Math.ceil(options.padding ?? 2)
+        );
+
+        const spacing = Math.max(
+            0,
+            Math.ceil(options.spacing ?? 2)
+        );
+
+        const atlasWidth = Math.floor(options.atlasWidth ?? 256);
+
+        if (atlasWidth <= 0) {
+            throw new Error("Invalid atlas width");
+        }
+
+        const fontSize = options.fontSize ?? 14;
+
+        const fontStyle = [
+            options.italic ? "italic" : "",
+            options.bold ? "bold" : "",
+            `${fontSize}px`,
+            options.fontFamily ?? "Arial"
+        ].filter(Boolean).join(" ");
+
+        // Measurement canvas
         const canvas = document.createElement("canvas");
-        const ctx = canvas.getContext("2d",{alpha:true})!;
-
-        const fontSegments:string[] = [];
-        // [style] [variant] [weight] [size] [line-height] [family]  bold italic 10px Arial
-        if (options.bold) fontSegments.push('bold');
-        if (options.italic) fontSegments.push('italic');
-        fontSegments.push(`${options.fontSize ?? 14}px`);
-        fontSegments.push(options.fontFamily ?? 'Arial');
-        const fontStyle = fontSegments.join(' ')
+        const ctx = canvas.getContext("2d", { alpha: true })!;
 
         ctx.font = fontStyle;
         ctx.textBaseline = "alphabetic";
+        ctx.textAlign = "left";
 
-        const metrics = [...chars].map(ch => {
+        /*
+         * Measure actual glyph bounds.
+         */
+        const metrics = chars.map(ch => {
+
             const m = ctx.measureText(ch);
+
+            const left = Math.floor(-m.actualBoundingBoxLeft);
+            const right = Math.ceil(m.actualBoundingBoxRight);
+
+            const top = Math.floor(-m.actualBoundingBoxAscent);
+            const bottom = Math.ceil(m.actualBoundingBoxDescent);
+
+            const width = Math.max(0, right - left);
+            const height = Math.max(0, bottom - top);
 
             return {
                 ch,
                 advance: m.width,
-                width: Math.ceil(m.width),
-                ascent: Math.ceil(m.actualBoundingBoxAscent),
-                descent: Math.ceil(m.actualBoundingBoxDescent),
+
+                left,
+                top,
+
+                width,
+                height
             };
         });
 
-        const ascent = Math.max(...metrics.map(m => m.ascent));
-        const descent = Math.max(...metrics.map(m => m.descent));
+        /*
+         * Common vertical metrics.
+         */
+        const ascent = Math.max(
+            0,
+            ...metrics.map(m => -m.top)
+        );
+
+        const descent = Math.max(
+            0,
+            ...metrics.map(m => m.top + m.height)
+        );
 
         const lineHeight =
             options.lineHeight ?? ascent + descent;
 
-        const cellHeight = lineHeight + spacing;
+        const baselineOffset =
+            ascent + (lineHeight - ascent - descent) / 2;
 
         /*
-         * Pack glyphs into rows.
+         * Pack glyphs.
          */
-        const positions: {
+        type GlyphPosition = {
             ch: string;
             x: number;
             y: number;
-            advance: number;
+
             width: number;
-        }[] = [];
+            height: number;
+
+            advance: number;
+
+            offsetX: number;
+            offsetY: number;
+
+            drawX: number;
+            drawY: number;
+        };
+
+        const positions: GlyphPosition[] = [];
 
         let x = padding;
         let y = padding;
+        let rowHeight = 0;
 
         for (const m of metrics) {
+
+            const cellWidth = m.width + padding * 2;
+            const cellHeight = m.height + padding * 2;
+
+            if (cellWidth > atlasWidth) {
+                throw new Error(
+                    `Glyph "${m.ch}" exceeds atlas width`
+                );
+            }
+
             if (
-                x + m.width + padding > atlasWidth &&
+                x + cellWidth > atlasWidth &&
                 x > padding
             ) {
                 x = padding;
-                y += cellHeight;
+                y += rowHeight + spacing;
+                rowHeight = 0;
             }
+
+            const glyphX = x + padding;
+            const glyphY = y + padding;
 
             positions.push({
                 ch: m.ch,
+
                 x,
                 y,
+
+                width: cellWidth,
+                height: cellHeight,
+
                 advance: m.advance,
-                width: m.width,
+
+                offsetX: m.left - padding,
+                offsetY: baselineOffset + m.top - padding,
+
+                drawX: glyphX - m.left,
+                drawY: glyphY - m.top
             });
 
-            x += m.width + spacing;
+            x += cellWidth + spacing;
+
+            rowHeight = Math.max(
+                rowHeight,
+                cellHeight
+            );
         }
 
-        const atlasHeight =
-            y + lineHeight + padding;
+        const atlasHeight = Math.max(
+            1,
+            Math.ceil(y + rowHeight + padding)
+        );
 
+        /*
+         * Resize canvas.
+         * This resets Canvas 2D state.
+         */
         canvas.width = atlasWidth;
         canvas.height = atlasHeight;
 
-
         ctx.font = fontStyle;
         ctx.textBaseline = "alphabetic";
-        ctx.fillStyle = 'green';
-        ctx.clearRect(0, 0, atlasWidth, atlasHeight);
-
-        // ctx.fillStyle = 'green';
-        // ctx.fillRect(0, 0, atlasWidth, atlasHeight);
+        ctx.textAlign = "left";
 
         const fillColor = options.fillColor ?? Color.WHITE();
         ctx.fillStyle = fillColor.toCssColor();
 
-        const charsInfoPartial: Record<string,Omit<CharInfo, "texture">> = {};
+        ctx.clearRect(
+            0,
+            0,
+            atlasWidth,
+            atlasHeight
+        );
 
-        for (const position of positions) {
+        const charsInfoPartial:
+            Record<string, Omit<CharInfo, "texture">> = {};
 
-            const baseline =
-                position.y + ascent;
+        /*
+         * Render glyphs.
+         */
+        for (const p of positions) {
 
             ctx.fillText(
-                position.ch,
-                position.x,
-                baseline
+                p.ch,
+                p.drawX,
+                p.drawY
             );
 
-            charsInfoPartial[position.ch] = {
-                pos: new Vector2(
-                    position.x,
-                    position.y
-                ),
+            charsInfoPartial[p.ch] = {
+                pos: new Vector2(p.x, p.y),
+
                 size: new Size(
-                    position.width,
-                    lineHeight
+                    p.width,
+                    p.height
                 ),
-                advance: position.advance,
+
+                advance: p.advance,
+
+                offsetX: p.offsetX,
+                offsetY: p.offsetY
             };
         }
 
-        const imageData = ctx.getImageData(
-            0, 0,
-            canvas.width,
-            canvas.height
-        );
-
-        const data = imageData.data;
-        for (let i = 0; i < data.length; i += 4) {
-            data[i] = fillColor.r;
-            data[i + 1] = fillColor.g;
-            data[i + 2] = fillColor.b;
-        }
-        ctx.putImageData(imageData, 0, 0);
-
+        /*
+         * Upload atlas.
+         */
         const texture = GLUtils.createTextureFromImage(canvas);
 
         const charsInfo: Record<string, CharInfo> = {};
 
-        for (const char of Object.keys(charsInfoPartial)) {
-            charsInfo[char] = {
-                ...charsInfoPartial[char],
-                texture,
+        for (const ch of Object.keys(charsInfoPartial)) {
+            charsInfo[ch] = {
+                ...charsInfoPartial[ch],
+                texture
             };
         }
 
-        document.body.appendChild(canvas);
-
         return new Font({
-            chars: charsInfo,
+            chars: charsInfo
         });
     }
 }
