@@ -25,33 +25,15 @@ export class Color extends ObservableEntity {
     }
 
     public fromCssColor(hex:string) {
-        // Remove leading # if present
-        const cleaned = hex.replace(/^#/, '');
+        const groups = hex.substring(1).match(/..?/g);
+        if (!groups) throw new Error(`Invalid hex string: ${hex}`);
+        const r = Number.parseInt(groups[0],16);
+        const g = Number.parseInt(groups[1],16);
+        const b = Number.parseInt(groups[2],16);
+        const a = groups[3]?
+            Number.parseInt(groups[3],16):
+            255;
 
-        // Validate format length
-        if (![3, 4, 6, 8].includes(cleaned.length)) {
-            throw new Error('Invalid hex color format');
-        }
-
-        let r, g, b, a = 255;
-
-        if (cleaned.length === 3 || cleaned.length === 4) {
-            // 3 or 4 digit shorthand format (e.g., "f00" -> "ff0000")
-            r = parseInt(cleaned[0] + cleaned[0], 16);
-            g = parseInt(cleaned[1] + cleaned[1], 16);
-            b = parseInt(cleaned[2] + cleaned[2], 16);
-            if (cleaned.length === 4) {
-                a = parseInt(cleaned[3] + cleaned[3], 16);
-            }
-        } else {
-            // 6 or 8 digit full format (e.g., "ff0000")
-            r = parseInt(cleaned.substring(0, 2), 16);
-            g = parseInt(cleaned.substring(2, 4), 16);
-            b = parseInt(cleaned.substring(4, 6), 16);
-            if (cleaned.length === 8) {
-                a = parseInt(cleaned.substring(6, 8), 16);
-            }
-        }
         this.r = r;
         this.g = g;
         this.b = b;

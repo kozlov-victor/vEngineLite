@@ -13,7 +13,6 @@ import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFo
 import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
 import {Font} from "../vEngineLight/gameObject/text/Font";
 import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
-import {Color} from "../vEngineLight/rendering/Color";
 
 export class TestCharacterScene extends Scene {
     private hero: AnimatedGameObject;
@@ -152,14 +151,17 @@ export class TestCharacterScene extends Scene {
         {
             const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
             const textLabel = new TextLabel(this,font);
-            textLabel.setText('😍Hello World\n💁👌це 🎍демо\nНова стрічка! Нам дуже подобається оце от все. Двіжок там, лалала');
+            textLabel.setText(
+                '😍Hello World\n💁👌це 🎍демо\nНова стрічка! Нам дуже подобається оце от все. Двіжок там, лалала'
+            );
             const parameters = textLabel.getTextParameters();
-            parameters.wrap = false;
+            parameters.wrap = true;
             parameters.textAlign = 'center';
+            parameters.verticalAlign = 'center';
             textLabel.setTextParameters(parameters);
             textLabel.position.xy(200,200);
-            textLabel.size.wh(Infinity,500);
-            textLabel.color.fromCssColor('#45d800');
+            textLabel.size.wh(400,250);
+            textLabel.color.fromCssColor('#45D800');
             this.addObject(textLabel);
         }
 

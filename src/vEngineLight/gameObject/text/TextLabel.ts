@@ -90,6 +90,7 @@ export class TextLabel extends RenderableContainer {
             this.prepareTextNoWrap();
         }
         this.alignHorizontal();
+        this.alignVertical();
         this.prepareRenderableLetters();
     }
 
@@ -227,6 +228,30 @@ export class TextLabel extends RenderableContainer {
                 }
                 break;
             }
+        }
+    }
+
+    private alignVertical() {
+        let boundHeight = this.size.h;
+        if (!boundHeight || !Number.isFinite(boundHeight)) {
+            return;
+        }
+        let offsetY = 0;
+        const linesHeight = this.lines.length * this.lineHeight;
+        switch (this.textParameters.verticalAlign) {
+            case 'center': {
+                offsetY = (boundHeight - linesHeight)/2;
+                break;
+            }
+            case 'bottom': {
+                offsetY = boundHeight - linesHeight;
+                break;
+            }
+        }
+        console.log(offsetY);
+        for (const line of this.lines) {
+            line.y = offsetY;
+            offsetY+=this.lineHeight;
         }
     }
 
