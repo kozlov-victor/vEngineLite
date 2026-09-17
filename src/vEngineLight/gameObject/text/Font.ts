@@ -10,6 +10,7 @@ export interface FontCreateOptions {
     readonly italic?: boolean;
     readonly fontSize?: number;
     readonly chars?: string;
+    readonly additionalChars?: string;
     readonly padding?: number;
     readonly spacing?: number;
     readonly lineHeight?: number;
@@ -65,7 +66,7 @@ export class Font {
         const chars = [
             ...new Set(
                 options.chars ??
-                LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS
+                LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS + options.additionalChars ?? ''
             )
         ];
 

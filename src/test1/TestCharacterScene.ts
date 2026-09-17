@@ -150,11 +150,16 @@ export class TestCharacterScene extends Scene {
         this.addObject(tileMap);
 
         {
-            const font = Font.fromCss({fontFamily:'Arial',fontSize: 35, fillColor:Color.WHITE().fromCssColor('#45d800')});
+            const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
             const textLabel = new TextLabel(this,font);
-            textLabel.setText('Hello World, це демо!');
+            textLabel.setText('😍Hello World\n💁👌це 🎍демо\nНова стрічка! Нам дуже подобається оце от все. Двіжок там, лалала');
+            const parameters = textLabel.getTextParameters();
+            parameters.wrap = false;
+            parameters.textAlign = 'center';
+            textLabel.setTextParameters(parameters);
             textLabel.position.xy(200,200);
-            //textLabel.color.fromCssColor('#45d800');
+            textLabel.size.wh(Infinity,500);
+            textLabel.color.fromCssColor('#45d800');
             this.addObject(textLabel);
         }
 
