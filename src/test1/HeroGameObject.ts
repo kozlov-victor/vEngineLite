@@ -1,32 +1,37 @@
-import {Sprite} from "../vEngineLight/gameObject/Sprite";
 import {Texture} from "../vEngineLight/rendering/Texture";
 import {FrameAnimation} from "../vEngineLight/animation/FrameAnimation";
 import {FrameAnimationPlayer} from "../vEngineLight/animation/FrameAnimationPlayer";
-import {Vector2} from "../vEngineLight/utils/Vector2";
-import {Color} from "../vEngineLight/rendering/Color";
-import {Size} from "../vEngineLight/utils/Size";
 import {Scene} from "../vEngineLight/application/Scene";
-import {SpriteSheet} from "../vEngineLight/types";
+import {IFrame, SpriteSheet} from "../vEngineLight/types";
+import {ArcadeRigidBody, ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
+import {ImageSprite} from "../vEngineLight/gameObject/ImageSprite";
 
-export class AnimatedGameObject extends Sprite {
+export class HeroGameObject extends ImageSprite {
 
     private readonly player = new FrameAnimationPlayer();
     private readonly walkAnimation:FrameAnimation;
     private readonly idleAnimation:FrameAnimation;
     private readonly fallAnimation:FrameAnimation;
+    private readonly sidDownAnimation:FrameAnimation;
+
+    private readonly bodyRef: ArcadeRigidBody;
+    private readonly regularBodyRect: IFrame = {x: 25, y: 2, width: 15, height: 62};
+    private readonly sitBodyRect: IFrame = {x: 25, y: 2, width: 15, height: 62};
+    private sit = false;
 
     constructor(scene: Scene, texture: Texture, spriteSheet: SpriteSheet) {
-        super(scene);
-        this.scale.xy(1);
+        super(scene, texture);
+
         this.position.xy(200,250);
-        this.textureInfo = {
-            texture,
-            rect: {
-                uv: new Vector2(),
-                size: new Size(texture.width, texture.height),
-            },
-            color: Color.WHITE(),
-        };
+
+        const body = scene.app.physics.createRigidBody({
+            type: ArcadeRigidBodyType.DYNAMIC,
+            target: this,
+            rect: this.regularBodyRect
+        });
+        this.body = body;
+        this.bodyRef = body;
+
         this.walkAnimation =
             new FrameAnimation(
                 this,
@@ -45,6 +50,12 @@ export class AnimatedGameObject extends Sprite {
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_fall1','hero_fall2']),
                 800
             );
+        this.sidDownAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_sit_down1','hero_sit_down2']),
+                1500
+            );
     }
 
     public override update(dt:number) {
@@ -54,15 +65,35 @@ export class AnimatedGameObject extends Sprite {
     }
 
     public walk() {
+        this.sit = false;
+        this.bodyRef.rect = this.regularBodyRect;
         this.player.play(this.walkAnimation);
     }
 
     public idle() {
+        this.sit = false;
+        this.bodyRef.rect = this.regularBodyRect;
         this.player.play(this.idleAnimation);
     }
 
     public fall() {
+        this.sit = false;
+        this.bodyRef.rect = this.regularBodyRect;
         this.player.play(this.fallAnimation);
+    }
+
+    public sitDown() {
+        this.sit = true;
+        this.bodyRef.rect = this.sitBodyRect;
+        this.player.play(this.sidDownAnimation);
+    }
+
+    public getRigidBody() {
+        return this.bodyRef;
+    }
+
+    public isSiting() {
+        return this.sit;
     }
 
 }

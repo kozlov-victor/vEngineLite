@@ -1,7 +1,7 @@
 import {Scene} from "../vEngineLight/application/Scene";
 import {GLUtils} from "../vEngineLight/utils/GLUtils";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
-import {AnimatedGameObject} from "./AnimatedGameObject";
+import {HeroGameObject} from "./HeroGameObject";
 import {Particle} from "./Particle";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
@@ -12,7 +12,7 @@ import {ColorPerVertexRectangle} from "../vEngineLight/gameObject/shapes/ColorPe
 export class MainScene extends Scene {
 
     private delta = 1;
-    private hero: AnimatedGameObject;
+    private hero: HeroGameObject;
 
     override onPreloadStarted() {
         this.app.assetManager
@@ -72,7 +72,7 @@ export class MainScene extends Scene {
 
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
-        const animatedCat = new AnimatedGameObject(this,catTexture,catSpriteSheet);
+        const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
         this.hero = animatedCat;
 

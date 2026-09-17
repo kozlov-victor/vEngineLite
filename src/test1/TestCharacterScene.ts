@@ -1,11 +1,11 @@
 import {Scene} from "../vEngineLight/application/Scene";
-import {AnimatedGameObject} from "./AnimatedGameObject";
+import {HeroGameObject} from "./HeroGameObject";
 import {GLUtils} from "../vEngineLight/utils/GLUtils";
 import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {MathEx} from "../vEngineLight/utils/MathEx";
-import {ArcadeRigidBody, ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
+import {ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
 import {SpriteSheet} from "../vEngineLight/types";
 import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
@@ -15,7 +15,7 @@ import {Font} from "../vEngineLight/gameObject/text/Font";
 import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
 
 export class TestCharacterScene extends Scene {
-    private hero: AnimatedGameObject;
+    private hero: HeroGameObject;
 
 
     constructor(app: VEngineLiteApplication) {
@@ -40,15 +40,8 @@ export class TestCharacterScene extends Scene {
     override onReady() {
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
-        const animatedCat = new AnimatedGameObject(this,catTexture,catSpriteSheet);
+        const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
-        animatedCat.body = this.app.physics.createRigidBody({
-            type: ArcadeRigidBodyType.DYNAMIC,
-            target: animatedCat,
-            rect: {
-                x: 25, y: 2, width: 15, height: 62,
-            }
-        });
 
         this.app.camera.followTarget = animatedCat;
 
@@ -149,18 +142,27 @@ export class TestCharacterScene extends Scene {
         this.addObject(tileMap);
 
         {
+
+            const rect = new Rectangle(this);
+            this.addObject(rect);
+            rect.size.wh(400,250);
+            rect.position.xy(200,200);
+            rect.color.fromCssColor('#8f8f8f33');
+            this.addObject(rect);
+
+
             const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
             const textLabel = new TextLabel(this,font);
             textLabel.setText(
-                '😍Hello World\n💁👌це 🎍демо\nНова стрічка! Нам дуже подобається оце от все. Двіжок там, лалала'
+                '😍Hello World\n💁👌це 🎍демо\nтекст! Нам дуже подобається оце от все. '
             );
             const parameters = textLabel.getTextParameters();
             parameters.wrap = true;
             parameters.textAlign = 'center';
             parameters.verticalAlign = 'center';
             textLabel.setTextParameters(parameters);
-            textLabel.position.xy(200,200);
-            textLabel.size.wh(400,250);
+            textLabel.position.from(rect.position);
+            textLabel.size.from(rect.size);
             textLabel.color.fromCssColor('#45D800');
             this.addObject(textLabel);
         }
@@ -184,40 +186,46 @@ export class TestCharacterScene extends Scene {
     override onUpdate(dt: number) {
         super.onUpdate(dt);
 
-        const heroRigidBody = this.hero?.body as ArcadeRigidBody;
-        if (!heroRigidBody) return;
+        if (!this.hero) return;
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;
-            heroRigidBody.velocity.x=100;
+            this.hero.getRigidBody().velocity.x=100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
-            heroRigidBody.velocity.x = 0;
+            this.hero.getRigidBody().velocity.x = 0;
             this.hero.idle();
         }
 
         if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
             this.hero.scale.x = -1;
             this.hero.pivot.x = 64;
-            heroRigidBody.velocity.x=-100;
+            this.hero.getRigidBody().velocity.x=-100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
-            heroRigidBody.velocity.x = 0;
+            this.hero.getRigidBody().velocity.x = 0;
+        }
+
+        if (this.input.keyboard.justPressed(KeyboardKey.DOWN)) {
+            if (this.hero.getRigidBody().onGround()) this.hero.sitDown();
+        }
+        else if (this.input.keyboard.justReleased(KeyboardKey.DOWN)) {
+            this.hero.idle();
         }
 
         if (
             this.input.keyboard.isPressed(KeyboardKey.SPACE) &&
-            heroRigidBody.onGround()
+            this.hero.getRigidBody().onGround()
         ) {
-            heroRigidBody.jump(-350);
+            this.hero.getRigidBody().jump(-350);
         }
 
-        if (heroRigidBody.onGround()) {
-            if (heroRigidBody.velocity.x!==0) {
+        if (this.hero.getRigidBody().onGround()) {
+            if (this.hero.getRigidBody().velocity.x!==0) {
                 this.hero.walk();
             }
             else {
-                this.hero.idle();
+                if (!this.hero.isSiting()) this.hero.idle();
             }
         }
         else {

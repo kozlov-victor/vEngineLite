@@ -1,9 +1,16 @@
 import {TriangleBatchRenderer} from "../rendering/TriangleBatchRenderer";
 import {IFrame} from "../types";
 import {RenderableContainer} from "./base/RenderableContainer";
+import {Scene} from "../application/Scene";
+import {TextureInfo} from "../components/TextureInfo";
 
 
-export class Sprite extends RenderableContainer {
+export abstract class Sprite extends RenderableContainer {
+
+    protected constructor(scene: Scene, textureInfo: TextureInfo) {
+        super(scene);
+        this.textureInfo = textureInfo;
+    }
 
     public render(renderer: TriangleBatchRenderer) {
         renderer.batchSprite(

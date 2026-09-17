@@ -1,7 +1,7 @@
 import {Vector2} from "../utils/Vector2";
 import {IFrame, IGeometry} from "../types";
 import {Size} from "../utils/Size";
-import {CollisionGroup, CollisionGroupManager} from "./CollisionGroupManager";
+import {CollisionGroupManager} from "./CollisionGroupManager";
 
 export interface IRigidBodyParams {
     target: IGeometry;
@@ -10,7 +10,7 @@ export interface IRigidBodyParams {
 export abstract class RigidBody {
 
     public readonly target: {size:Size,position:Vector2};
-    public readonly rect: IFrame;
+    public rect: IFrame;
     public readonly velocity: Vector2;
     public collisionGroup = CollisionGroupManager.getDefaultGroup();
     public collideWithGroups = CollisionGroupManager.getDefaultGroup();

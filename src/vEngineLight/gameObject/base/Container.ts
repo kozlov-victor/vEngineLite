@@ -5,7 +5,7 @@ import {Scene} from "../../application/Scene";
 import {IGeometry, ITransformable, IUpdateable} from "../../types";
 import {RigidBody} from "../../physics/IPhysics";
 
-export class Container implements IUpdateable, IGeometry, ITransformable {
+export abstract class Container implements IUpdateable, IGeometry, ITransformable {
 
     private readonly transform = new Transform();
     public body?: RigidBody;
