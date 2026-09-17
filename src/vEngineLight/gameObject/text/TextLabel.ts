@@ -248,7 +248,6 @@ export class TextLabel extends RenderableContainer {
                 break;
             }
         }
-        console.log(offsetY);
         for (const line of this.lines) {
             line.y = offsetY;
             offsetY+=this.lineHeight;
