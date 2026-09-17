@@ -15,7 +15,13 @@ import {Font} from "../vEngineLight/gameObject/text/Font";
 import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
 
 export class TestCharacterScene extends Scene {
+
     private hero: HeroGameObject;
+    private cameraFollowStrategy = new LookAheadFollowStrategy(
+        100,
+        6,
+        4
+    );
 
 
     constructor(app: VEngineLiteApplication) {
@@ -44,13 +50,7 @@ export class TestCharacterScene extends Scene {
         this.addObject(animatedCat);
 
         this.app.camera.followTarget = animatedCat;
-
-        this.app.camera.followStrategy =
-            new LookAheadFollowStrategy(
-                100,
-                6,
-                4
-            );
+        this.app.camera.followStrategy = this.cameraFollowStrategy;
 
         this.hero = animatedCat;
 
@@ -190,6 +190,8 @@ export class TestCharacterScene extends Scene {
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;
+            this.cameraFollowStrategy.lookDirectionX = 'right';
+            this.cameraFollowStrategy.lookDirectionY = 'none';
             this.hero.getRigidBody().velocity.x=100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
@@ -200,6 +202,8 @@ export class TestCharacterScene extends Scene {
         if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
             this.hero.scale.x = -1;
             this.hero.pivot.x = 64;
+            this.cameraFollowStrategy.lookDirectionX = 'left';
+            this.cameraFollowStrategy.lookDirectionY = 'none';
             this.hero.getRigidBody().velocity.x=-100;
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
@@ -207,9 +211,13 @@ export class TestCharacterScene extends Scene {
         }
 
         if (this.input.keyboard.justPressed(KeyboardKey.DOWN)) {
-            if (this.hero.getRigidBody().onGround()) this.hero.sitDown();
+            if (this.hero.getRigidBody().onGround()) {
+                this.hero.sitDown();
+                this.cameraFollowStrategy.lookDirectionY = 'bottom';
+            }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.DOWN)) {
+            this.cameraFollowStrategy.lookDirectionY = 'none';
             this.hero.idle();
         }
 

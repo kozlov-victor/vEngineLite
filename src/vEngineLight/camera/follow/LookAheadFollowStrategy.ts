@@ -5,9 +5,12 @@ import {Container} from "../../gameObject/base/Container";
 export class LookAheadFollowStrategy implements CameraFollowStrategy {
 
     private lookAheadX = 0;
+    private lookAheadY = 0;
+    public lookDirectionX:'left'|'right'|'none' = 'right';
+    public lookDirectionY:'top'|'bottom'|'none' = 'none';
 
     constructor(
-        private distance = 100,
+        private readonly distance: number,
         private lookAheadSmoothing = 6,
         private cameraSmoothing = 4
     ) {}
@@ -19,17 +22,16 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
     ) {
         const seconds = dt / 1000;
 
-        let direction = 0;
+        let directionX = 0;
+        if (this.lookDirectionX==='right') directionX = 1;
+        if (this.lookDirectionX==='left') directionX = -1;
 
-        if (target.scale.x > 0) {
-            direction = 1;
-        }
-        else if (target.scale.x < 0) {
-            direction = -1;
-        }
+        let directionY = 0;
+        if (this.lookDirectionY==='top') directionY = -1;
+        else if (this.lookDirectionY==='bottom') directionY = 1;
 
-        const desiredLookAhead =
-            this.distance * direction;
+        const desiredLookAheadX = this.distance * directionX;
+        const desiredLookAheadY = this.distance * directionY;
 
         const lookAheadAlpha =
             1 - Math.exp(
@@ -39,8 +41,14 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
 
         this.lookAheadX +=
             (
-                desiredLookAhead -
+                desiredLookAheadX -
                 this.lookAheadX
+            ) * lookAheadAlpha;
+
+        this.lookAheadY +=
+            (
+                desiredLookAheadY -
+                this.lookAheadY
             ) * lookAheadAlpha;
 
 
@@ -50,7 +58,8 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
             camera.app.width / 2;
 
         const targetY =
-            target.position.y -
+            target.position.y +
+            this.lookAheadY -
             camera.app.height / 2;
 
         const cameraAlpha =
@@ -58,9 +67,9 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
                 -this.cameraSmoothing * seconds
             );
 
-        const bounds = camera.app.getCurrentScene().size;
-        const screenWidth = camera.app.width;
-        const screenHeight = camera.app.height;
+        const wordBounds = camera.app.getCurrentScene().size;
+        const viewPortWidth = camera.app.width;
+        const viewPortHeight = camera.app.height;
 
         let posX = camera.position.x +
             (
@@ -77,8 +86,8 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
         if (posX<0) posX = 0;
         if (posY<0) posY = 0;
 
-        if (posX>bounds.w - screenWidth) posX = bounds.w - screenWidth;
-        if (posY>bounds.h - screenHeight) posY = bounds.h - screenHeight;
+        if (posX>wordBounds.w - viewPortWidth) posX = wordBounds.w - viewPortWidth;
+        if (posY>wordBounds.h - viewPortHeight) posY = wordBounds.h - viewPortHeight;
 
         camera.position.xy(Math.round(posX), Math.round(posY));
 
