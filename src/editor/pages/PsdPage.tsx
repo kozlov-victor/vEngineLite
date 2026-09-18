@@ -9,6 +9,7 @@ import {PsdLayerComponent} from "./PsdLayerComponent";
 import {SpriteSheetRenderer} from "../spritesheet/SpriteSheetRenderer";
 import {IPackedSpriteSheet, SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
 import {InputSetterService, Numeric} from "@engine/renderable/tsx/dom/utils/input.setter.service";
+import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
 
 type tPackType = 'spriteSheet'|'tileMap';
 
@@ -79,11 +80,11 @@ export class PsdPage extends BaseTsxComponent {
                     <button onclick={this.openPsd}>Відкрити PSD</button>
                 </div>
                 <div>
-                    {this.psd &&
-                        <>
-                            {
-                                this.psd.layers.map((l, i) =>
-                                    <>
+                    <If condition={this.psd!==undefined}>
+                        {()=>
+                            <>
+                                <Loop array={this.psd.layers}>
+                                    {(l:PsdLayer,i:number)=>
                                         <div
                                             onclick={_ => this.toggleSelection(l)}
                                             classNames={{'psd-frame': true, selected: this.selected.includes(l)}}
@@ -97,30 +98,27 @@ export class PsdPage extends BaseTsxComponent {
                                                 {l.name}
                                             </div>
                                         </div>
-                                    </>
-                                )
-                            }
-
-                            <div>
-                                <select {...this.service.bind(this, 'packType', v => v as tPackType)}>
-                                    <option value={'spriteSheet'}>spriteSheet</option>
-                                    <option value={'tileMap'}>tileMap</option>
-                                </select>
-                                {
-                                    this.packType === 'tileMap' &&
-                                    <>
-                                        cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
-                                    </>
-                                }
-                            </div>
-
-                            <div>
-                                <button onclick={this.export}>Експорт</button>
-                            </div>
-
-                        </>
-                    }
-
+                                    }
+                                </Loop>
+                                <div>
+                                    <select {...this.service.bind(this, 'packType', v => v as tPackType)}>
+                                        <option value={'spriteSheet'}>spriteSheet</option>
+                                        <option value={'tileMap'}>tileMap</option>
+                                    </select>
+                                    <If condition={this.packType === 'tileMap'}>
+                                        {()=>
+                                            <>
+                                                cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
+                                            </>
+                                        }
+                                    </If>
+                                </div>
+                                <div>
+                                    <button onclick={this.export}>Експорт</button>
+                                </div>
+                            </>
+                        }
+                    </If>
                 </div>
             </>
         );

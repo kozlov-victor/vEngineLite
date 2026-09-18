@@ -32,17 +32,15 @@ export class PsdLayerComponent extends BaseTsxComponent {
     override render(): JSX.Element {
         const header = this.props.header;
         return (
-            <>
-                <canvas
-                    ref={el => this.el = el}
-                    style={{
-                        width: `${header.width}px`,
-                        height: `${header.height}px`,
-                    }}
-                    width={header.width}
-                    height={header.height}
-                />
-            </>
+            <canvas
+                ref={el => this.el = el}
+                style={{
+                    width: `${header.width}px`,
+                    height: `${header.height}px`,
+                }}
+                width={header.width}
+                height={header.height}
+            />
         );
     }
 
