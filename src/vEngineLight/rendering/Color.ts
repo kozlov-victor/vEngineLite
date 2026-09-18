@@ -24,6 +24,10 @@ export class Color extends ObservableEntity {
         return new Color(0,0,0,255);
     }
 
+    public from(other:Color) {
+        this.rgba(other.r,other.g,other.b,other.a);
+    }
+
     public fromCssColor(hex:string) {
         const groups = hex.substring(1).match(/..?/g);
         if (!groups) throw new Error(`Invalid hex string: ${hex}`);

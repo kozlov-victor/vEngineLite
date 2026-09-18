@@ -1,7 +1,7 @@
 import {Scene} from "../vEngineLight/application/Scene";
 import {GLUtils} from "../vEngineLight/utils/GLUtils";
 import {TileMap} from "../vEngineLight/gameObject/TileMap";
-import {HeroGameObject} from "./HeroGameObject";
+import {HeroGameObject} from "./hero/HeroGameObject";
 import {Particle} from "./Particle";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
 import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
@@ -34,7 +34,7 @@ export class MainScene extends Scene {
         const tileMapImage = this.app.assetManager.getImage('tileset');
         const tileMapTexture = GLUtils.createTextureFromImage(tileMapImage);
 
-        const tilemap = new TileMap(
+        const tileMap = new TileMap(
             this,
             [ // map data
                 1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
@@ -49,7 +49,7 @@ export class MainScene extends Scene {
             tileMapTexture
         );
         // Рухаємо всю карту трохи вбік
-        tilemap.position.xy(150, 50);
+        tileMap.position.xy(150, 50);
 
         const NUM_SPRITES = 1000;
         for (let i = 0; i < NUM_SPRITES; i++) {
@@ -57,7 +57,7 @@ export class MainScene extends Scene {
             this.addObject(p);
         }
 
-        this.addObject(tilemap);
+        this.addObject(tileMap);
 
         const r = new Rectangle(this);
         r.color.rgba(255,0,0,255);

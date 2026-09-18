@@ -71,6 +71,20 @@
             "height": 64,
             "x": 0,
             "y": 195
+        },
+        {
+            "name": "hero_look-up2",
+            "width": 64,
+            "height": 64,
+            "x": 65,
+            "y": 195
+        },
+        {
+            "name": "hero_look-up1",
+            "width": 64,
+            "height": 64,
+            "x": 130,
+            "y": 195
         }
     ]
 }
