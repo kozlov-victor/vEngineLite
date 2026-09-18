@@ -234,7 +234,7 @@ export class TestCharacterScene extends Scene {
             this.cameraFollowStrategy.lookDirectionY = 'top';
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.UP)) {
-            const accepted = this.hero.animationStateMachine.sendCommand('stopLoopUp');
+            const accepted = this.hero.animationStateMachine.sendCommand('stopLookUp');
             if (!accepted) return;
             this.cameraFollowStrategy.lookDirectionY = 'none';
         }

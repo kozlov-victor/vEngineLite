@@ -15,7 +15,7 @@ export class HeroLookUpState extends AnimationState {
 
     receiveCommand(command: string): string | null {
         switch (command) {
-            case 'stopLoopUp': return HeroIdleState.name;
+            case 'stopLookUp': return HeroIdleState.name;
             //case 'walk': return HeroWalkState.name;
             case 'unground': return HeroFallState.name;
         }
