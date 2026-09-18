@@ -79,47 +79,45 @@ export class PsdPage extends BaseTsxComponent {
                 <div>
                     <button onclick={this.openPsd}>Відкрити PSD</button>
                 </div>
-                <div>
-                    <If condition={this.psd!==undefined}>
-                        {()=>
-                            <>
-                                <Loop array={this.psd.layers}>
-                                    {(l:PsdLayer,i:number)=>
-                                        <div
-                                            onclick={_ => this.toggleSelection(l)}
-                                            classNames={{'psd-frame': true, selected: this.selected.includes(l)}}
-                                            key={i}>
-                                            <PsdLayerComponent
-                                                header={this.psd.header}
-                                                trackBy={`_${i}`}
-                                                layer={l}
-                                            />
-                                            <div className={'psd-layer-name'}>
-                                                {l.name}
-                                            </div>
+                <If condition={Boolean(this.psd)}>
+                    {()=>
+                        <div>
+                            <Loop array={this.psd.layers}>
+                                {(l:PsdLayer,i:number)=>
+                                    <div
+                                        onclick={_ => this.toggleSelection(l)}
+                                        classNames={{'psd-frame': true, selected: this.selected.includes(l)}}
+                                        key={i}>
+                                        <PsdLayerComponent
+                                            header={this.psd.header}
+                                            trackBy={`_${i}`}
+                                            layer={l}
+                                        />
+                                        <div className={'psd-layer-name'}>
+                                            {l.name}
                                         </div>
+                                    </div>
+                                }
+                            </Loop>
+                            <div>
+                                <select {...this.service.bind(this, 'packType', v => v as tPackType)}>
+                                    <option value={'spriteSheet'}>spriteSheet</option>
+                                    <option value={'tileMap'}>tileMap</option>
+                                </select>
+                                <If condition={this.packType === 'tileMap'}>
+                                    {()=>
+                                        <>
+                                            cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
+                                        </>
                                     }
-                                </Loop>
-                                <div>
-                                    <select {...this.service.bind(this, 'packType', v => v as tPackType)}>
-                                        <option value={'spriteSheet'}>spriteSheet</option>
-                                        <option value={'tileMap'}>tileMap</option>
-                                    </select>
-                                    <If condition={this.packType === 'tileMap'}>
-                                        {()=>
-                                            <>
-                                                cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
-                                            </>
-                                        }
-                                    </If>
-                                </div>
-                                <div>
-                                    <button onclick={this.export}>Експорт</button>
-                                </div>
-                            </>
-                        }
-                    </If>
-                </div>
+                                </If>
+                            </div>
+                            <div>
+                                <button onclick={this.export}>Експорт</button>
+                            </div>
+                        </div>
+                    }
+                </If>
             </>
         );
     }
