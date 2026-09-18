@@ -11,7 +11,8 @@
         "typescript": "7.0.2"
     },
     "scripts": {
-        "start": "node mini-bundler.mjs"
+        "start": "node mini-bundler.mjs --dev",
+        "build": "node mini-bundler.mjs"
     },
     "main": ""
 }
