@@ -14,8 +14,8 @@ export class FrameAnimationPlayer {
         this.currentAnimation = undefined;
     }
 
-    public update(time: number) {
-        if(this.currentAnimation) this.currentAnimation.update(time);
+    public update(dt: number) {
+        if(this.currentAnimation) this.currentAnimation.update(dt);
     }
 
 }

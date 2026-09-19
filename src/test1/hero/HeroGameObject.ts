@@ -49,7 +49,7 @@ export class HeroGameObject extends ImageSprite {
             new FrameAnimation(
                 this,
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_idle1','hero_idle2']),
-                1600
+                1600,
             );
         this.fallAnimation =
             new FrameAnimation(
@@ -79,8 +79,7 @@ export class HeroGameObject extends ImageSprite {
 
     public override update(dt:number) {
         super.update(dt);
-        const time = this.scene.app.getTime();
-        this.animationPlayer.update(time);
+        this.animationPlayer.update(dt);
     }
 
     public getRigidBody() {

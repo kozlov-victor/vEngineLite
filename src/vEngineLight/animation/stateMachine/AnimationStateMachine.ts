@@ -23,7 +23,6 @@ export class AnimationStateMachine {
             this.currentState.onExit();
             this.currentState = this.getState(nextStateName);
             this.currentState.onEnter();
-            //console.log('onEntered',this.currentState);
             return true;
         }
         return false;

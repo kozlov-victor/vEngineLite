@@ -57,7 +57,9 @@ const ctx = await esbuild.context({
     bundle: true,
     outdir: 'out',
     format: 'iife',
-    sourcemap: true,
+    sourcemap: !dev,
+    keepNames: !dev,
+    minify: !dev,
     define: {
         BUILD_ID: JSON.stringify(`${new Date().getTime()}`),
     },

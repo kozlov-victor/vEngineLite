@@ -4,9 +4,10 @@ import {IFrame, SpriteSheet} from "../types";
 export class FrameAnimation {
 
     private readonly frameDuration: number;
-    private started = 0;
+    private time: number;
     private currentFrame:IFrame;
-    private currentLoop = 0;
+    private currentLoop: number;
+    private completed: boolean;
 
     public static framesFromRegularSpriteSheet(textureWidth: number, textureHeight: number, tilesetCols: number, tilesetRows: number) {
         const frames: IFrame[] = [];
@@ -32,23 +33,29 @@ export class FrameAnimation {
         return result;
     }
 
-    constructor(private readonly gameObject: Sprite, private readonly frames: IFrame[], duration: number, private readonly loops = Infinity, startFrameIndex = 0 ) {
+    constructor(private readonly gameObject: Sprite, private readonly frames: IFrame[], private readonly duration: number, private readonly loops = Infinity, startFrameIndex = 0 ) {
         this.frameDuration = ~~(duration / frames.length);
         this.currentFrame = frames[startFrameIndex];
         this.updateGameObject();
     }
 
-    public update(time: number) {
-        if (!this.started) this.started = time;
-        const delta = time - this.started;
-        let currentFrameIndex = ~~(delta / this.frameDuration);
-        if (currentFrameIndex >= this.frames.length) {
+    public update(dt: number) {
+        if (this.completed) return;
+        this.time+=dt;
+        if (this.time>this.duration) {
+            this.time%=this.duration;
             this.currentLoop++;
+            if (this.currentLoop >= this.loops) {
+                this.completed = true;
+                return;
+            }
         }
-        if (this.currentLoop >= this.loops) return;
-        currentFrameIndex %= this.frames.length;
+
+        let currentFrameIndex = Math.floor(this.time / this.frameDuration);
         this.currentFrame = this.frames[currentFrameIndex];
         this.updateGameObject();
+
+
     }
 
     public getCurrentFrame() {
@@ -60,8 +67,9 @@ export class FrameAnimation {
     }
 
     public reset() {
-        this.started = 0;
+        this.time = 0;
         this.currentLoop = 0;
+        this.completed = false;
     }
 
     private updateGameObject() {
