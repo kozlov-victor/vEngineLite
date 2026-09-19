@@ -191,8 +191,7 @@ export class TestCharacterScene extends Scene {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;
             const accepted = this.hero.animationStateMachine.sendCommand('walk');
-            if (accepted || !this.hero.getRigidBody().onGround()) {
-                this.hero.getRigidBody().velocity.x=100;
+            if (accepted) {
                 this.cameraFollowStrategy.lookDirectionX = 'right';
                 this.cameraFollowStrategy.lookDirectionY = 'none';
             }
@@ -206,8 +205,7 @@ export class TestCharacterScene extends Scene {
             this.hero.scale.x = -1;
             this.hero.pivot.x = 64;
             const accepted = this.hero.animationStateMachine.sendCommand('walk');
-            if (accepted || !this.hero.getRigidBody().onGround()) {
-                this.hero.getRigidBody().velocity.x=-100;
+            if (accepted) {
                 this.cameraFollowStrategy.lookDirectionX = 'left';
                 this.cameraFollowStrategy.lookDirectionY = 'none';
             }

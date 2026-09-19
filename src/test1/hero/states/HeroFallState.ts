@@ -2,14 +2,17 @@ import {AnimationState} from "../../../vEngineLight/animation/stateMachine/Anima
 import {HeroGameObject} from "../HeroGameObject";
 import {HeroIdleState} from "./HeroIdleState";
 import {HeroAttackState} from "./HeroAttackState";
+import {Scene} from "../../../vEngineLight/application/Scene";
+import {HeroAbstractMovingState} from "./abstracts/HeroAbstractMovingState";
 
-export class HeroFallState extends AnimationState {
+export class HeroFallState extends HeroAbstractMovingState {
 
-    constructor(private readonly hero: HeroGameObject) {
-        super();
+    constructor(private readonly scene: Scene, private readonly hero: HeroGameObject) {
+        super(scene, hero);
     }
 
     override onEnter() {
+        this.setHeroVelocity();
         return this.hero.fallAnimation;
     }
 
@@ -17,6 +20,7 @@ export class HeroFallState extends AnimationState {
         switch (command) {
             case 'attack': return HeroAttackState.name;
             case 'ground': return HeroIdleState.name;
+            case 'walk': return HeroFallState.name;
         }
         return null;
     }

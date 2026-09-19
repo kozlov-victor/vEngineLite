@@ -5,10 +5,11 @@ import {HeroWalkState} from "./HeroWalkState";
 import {HeroFallState} from "./HeroFallState";
 import {HeroSitState} from "./HeroSitState";
 import {HeroAttackState} from "./HeroAttackState";
+import {Scene} from "../../../vEngineLight/application/Scene";
 
 export class HeroIdleState extends AnimationState {
 
-    constructor(private readonly hero: HeroGameObject) {
+    constructor(private readonly scene: Scene, private readonly hero: HeroGameObject) {
         super();
     }
 

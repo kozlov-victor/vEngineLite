@@ -15,6 +15,7 @@ import {HeroAttackState} from "./states/HeroAttackState";
 
 export class HeroGameObject extends ImageSprite {
 
+    public readonly walkVelocity = 100;
     public readonly walkAnimation:FrameAnimation;
     public readonly idleAnimation:FrameAnimation;
     public readonly lookUpAnimation:FrameAnimation;
@@ -79,8 +80,8 @@ export class HeroGameObject extends ImageSprite {
             );
 
         this.animationStateMachine.addStates(
-            new HeroIdleState(this), new HeroLookUpState(this), new HeroWalkState(this),
-            new HeroFallState(this), new HeroSitState(this), new HeroAttackState(this),
+            new HeroIdleState(this.scene, this), new HeroLookUpState(this.scene, this), new HeroWalkState(this.scene, this),
+            new HeroFallState(this.scene, this), new HeroSitState(this.scene, this), new HeroAttackState(this.scene, this),
         )
         this.animationStateMachine.setInitialState(HeroIdleState.name);
     }
