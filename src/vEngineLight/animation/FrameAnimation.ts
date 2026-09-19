@@ -66,6 +66,10 @@ export class FrameAnimation {
         return this.currentLoop;
     }
 
+    public isCompleted() {
+        return this.completed;
+    }
+
     public reset() {
         this.time = 0;
         this.currentLoop = 0;

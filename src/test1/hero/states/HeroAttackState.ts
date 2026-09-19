@@ -1,23 +1,22 @@
 import {AnimationState} from "../../../vEngineLight/animation/stateMachine/AnimationState";
 import {HeroGameObject} from "../HeroGameObject";
 import {HeroIdleState} from "./HeroIdleState";
-import {HeroAttackState} from "./HeroAttackState";
 
-export class HeroFallState extends AnimationState {
+export class HeroAttackState extends AnimationState {
 
     constructor(private readonly hero: HeroGameObject) {
         super();
     }
 
     override onEnter() {
-        return this.hero.fallAnimation;
+        return this.hero.attackAnimation;
+    }
+
+    override onAnimationCompleted(): string | null {
+        return HeroIdleState.name;
     }
 
     receiveCommand(command: string): string | null {
-        switch (command) {
-            case 'attack': return HeroAttackState.name;
-            case 'ground': return HeroIdleState.name;
-        }
         return null;
     }
 

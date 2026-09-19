@@ -9,8 +9,8 @@ export class HeroLookUpState extends AnimationState {
         super();
     }
 
-    override onEnter(): void {
-        this.hero.animationPlayer.play(this.hero.lookUpAnimation);
+    override onEnter() {
+        return this.hero.lookUpAnimation;
     }
 
     receiveCommand(command: string): string | null {

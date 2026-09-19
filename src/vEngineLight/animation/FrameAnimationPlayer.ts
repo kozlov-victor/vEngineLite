@@ -1,12 +1,15 @@
 import {FrameAnimation} from "./FrameAnimation";
+import {IUpdateable} from "../types";
 
-export class FrameAnimationPlayer {
+export class FrameAnimationPlayer implements IUpdateable {
 
     private currentAnimation: FrameAnimation|undefined;
+    private completed: boolean;
 
     public play(fa: FrameAnimation) {
         if (fa===this.currentAnimation) return;
         fa.reset();
+        this.completed = false;
         this.currentAnimation = fa;
     }
 
@@ -14,8 +17,14 @@ export class FrameAnimationPlayer {
         this.currentAnimation = undefined;
     }
 
+    public isAnimationCompleted() {
+        return this.completed;
+    }
+
     public update(dt: number) {
-        if(this.currentAnimation) this.currentAnimation.update(dt);
+        if(!this.currentAnimation) return;
+        this.currentAnimation.update(dt);
+        this.completed = this.currentAnimation.isCompleted();
     }
 
 }

@@ -9,8 +9,8 @@ export class HeroSitState extends AnimationState {
         super();
     }
 
-    override onEnter(): void {
-        this.hero.animationPlayer.play(this.hero.sidDownAnimation);
+    override onEnter() {
+        return this.hero.sitAnimation;
     }
 
     receiveCommand(command: string): string | null {

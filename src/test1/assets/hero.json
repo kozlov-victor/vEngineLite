@@ -1,26 +1,54 @@
 {
-    "width": 256,
-    "height": 512,
+    "width": 512,
+    "height": 256,
     "frames": [
         {
-            "name": "hero_sit_down2",
+            "name": "hero_attack4",
             "width": 64,
             "height": 64,
             "x": 0,
             "y": 0
         },
         {
-            "name": "hero_sit_down1",
+            "name": "hero_attack3",
             "width": 64,
             "height": 64,
             "x": 65,
             "y": 0
         },
         {
-            "name": "hero_step4",
+            "name": "hero_attack2",
             "width": 64,
             "height": 64,
             "x": 130,
+            "y": 0
+        },
+        {
+            "name": "hero_attack1",
+            "width": 64,
+            "height": 64,
+            "x": 195,
+            "y": 0
+        },
+        {
+            "name": "hero_sit_down2",
+            "width": 64,
+            "height": 64,
+            "x": 260,
+            "y": 0
+        },
+        {
+            "name": "hero_sit_down1",
+            "width": 64,
+            "height": 64,
+            "x": 325,
+            "y": 0
+        },
+        {
+            "name": "hero_step4",
+            "width": 64,
+            "height": 64,
+            "x": 390,
             "y": 0
         },
         {
@@ -48,43 +76,43 @@
             "name": "hero_idle2",
             "width": 64,
             "height": 64,
-            "x": 0,
-            "y": 130
+            "x": 195,
+            "y": 65
         },
         {
             "name": "hero_idle1",
             "width": 64,
             "height": 64,
-            "x": 65,
-            "y": 130
+            "x": 260,
+            "y": 65
         },
         {
             "name": "hero_fall2",
             "width": 64,
             "height": 64,
-            "x": 130,
-            "y": 130
+            "x": 325,
+            "y": 65
         },
         {
             "name": "hero_fall1",
             "width": 64,
             "height": 64,
+            "x": 390,
+            "y": 65
+        },
+        {
+            "name": "hero_look-up1",
+            "width": 64,
+            "height": 64,
             "x": 0,
-            "y": 195
+            "y": 130
         },
         {
             "name": "hero_look-up2",
             "width": 64,
             "height": 64,
             "x": 65,
-            "y": 195
-        },
-        {
-            "name": "hero_look-up1",
-            "width": 64,
-            "height": 64,
-            "x": 130,
-            "y": 195
+            "y": 130
         }
     ]
 }

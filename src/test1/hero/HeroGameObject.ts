@@ -11,6 +11,7 @@ import {HeroLookUpState} from "./states/HeroLookUpState";
 import {HeroWalkState} from "./states/HeroWalkState";
 import {HeroFallState} from "./states/HeroFallState";
 import {HeroSitState} from "./states/HeroSitState";
+import {HeroAttackState} from "./states/HeroAttackState";
 
 export class HeroGameObject extends ImageSprite {
 
@@ -18,10 +19,11 @@ export class HeroGameObject extends ImageSprite {
     public readonly idleAnimation:FrameAnimation;
     public readonly lookUpAnimation:FrameAnimation;
     public readonly fallAnimation:FrameAnimation;
-    public readonly sidDownAnimation:FrameAnimation;
+    public readonly sitAnimation:FrameAnimation;
+    public readonly attackAnimation:FrameAnimation;
 
     public readonly animationPlayer = new FrameAnimationPlayer();
-    public readonly animationStateMachine = new AnimationStateMachine();
+    public readonly animationStateMachine = new AnimationStateMachine(this.animationPlayer);
 
     private readonly bodyRef: ArcadeRigidBody;
     private readonly regularBodyRect: IFrame = {x: 25, y: 2, width: 15, height: 62};
@@ -57,7 +59,7 @@ export class HeroGameObject extends ImageSprite {
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_fall1','hero_fall2']),
                 800
             );
-        this.sidDownAnimation =
+        this.sitAnimation =
             new FrameAnimation(
                 this,
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_sit_down1','hero_sit_down2']),
@@ -69,10 +71,16 @@ export class HeroGameObject extends ImageSprite {
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_look-up1','hero_look-up2']),
                 1600
             );
+        this.attackAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack1','hero_attack2','hero_attack3','hero_attack4']),
+                500, 1
+            );
 
         this.animationStateMachine.addStates(
             new HeroIdleState(this), new HeroLookUpState(this), new HeroWalkState(this),
-            new HeroFallState(this), new HeroSitState(this),
+            new HeroFallState(this), new HeroSitState(this), new HeroAttackState(this),
         )
         this.animationStateMachine.setInitialState(HeroIdleState.name);
     }
@@ -80,6 +88,7 @@ export class HeroGameObject extends ImageSprite {
     public override update(dt:number) {
         super.update(dt);
         this.animationPlayer.update(dt);
+        this.animationStateMachine.update(dt);
     }
 
     public getRigidBody() {
