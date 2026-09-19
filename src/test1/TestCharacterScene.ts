@@ -169,12 +169,12 @@ export class TestCharacterScene extends Scene {
 
         this.calculateBounds();
 
-        this.input.keyboard.onKeyDown(KeyboardKey.Z, ()=>{
+        this.input.keyboard.onKeyDown(KeyboardKey.X, ()=>{
             const platform = new Rectangle(this);
             this.addObject(platform);
             platform.size.wh(50,30);
-            platform.position.xy(MathEx.randomInt(this.size.w),MathEx.randomInt(50));
-            platform.color.rgb(120,0,0);
+            platform.position.xy(MathEx.randomInt(0,this.size.w),MathEx.randomInt(0,50));
+            platform.color.rgba(MathEx.randomInt(100,255),MathEx.randomInt(100,255),MathEx.randomInt(100,255),MathEx.randomInt(100,255));
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,

@@ -9,14 +9,14 @@ export class Particle extends ImageSprite {
     constructor(scene: Scene, texture: Texture) {
         super(scene, texture);
         const color = new Color(
-            MathEx.randomInt(255),
-            MathEx.randomInt(255),
-            MathEx.randomInt(255)
+            MathEx.randomInt(0,255),
+            MathEx.randomInt(0,255),
+            MathEx.randomInt(0,255)
         );
         this.textureInfo.color.from(color);
         const size = 16;
         this.size.wh(size);
-        this.position.xy(MathEx.randomInt(scene.app.width),MathEx.randomInt(scene.app.height));
+        this.position.xy(MathEx.randomInt(0,scene.app.width),MathEx.randomInt(0,scene.app.height));
         this.pivot.xy(size / 2, size / 2);
     }
 

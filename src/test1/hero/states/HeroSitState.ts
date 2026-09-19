@@ -3,6 +3,7 @@ import {HeroGameObject} from "../HeroGameObject";
 import {HeroIdleState} from "./HeroIdleState";
 import {HeroFallState} from "./HeroFallState";
 import {Scene} from "../../../vEngineLight/application/Scene";
+import {HeroAttackState} from "./HeroAttackState";
 
 export class HeroSitState extends AnimationState {
 
@@ -17,6 +18,7 @@ export class HeroSitState extends AnimationState {
     receiveCommand(command: string): string | null {
         switch (command) {
             case 'stopSit': return HeroIdleState.name;
+            case 'attack': return HeroAttackState.name;
             case 'unground': return HeroFallState.name;
         }
         return null;
