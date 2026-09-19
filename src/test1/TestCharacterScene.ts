@@ -190,11 +190,11 @@ export class TestCharacterScene extends Scene {
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;
-            this.cameraFollowStrategy.lookDirectionX = 'right';
-            this.cameraFollowStrategy.lookDirectionY = 'none';
             const accepted = this.hero.animationStateMachine.sendCommand('walk');
             if (accepted || !this.hero.getRigidBody().onGround()) {
                 this.hero.getRigidBody().velocity.x=100;
+                this.cameraFollowStrategy.lookDirectionX = 'right';
+                this.cameraFollowStrategy.lookDirectionY = 'none';
             }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
@@ -205,11 +205,11 @@ export class TestCharacterScene extends Scene {
         if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
             this.hero.scale.x = -1;
             this.hero.pivot.x = 64;
-            this.cameraFollowStrategy.lookDirectionX = 'left';
-            this.cameraFollowStrategy.lookDirectionY = 'none';
             const accepted = this.hero.animationStateMachine.sendCommand('walk');
             if (accepted || !this.hero.getRigidBody().onGround()) {
                 this.hero.getRigidBody().velocity.x=-100;
+                this.cameraFollowStrategy.lookDirectionX = 'left';
+                this.cameraFollowStrategy.lookDirectionY = 'none';
             }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
@@ -217,26 +217,30 @@ export class TestCharacterScene extends Scene {
             this.hero.getRigidBody().velocity.x = 0;
         }
 
-        if (this.input.keyboard.justPressed(KeyboardKey.DOWN)) {
+        if (this.input.keyboard.isPressed(KeyboardKey.DOWN)) {
             const accepted = this.hero.animationStateMachine.sendCommand('sit');
-            if (!accepted) return;
-            this.cameraFollowStrategy.lookDirectionY = 'bottom';
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'bottom';
+            }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.DOWN)) {
             const accepted = this.hero.animationStateMachine.sendCommand('stopSit');
-            if (!accepted) return;
-            this.cameraFollowStrategy.lookDirectionY = 'none';
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
         }
 
-        if (this.input.keyboard.justPressed(KeyboardKey.UP)) {
+        if (this.input.keyboard.isPressed(KeyboardKey.UP)) {
             const accepted = this.hero.animationStateMachine.sendCommand('lookUp');
-            if (!accepted) return;
-            this.cameraFollowStrategy.lookDirectionY = 'top';
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'top';
+            }
         }
         else if (this.input.keyboard.justReleased(KeyboardKey.UP)) {
             const accepted = this.hero.animationStateMachine.sendCommand('stopLookUp');
-            if (!accepted) return;
-            this.cameraFollowStrategy.lookDirectionY = 'none';
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
         }
 
         if (
