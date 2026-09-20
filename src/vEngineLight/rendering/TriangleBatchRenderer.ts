@@ -126,7 +126,7 @@ export class TriangleBatchRenderer {
     }
 
     private updateProjectionMatrix() {
-        Mat2d.projection(this.app.width, this.app.height, this.projMatrix);
+        Mat2d.projection(this.app.size.w, this.app.size.h, this.projMatrix);
     }
 
     public setCamera(camera: Camera) {
@@ -244,7 +244,7 @@ export class TriangleBatchRenderer {
     public clearRenderBuffer(color: Color) {
         const gl = GLUtils.getContext();
         const normColor = color.getNormalized();
-        gl.viewport(0, 0, this.app.width, this.app.height);
+        gl.viewport(0, 0, this.app.viewPort.w, this.app.viewPort.h);
         gl.clearColor(normColor[0], normColor[1], normColor[2], normColor[3]);
         gl.clear(gl.COLOR_BUFFER_BIT);
     }

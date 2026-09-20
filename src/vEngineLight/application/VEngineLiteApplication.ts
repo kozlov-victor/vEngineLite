@@ -5,6 +5,9 @@ import {TriangleBatchRenderer} from "../rendering/TriangleBatchRenderer";
 import {Camera} from "../camera/Camera";
 import {GLUtils} from "../utils/GLUtils";
 import {ArcadePhysics} from "../physics/ArcadePhysics";
+import {Size} from "../utils/Size";
+import {AbstractScaleStrategy} from "../rendering/scaleStrategy/AbstractScaleStrategy";
+import {NoopScaleStrategy} from "../rendering/scaleStrategy/NoopScaleStrategy";
 
 export class VEngineLiteApplication {
     public readonly fpsCounter = new FpsCounter();
@@ -12,6 +15,8 @@ export class VEngineLiteApplication {
     public readonly assetManager = new AssetManager();
     public readonly camera = new Camera(this);
     public readonly physics = new ArcadePhysics();
+    public readonly viewPort = new Size(); // todo
+
     private scene: Scene;
     private running  = false;
     private lastTime: number;
@@ -21,11 +26,14 @@ export class VEngineLiteApplication {
     private readonly MAX_STEPS = 10;
     private accumulator = 0;
 
-    constructor(canvas: HTMLCanvasElement, public readonly width: number, public readonly height: number) {
+    constructor(private readonly canvas: HTMLCanvasElement, public readonly size: Size, scaleStrategy:AbstractScaleStrategy = new NoopScaleStrategy()) {
         GLUtils.createAndHoldContext(canvas);
 
-        canvas.width = width;
-        canvas.height = height;
+        canvas.width = size.w;
+        canvas.height = size.h;
+
+        this.listenToResize(scaleStrategy);
+
         this.renderer = new TriangleBatchRenderer(this);
         this.renderer.setCamera(this.camera);
         this.renderer.bind();
@@ -60,6 +68,13 @@ export class VEngineLiteApplication {
         };
         this.lastTime = performance.now();
         requestAnimationFrame(step);
+    }
+
+    private listenToResize(scaleStrategy: AbstractScaleStrategy) {
+        window.addEventListener("resize", () => {
+            scaleStrategy.onResize(this,this.canvas);
+        });
+        scaleStrategy.onResize(this,this.canvas);
     }
 
     private onNextUpdate(dt: number) {

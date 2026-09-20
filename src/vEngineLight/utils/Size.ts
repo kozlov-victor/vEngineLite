@@ -36,6 +36,7 @@ export class Size extends ObservableEntity {
 
     from(other:Size) {
         this.wh(other.w, other.h);
+        return this;
     }
 
 }

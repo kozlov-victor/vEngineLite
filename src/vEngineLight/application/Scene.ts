@@ -7,7 +7,7 @@ import {Color} from "../rendering/Color";
 
 export abstract class Scene {
 
-    public readonly size = new Size(this.app.width,this.app.height);
+    public readonly size = new Size().from(this.app.size);
     public bgColor = Color.WHITE();
 
     public readonly input = {
@@ -21,8 +21,8 @@ export abstract class Scene {
     }
 
     public calculateBounds() {
-        let w = Math.max(...this.objects.map(it=>it.position.x+it.size.w),this.app.width);
-        let h = Math.max(...this.objects.map(it=>it.position.y+it.size.h),this.app.height);
+        let w = Math.max(...this.objects.map(it=>it.position.x+it.size.w),this.app.size.w);
+        let h = Math.max(...this.objects.map(it=>it.position.y+it.size.h),this.app.size.h);
         this.size.wh(w,h);
     }
 

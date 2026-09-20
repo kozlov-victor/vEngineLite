@@ -2,6 +2,7 @@ import * as esbuild from 'esbuild';
 import fs from 'node:fs/promises';
 import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
 import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mjs';
+import { execFileSync } from 'node:child_process';
 
 const dev = process.argv.includes('--dev');
 
@@ -76,6 +77,15 @@ if (dev) {
     console.log('Watcher запущено. Очікування змін у файлах...');
 }
 else {
+
+    console.log('Перевірка TypeScript...');
+
+    execFileSync(
+        process.execPath,
+        ['./node_modules/typescript/bin/tsc', '--noEmit'],
+        { stdio: 'inherit' }
+    );
+
     await ctx.rebuild();
     await ctx.dispose();
     console.log('Білд завершено. Вихід');

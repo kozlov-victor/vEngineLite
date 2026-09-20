@@ -55,12 +55,12 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
         const targetX =
             target.position.x +
             this.lookAheadX -
-            camera.app.width / 2;
+            camera.app.size.w / 2;
 
         const targetY =
             target.position.y +
             this.lookAheadY -
-            camera.app.height / 2;
+            camera.app.size.h / 2;
 
         const cameraAlpha =
             1 - Math.exp(
@@ -68,8 +68,8 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
             );
 
         const wordBounds = camera.app.getCurrentScene().size;
-        const viewPortWidth = camera.app.width;
-        const viewPortHeight = camera.app.height;
+        const viewPortWidth = camera.app.size.w;
+        const viewPortHeight = camera.app.size.h;
 
         let posX = camera.position.x +
             (
