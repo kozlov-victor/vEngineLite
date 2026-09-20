@@ -9,7 +9,7 @@ const app =
     new VEngineLiteApplication(
         document.querySelector("#c") as HTMLCanvasElement,
         new Size(640, 480),
-        //new ScaleStrategyFitCanvasToScreen()
+        new ScaleStrategyFitCanvasToScreen()
     );
 app.runScene(new TestCharacterScene(app));
 

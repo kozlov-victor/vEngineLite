@@ -11,6 +11,8 @@ import {RigidBody} from "../physics/IPhysics";
 import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
 import {IGeometry} from "../types";
 
+const epsilon = 0.3;
+
 // Спрощена структура для зберігання даних тайла
 interface Tile extends IGeometry {
     readonly size: Size;
@@ -50,7 +52,7 @@ export class TileMap extends RenderableContainer {
             },
             color: Color.WHITE(),
         }
-        this.tileSize = new Size(tileWidth, tileHeight);
+        this.tileSize = new Size(tileWidth + epsilon, tileHeight + epsilon);
 
         this.createTiles(data, mapWidthInTiles, tilesetCols, tileWidth, tileHeight);
         this.createMergedCollisionBodies(data, mapWidthInTiles, mapHeightInTiles, tileWidth, tileHeight);
