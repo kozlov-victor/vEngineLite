@@ -26,7 +26,7 @@ export class VEngineLiteApplication {
 
         canvas.width = width;
         canvas.height = height;
-        this.renderer = new TriangleBatchRenderer(canvas.width, canvas.height);
+        this.renderer = new TriangleBatchRenderer(this);
         this.renderer.setCamera(this.camera);
         this.renderer.bind();
     }

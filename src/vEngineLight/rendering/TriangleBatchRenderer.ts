@@ -6,6 +6,7 @@ import {TextureInfo} from "../components/TextureInfo";
 import {n2, n9, Triangle, Vertex} from "../types";
 import {Mat2d} from "../utils/Mat2d";
 import {Color} from "./Color";
+import {VEngineLiteApplication} from "../application/VEngineLiteApplication";
 
 
 
@@ -43,7 +44,7 @@ export class TriangleBatchRenderer {
         v3: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
     };
 
-    constructor(readonly width: number, readonly height: number ) {
+    constructor(private readonly app: VEngineLiteApplication) {
         this.vertexData = new Float32Array(
             TriangleBatchRenderer.TRIANGLES_IN_BATCH *
             TriangleBatchRenderer.VERTICES_IN_TRIANGLE *
@@ -125,7 +126,7 @@ export class TriangleBatchRenderer {
     }
 
     private updateProjectionMatrix() {
-        Mat2d.projection(this.width, this.height, this.projMatrix);
+        Mat2d.projection(this.app.width, this.app.height, this.projMatrix);
     }
 
     public setCamera(camera: Camera) {
@@ -243,7 +244,7 @@ export class TriangleBatchRenderer {
     public clearRenderBuffer(color: Color) {
         const gl = GLUtils.getContext();
         const normColor = color.getNormalized();
-        gl.viewport(0, 0, this.width, this.height);
+        gl.viewport(0, 0, this.app.width, this.app.height);
         gl.clearColor(normColor[0], normColor[1], normColor[2], normColor[3]);
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
