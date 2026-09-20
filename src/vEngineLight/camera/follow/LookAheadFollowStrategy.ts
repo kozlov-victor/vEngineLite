@@ -1,6 +1,7 @@
 import {CameraFollowStrategy} from "./CameraFollowStrategy";
 import {Camera} from "../Camera";
 import {Container} from "../../gameObject/base/Container";
+import {MathEx} from "../../utils/MathEx";
 
 export class LookAheadFollowStrategy implements CameraFollowStrategy {
 
@@ -86,8 +87,8 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
         if (posX<0) posX = 0;
         if (posY<0) posY = 0;
 
-        if (posX>wordBounds.w - viewPortWidth) posX = wordBounds.w - viewPortWidth;
-        if (posY>wordBounds.h - viewPortHeight) posY = wordBounds.h - viewPortHeight;
+        posX = MathEx.clamp(posX, 0, wordBounds.w - viewPortWidth);
+        posY = MathEx.clamp(posY, 0, wordBounds.h - viewPortHeight);
 
         camera.position.xy(posX, posY);
 
