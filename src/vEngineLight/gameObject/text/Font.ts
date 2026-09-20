@@ -66,7 +66,7 @@ export class Font {
         const chars = [
             ...new Set(
                 options.chars ??
-                LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS + options.additionalChars ?? ''
+                LAT_CHARS + STANDARD_SYMBOLS + CYR_CHARS + (options.additionalChars ?? '')
             )
         ];
 

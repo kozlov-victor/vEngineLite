@@ -2,17 +2,55 @@ import * as esbuild from 'esbuild';
 import fs from 'node:fs/promises';
 import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
 import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mjs';
-import { execFileSync } from 'node:child_process';
+import {spawn} from 'node:child_process';
 
 const dev = process.argv.includes('--dev');
+
+
 
 class CustomTransformerPlugin {
 
     constructor() {
 
+
+    }
+
+    _checkTypeScript() {
+        return new Promise((resolve) => {
+            const tsc = spawn(
+                process.execPath,
+                [
+                    './node_modules/typescript/bin/tsc',
+                    '--project', './tsconfig.json',
+                    '--noEmit',
+                    '--incremental', 'false'
+                ],
+                { stdio: 'inherit' }
+            );
+
+            tsc.on('error', (error) => {
+                resolve({
+                    errors: [{
+                        text: `Не вдалося запустити TypeScript: ${error.message}`
+                    }]
+                });
+            });
+
+            tsc.on('close', (code) => {
+                resolve(code === 0
+                    ? {}
+                    : {
+                        errors: [{
+                            text: 'Перевірка TypeScript завершилася з помилками'
+                        }]
+                    }
+                );
+            });
+        });
     }
 
     pipe(...transformers) {
+        const self = this;
         return {
             name: 'custom-transformer',
             setup(build) {
@@ -22,6 +60,7 @@ class CustomTransformerPlugin {
                     for (const transformer of transformers) {
                         await transformer.onBuildStarted(build);
                     }
+                    return await self._checkTypeScript();
                 });
 
                 build.onLoad({ filter: /\.(ts|tsx)$/ }, async (args) => {
@@ -33,7 +72,8 @@ class CustomTransformerPlugin {
 
                     return {
                         contents: code,
-                        loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts'
+                        loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
+                        watchFiles: [args.path]
                     };
                 });
 
@@ -77,15 +117,6 @@ if (dev) {
     console.log('Watcher запущено. Очікування змін у файлах...');
 }
 else {
-
-    console.log('Перевірка TypeScript...');
-
-    execFileSync(
-        process.execPath,
-        ['./node_modules/typescript/bin/tsc', '--noEmit'],
-        { stdio: 'inherit' }
-    );
-
     await ctx.rebuild();
     await ctx.dispose();
     console.log('Білд завершено. Вихід');
