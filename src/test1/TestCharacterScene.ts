@@ -154,11 +154,11 @@ export class TestCharacterScene extends Scene {
             const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
             const textLabel = new TextLabel(this,font);
             textLabel.setText(
-                '😍Hello World\n💁👌це 🎍демо\nтекст! Нам дуже подобається оце от все. '
+                '😍Hello World\n💁👌це 🎍демо\nтекст! Нам дуже подобається оце от все. Перевірка вирівнювання тесту. Тут довгий тест новий. І ще слово одне'
             );
             const parameters = textLabel.getTextParameters();
             parameters.wrap = true;
-            parameters.textAlign = 'center';
+            parameters.textAlign = 'justify';
             parameters.verticalAlign = 'center';
             textLabel.setTextParameters(parameters);
             textLabel.position.from(rect.position);

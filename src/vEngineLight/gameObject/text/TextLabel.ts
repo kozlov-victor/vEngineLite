@@ -33,7 +33,7 @@ interface RenderableLetter extends Letter {
 
 export interface TextParameters {
     wrap: boolean;
-    textAlign?:'left'|'right'|'center';
+    textAlign?:'left'|'right'|'center'|'justify';
     verticalAlign?:'top' | 'bottom' | 'center';
 }
 
@@ -225,6 +225,21 @@ export class TextLabel extends RenderableContainer {
             case 'center': {
                 for (const line of this.lines) {
                     line.x = (boundWidth - line.length)/2;
+                }
+                break;
+            }
+            case 'justify': {
+                for (const line of this.lines) {
+                    const allWordsLengthSum =
+                        line.words.map(it=>it.length).reduce((prev,cur)=>prev+cur, 0);
+                    if (line.words.length===1) continue; // тільки одне слово в стрічці
+                    const spaceSize = (boundWidth - allWordsLengthSum) / (line.words.length - 1);
+                    if (spaceSize>this.spaceWidth*3) continue; // завеликі пробіли - не вирівнюємо
+                    let x = 0;
+                    for (const word of line.words) {
+                        word.x = x;
+                        x+=word.length+spaceSize;
+                    }
                 }
                 break;
             }
