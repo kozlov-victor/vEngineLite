@@ -42,26 +42,20 @@ async function main() {
 
     await ftp.connect();
 
-    try {
-        console.log(`Removing old deployment: ${REMOTE_DIR}`);
-        await ftp.removeDirectory(REMOTE_DIR);
+    console.log(`Removing old deployment: ${REMOTE_DIR}`);
+    await ftp.removeDirectory(REMOTE_DIR);
 
-        console.log(`Creating deployment directory: ${REMOTE_DIR}`);
+    console.log(`Creating deployment directory: ${REMOTE_DIR}`);
 
-        await ftp.ensureDirectory(REMOTE_DIR);
+    await ftp.ensureDirectory(REMOTE_DIR);
 
-        console.log(`Uploading ${LOCAL_OUT}...`);
-        await ftp.uploadDirectory(LOCAL_OUT,REMOTE_DIR);
+    console.log(`Uploading ${LOCAL_OUT}...`);
+    await ftp.uploadDirectory(LOCAL_OUT,REMOTE_DIR);
 
-        console.log(`Uploading ${LOCAL_INDEX}...`);
-        await ftp.upload(LOCAL_INDEX, `${REMOTE_DIR}/index.html`);
+    console.log(`Uploading ${LOCAL_INDEX}...`);
+    await ftp.upload(LOCAL_INDEX, `${REMOTE_DIR}/index.html`);
 
-        console.log('Deployment completed successfully.');
-
-    }
-    finally {
-        await ftp.close();
-    }
+    console.log('Deployment completed successfully.');
 }
 
 main().catch(error => {
@@ -74,4 +68,6 @@ main().catch(error => {
             : error
     );
     process.exitCode = 1;
+}).finally(async ()=>{
+    await ftp.close();
 });

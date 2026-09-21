@@ -23,7 +23,7 @@ class CustomTransformerPlugin {
                     './node_modules/typescript/bin/tsc',
                     '--project', './tsconfig.json',
                     '--noEmit',
-                    '--incremental', 'false'
+                    '--incremental', 'false',
                 ],
                 { stdio: 'inherit' }
             );

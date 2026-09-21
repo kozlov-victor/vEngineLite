@@ -1,5 +1,7 @@
-import fs from 'node:fs/promises';
-import path from 'node:path';
+import * as fs from 'node:fs/promises';
+import * as path from 'node:path';
+// @ts-ignore
+import type {PluginBuild} from 'esbuild';
 
 export interface ImportCssOptions {
     output: string;
@@ -14,11 +16,11 @@ export class ImportCssPlugin {
         this.output = params.output;
     }
 
-    async onBuildStarted(build: any) {
+    async onBuildStarted(build: PluginBuild) {
         this.fileContents = [];
     }
 
-    async onBuildFinished(build:any) {
+    async onBuildFinished(build:PluginBuild) {
         const finalCss = this.fileContents.join('\n');
 
         const outdir = build.initialOptions.outdir;
@@ -34,7 +36,7 @@ export class ImportCssPlugin {
         await fs.writeFile(outputPath,finalCss,'utf8');
     }
 
-    async transform(code:string,build:any,args:any) {
+    async transform(code:string,build:PluginBuild,args:any) {
         const cssPaths = extractCssPaths(code,'CSS');
         for (const relativePath of cssPaths) {
             const cssPath = path.resolve(

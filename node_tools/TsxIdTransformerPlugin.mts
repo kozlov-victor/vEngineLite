@@ -1,3 +1,4 @@
+// @ts-ignore
 import swc from '@swc/core';
 
 export class TsxIdTransformerPlugin {
