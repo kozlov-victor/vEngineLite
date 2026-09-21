@@ -34,7 +34,8 @@
         "jsxFragmentFactory": "VEngineTsxFactory.createFragment"
     },
     "exclude": [
-        "node_modules"
+        "node_modules",
+        "node_tools"
     ],
     "watchOptions": {
         "excludeDirectories": ["**/node_modules", "./out/"]

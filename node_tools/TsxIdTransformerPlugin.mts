@@ -2,17 +2,17 @@ import swc from '@swc/core';
 
 export class TsxIdTransformerPlugin {
 
-    counter = 0;
+    private counter = 0;
 
-    async onBuildStarted(build) {
+    async onBuildStarted(build: any) {
         this.counter = 0;
     }
 
-    async onBuildFinished(build) {
+    async onBuildFinished(build: any) {
 
     }
 
-    transform(code,build,args) {
+    transform(code: string,build: any,args: any) {
 
         if (!args.path.endsWith('.tsx')) return code;
 
@@ -27,7 +27,7 @@ export class TsxIdTransformerPlugin {
         return swc.printSync(ast).code;
     }
 
-    _visit(node) {
+    _visit(node: any) {
 
         if (!node || typeof node !== 'object') {
             return;
@@ -40,7 +40,7 @@ export class TsxIdTransformerPlugin {
         //
         if (node.type === 'JSXOpeningElement') {
 
-            const attributes = node.attributes ?? [];
+            const attributes:any[] = node.attributes ?? [];
 
             const hasId = attributes.some(
                 attribute =>

@@ -1,7 +1,7 @@
 import * as esbuild from 'esbuild';
 import fs from 'node:fs/promises';
-import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mjs';
-import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mjs';
+import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mts';
+import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mts';
 import {spawn} from 'node:child_process';
 
 const dev = process.argv.includes('--dev');
