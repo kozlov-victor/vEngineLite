@@ -72,22 +72,21 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
         const viewPortWidth = camera.app.size.w;
         const viewPortHeight = camera.app.size.h;
 
-        let posX = camera.position.x +
+
+        camera.position.x = camera.position.x +
             (
                 targetX -
                 camera.position.x
             ) * cameraAlpha;
 
-        let posY = camera.position.y +
+        camera.position.y = camera.position.y +
             (
                 targetY -
                 camera.position.y
             ) * cameraAlpha;
 
-        posX = MathEx.clamp(posX, 0, wordBounds.w - viewPortWidth);
-        posY = MathEx.clamp(posY, 0, wordBounds.h - viewPortHeight);
-
-        camera.position.xy(posX, posY);
+        camera.position.x = MathEx.clamp(camera.position.x, 0, wordBounds.w - viewPortWidth);
+        camera.position.y = MathEx.clamp(camera.position.y, 0, wordBounds.h - viewPortHeight);
 
     }
 }
