@@ -3,6 +3,7 @@ import fs from 'node:fs/promises';
 import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mts';
 import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mts';
 import {spawn} from 'node:child_process';
+import {GlslTransformerPlugin} from "./node_tools/GlslTransformerPlugin.mts";
 
 const dev = process.argv.includes('--dev');
 
@@ -108,6 +109,7 @@ const ctx = await esbuild.context({
         new CustomTransformerPlugin().pipe(
             new ImportCssPlugin({output: 'editor/all.css'}),
             new TsxIdTransformerPlugin(),
+            new GlslTransformerPlugin({minify: !dev})
         )
     ]
 });

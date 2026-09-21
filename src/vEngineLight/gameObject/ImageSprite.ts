@@ -17,5 +17,6 @@ export class ImageSprite extends Sprite {
             color: Color.WHITE(),
         };
         super(scene, textureInfo);
+        this.size.from(textureInfo.rect.size);
     }
 }
