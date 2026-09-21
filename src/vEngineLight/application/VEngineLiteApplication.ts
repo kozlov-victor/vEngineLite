@@ -35,7 +35,6 @@ export class VEngineLiteApplication {
         this.listenToResize(scaleStrategy);
 
         this.renderer = new TriangleBatchRenderer(this);
-        this.renderer.setCamera(this.camera);
         this.renderer.bind();
     }
 
