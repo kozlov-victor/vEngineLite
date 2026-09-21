@@ -150,7 +150,6 @@ export class TestCharacterScene extends Scene {
             rect.color.fromCssColor('#8f8f8f33');
             this.addObject(rect);
 
-
             const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
             const textLabel = new TextLabel(this,font);
             textLabel.setText(

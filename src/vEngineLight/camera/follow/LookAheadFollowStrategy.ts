@@ -84,9 +84,6 @@ export class LookAheadFollowStrategy implements CameraFollowStrategy {
                 camera.position.y
             ) * cameraAlpha;
 
-        if (posX<0) posX = 0;
-        if (posY<0) posY = 0;
-
         posX = MathEx.clamp(posX, 0, wordBounds.w - viewPortWidth);
         posY = MathEx.clamp(posY, 0, wordBounds.h - viewPortHeight);
 

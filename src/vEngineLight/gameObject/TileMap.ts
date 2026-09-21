@@ -11,7 +11,7 @@ import {RigidBody} from "../physics/IPhysics";
 import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
 import {IGeometry} from "../types";
 
-const epsilon = 0.3;
+const epsilon = 0.5;
 
 // Спрощена структура для зберігання даних тайла
 interface Tile extends IGeometry {

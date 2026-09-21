@@ -121,7 +121,7 @@ export class TextLabel extends RenderableContainer {
         const boundHeight = this.size.h;
         let wordsOfCurrentLine:Word[] = [];
         for (const word of words) {
-            if (y>=boundHeight) {
+            if (y>=boundHeight - this.lineHeight) {
                 wordsOfCurrentLine = [];
                 break;
             }
@@ -153,6 +153,36 @@ export class TextLabel extends RenderableContainer {
                 length: x,
             };
             this.lines.push(line);
+        }
+        this.clampOverflowLines();
+    }
+
+    private clampOverflowLines() {
+        const boundWidth = this.size.w;
+        for (let i = 0; i < this.lines.length; i++) {
+            const line = this.lines[i];
+            if (line.words.length===1 && line.length>boundWidth) {
+                let length = 0;
+                const newChars:Letter[] = [];
+                const word = line.words[0];
+                for (const ch of word.letters) {
+                    length+=ch.charInfo.advance;
+                    if (length<=boundWidth) {
+                        newChars.push(ch);
+                    }
+                    else break;
+                }
+                const newWord:Word = {
+                    x:0,letters:newChars,
+                    length:newChars.map(it=>it.charInfo.advance).reduce((a,b)=>a+b,0)
+                };
+                this.lines[i] = {
+                    x: 0,
+                    y: line.y,
+                    words: [newWord],
+                    length: newWord.length,
+                };
+            }
         }
     }
 
