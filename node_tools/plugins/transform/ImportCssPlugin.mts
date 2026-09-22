@@ -1,13 +1,15 @@
 import * as fs from 'node:fs/promises';
 import * as path from 'node:path';
 // @ts-ignore
-import type {PluginBuild} from 'esbuild';
+import type {OnLoadArgs, PluginBuild} from 'esbuild';
+// @ts-ignore
+import type {MiniBundlerTransformPlugin} from "../base/MiniBundlerTransformPlugin.mts";
 
-export interface ImportCssOptions {
+export interface ImportCssOptions{
     output: string;
 }
 
-export class ImportCssPlugin {
+export class ImportCssPlugin implements MiniBundlerTransformPlugin {
 
     private readonly output: string;
     private fileContents: string[];
@@ -18,6 +20,25 @@ export class ImportCssPlugin {
 
     async onBuildStarted(build: PluginBuild) {
         this.fileContents = [];
+    }
+
+    async transform(code: string, build: PluginBuild, args: OnLoadArgs) {
+        const cssPaths = extractCssPaths(code, 'CSS');
+
+        const watchFiles: string[] = [];
+        for (const relativePath of cssPaths) {
+            const cssPath = path.resolve(
+                path.dirname(args.path),
+                relativePath
+            );
+
+            const source = await fs.readFile(cssPath, 'utf8');
+
+            this.fileContents.push(source);
+            watchFiles.push(cssPath);
+        }
+
+        return {code, watchFiles};
     }
 
     async onBuildFinished(build:PluginBuild) {
@@ -34,22 +55,6 @@ export class ImportCssPlugin {
         const outputPath = path.resolve(outdir,this.output);
         await fs.mkdir(path.dirname(outputPath),{ recursive: true });
         await fs.writeFile(outputPath,finalCss,'utf8');
-    }
-
-    async transform(code:string,build:PluginBuild,args:any) {
-        const cssPaths = extractCssPaths(code,'CSS');
-        for (const relativePath of cssPaths) {
-            const cssPath = path.resolve(
-                path.dirname(args.path),
-                relativePath
-            );
-
-            let source = await fs.readFile(cssPath,'utf8');
-
-            this.fileContents.push(source);
-        }
-
-        return code;
     }
 
 

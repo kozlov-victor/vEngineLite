@@ -31,7 +31,7 @@ export class TestCharacterScene extends Scene {
 
     override onPreloadStarted() {
         this.app.assetManager
-            .setBaseUrl('./src/test1/')
+            .setBaseUrl('../src/test1/')
             .add('tileset', 'image', 'assets/tiles.png')
             .add('tilemap', 'json', 'assets/map.json')
             .add('cat', 'image', 'assets/hero.png')

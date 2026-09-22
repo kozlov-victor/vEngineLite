@@ -24,7 +24,8 @@
         "strictNullChecks": true,
         "removeComments": true,
         "paths": {
-            "@engine/*": ["./engine/*"]
+            "@engine/*": ["./engine/*"],
+            "@vEngineLite/*": ["./src/vEngineLite/*"],
         },
         "incremental": true,
         "stripInternal": true,

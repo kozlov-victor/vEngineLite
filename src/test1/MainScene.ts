@@ -17,7 +17,7 @@ export class MainScene extends Scene {
 
     override onPreloadStarted() {
         this.app.assetManager
-            .setBaseUrl('./src/test1/')
+            .setBaseUrl('../src/test1/')
             .add('lava', 'image', 'assets/lava.png')
             .add('tileset', 'image', 'assets/tiles2.png')
             .add('cat', 'image', 'assets/hero.png')

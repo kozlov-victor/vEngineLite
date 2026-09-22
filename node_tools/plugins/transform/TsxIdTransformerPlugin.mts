@@ -1,21 +1,21 @@
 // @ts-ignore
 import swc from '@swc/core';
+// @ts-ignore
+import type {OnLoadArgs, PluginBuild} from 'esbuild';
+// @ts-ignore
+import type {MiniBundlerTransformPlugin} from "../base/MiniBundlerTransformPlugin.mts";
 
-export class TsxIdTransformerPlugin {
+export class TsxIdTransformerPlugin implements MiniBundlerTransformPlugin {
 
     private counter = 0;
 
-    async onBuildStarted(build: any) {
+    async onBuildStarted(build: PluginBuild) {
         this.counter = 0;
     }
 
-    async onBuildFinished(build: any) {
+    async transform(code: string,build: PluginBuild,args: OnLoadArgs) {
 
-    }
-
-    transform(code: string,build: any,args: any) {
-
-        if (!args.path.endsWith('.tsx')) return code;
+        if (!args.path.endsWith('.tsx')) return {code};
 
         const ast = swc.parseSync(code, {
             syntax: 'typescript',
@@ -23,12 +23,16 @@ export class TsxIdTransformerPlugin {
             decorators: true
         });
 
-        this._visit(ast);
-
-        return swc.printSync(ast).code;
+        this.visit(ast);
+        code = swc.printSync(ast).code;
+        return {code};
     }
 
-    _visit(node: any) {
+    async onBuildFinished(build: PluginBuild) {
+
+    }
+
+    private visit(node: any) {
 
         if (!node || typeof node !== 'object') {
             return;
@@ -106,14 +110,14 @@ export class TsxIdTransformerPlugin {
             if (Array.isArray(value)) {
 
                 for (const child of value) {
-                    this._visit(child);
+                    this.visit(child);
                 }
 
             } else if (
                 value &&
                 typeof value === 'object'
             ) {
-                this._visit(value);
+                this.visit(value);
             }
         }
     }
