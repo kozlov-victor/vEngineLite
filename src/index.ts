@@ -11,7 +11,7 @@ const app =
         new Size(640, 480),
         new ScaleStrategyFitCanvasToScreen()
     );
-app.runScene(new MainScene(app));
+app.runScene(new TestCharacterScene(app));
 
 const fpsElem = document.querySelector("#fps")!;
 fpsElem.textContent = `-`;
