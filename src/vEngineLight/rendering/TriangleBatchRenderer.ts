@@ -31,7 +31,6 @@ export class TriangleBatchRenderer {
 
     private currentTexture: Texture;
     private vertexBuffer: WebGLBuffer;
-    private camera: Camera;
 
     private readonly projMatrix = new Mat2d();
     private readonly viewMatrix = new Mat2d();
@@ -127,10 +126,6 @@ export class TriangleBatchRenderer {
 
     private updateProjectionMatrix() {
         Mat2d.projection(this.app.size.w, this.app.size.h, this.projMatrix);
-    }
-
-    public setCamera(camera: Camera) {
-        this.camera = camera;
     }
 
     public bind() {
@@ -253,13 +248,9 @@ export class TriangleBatchRenderer {
         if (this.currentTriangle === 0) return;
         const gl = GLUtils.getContext();
 
-        if (this.camera) {
-            const cameraMatrix = this.camera.getWorldMatrix();
-            cameraMatrix.invert(this.viewMatrix);
-            this.projMatrix.multiply(this.viewMatrix, this.viewProjMatrix);
-        } else {
-            this.viewProjMatrix.copyFrom(this.projMatrix);
-        }
+        const cameraMatrix = this.app.camera.getWorldMatrix();
+        cameraMatrix.invert(this.viewMatrix);
+        this.projMatrix.multiply(this.viewMatrix, this.viewProjMatrix);
 
         gl.uniformMatrix3fv(this.viewProjectionUniformLocation, false, this.viewProjMatrix.toN9(this.mat3));
         gl.uniform2f(this.textureSizeUniformLocation, this.currentTexture.width, this.currentTexture.height);
