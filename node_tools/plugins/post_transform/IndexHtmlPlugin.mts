@@ -35,7 +35,9 @@ export class IndexHtmlPlugin implements MiniBundlerPostTransformPlugin {
             html = html.replace(
                 /\{\{\s*([A-Z0-9_]+)\s*}}/g,
                 (_, name) => {
-                    return (this.options.variables as any)[name] ?? '';
+                    let value = (this.options.variables as any)[name] ?? '';
+                    if ((value as Function).call) value = (value as Function)();
+                    return value;
                 }
             );
 

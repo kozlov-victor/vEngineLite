@@ -18,7 +18,7 @@ export class AnimationStateMachine implements IUpdateable {
 
     public setInitialState(state:string) {
         this.currentState = this.getState(state);
-        this.player.play(this.currentState.onEnter());
+        this.playCurrentAnimation();
     }
 
     public sendCommand(message:string) {
@@ -40,7 +40,14 @@ export class AnimationStateMachine implements IUpdateable {
     private toNextState(nextStateName:string) {
         this.currentState.onExit();
         this.currentState = this.getState(nextStateName);
-        this.player.play(this.currentState.onEnter());
+        this.playCurrentAnimation();
+    }
+
+    private playCurrentAnimation() {
+        const started = this.player.play(this.currentState.onEnter());
+        if (started) {
+            this.currentState.onAnimationStarted();
+        }
     }
 
     public update(dt: number) {

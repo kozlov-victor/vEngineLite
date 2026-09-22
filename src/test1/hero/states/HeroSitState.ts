@@ -4,6 +4,7 @@ import {HeroIdleState} from "./HeroIdleState";
 import {HeroFallState} from "./HeroFallState";
 import {Scene} from "../../../vEngineLight/application/Scene";
 import {HeroAttackState} from "./HeroAttackState";
+import {HeroFireState} from "./HeroFireState";
 
 export class HeroSitState extends AnimationState {
 
@@ -20,6 +21,7 @@ export class HeroSitState extends AnimationState {
             case 'stopSit': return HeroIdleState.name;
             case 'attack': return HeroAttackState.name;
             case 'unground': return HeroFallState.name;
+            case 'fire': return HeroFireState.name;
         }
         return null;
     }

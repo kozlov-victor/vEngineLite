@@ -61,6 +61,14 @@ export class CustomTransformerPlugin {
             name: 'custom-transformer',
             setup(build: PluginBuild) {
 
+                for (const transformer of self.transformPlugins) {
+                    transformer.configure?.(build);
+                }
+
+                for (const transformer of self.postTransformPlugins) {
+                    transformer.configure?.(build);
+                }
+
                 build.onStart(async () => {
                     console.log('Збірка розпочалася...');
                     for (const transformer of self.transformPlugins) {

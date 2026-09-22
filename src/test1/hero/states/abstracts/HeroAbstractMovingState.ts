@@ -15,10 +15,10 @@ export abstract class HeroAbstractMovingState extends AnimationState {
     }
 
     protected setHeroVelocity() {
-        let vel = 0;
+        let vel: number|undefined;
         if (this._scene.input.keyboard.isPressed(KeyboardKey.RIGHT)) vel = this._hero.walkVelocity;
         else if (this._scene.input.keyboard.isPressed(KeyboardKey.LEFT)) vel = -this._hero.walkVelocity;
-        this._hero.getRigidBody().velocity.x = vel;
+        if (vel!==undefined) this._hero.getRigidBody().velocity.x = vel;
     }
 
 }

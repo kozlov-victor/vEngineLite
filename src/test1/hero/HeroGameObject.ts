@@ -12,6 +12,7 @@ import {HeroWalkState} from "./states/HeroWalkState";
 import {HeroFallState} from "./states/HeroFallState";
 import {HeroSitState} from "./states/HeroSitState";
 import {HeroAttackState} from "./states/HeroAttackState";
+import {HeroFireState} from "./states/HeroFireState";
 
 export class HeroGameObject extends ImageSprite {
 
@@ -22,6 +23,7 @@ export class HeroGameObject extends ImageSprite {
     public readonly fallAnimation:FrameAnimation;
     public readonly sitAnimation:FrameAnimation;
     public readonly attackAnimation:FrameAnimation;
+    public readonly fireAnimation:FrameAnimation;
 
     public readonly animationPlayer = new FrameAnimationPlayer();
     public readonly animationStateMachine = new AnimationStateMachine(this.animationPlayer);
@@ -78,10 +80,17 @@ export class HeroGameObject extends ImageSprite {
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack1','hero_attack2','hero_attack3','hero_attack4']),
                 500, 1
             );
+        this.fireAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_fire1','hero_fire2']),
+                450, 1
+            );
 
         this.animationStateMachine.addStates(
             new HeroIdleState(this.scene, this), new HeroLookUpState(this.scene, this), new HeroWalkState(this.scene, this),
             new HeroFallState(this.scene, this), new HeroSitState(this.scene, this), new HeroAttackState(this.scene, this),
+            new HeroFireState(this.scene, this),
         )
         this.animationStateMachine.setInitialState(HeroIdleState.name);
     }

@@ -1,11 +1,14 @@
+
 // @ts-ignore
-import * as esbuild from 'esbuild';
+import type {MiniBundlerTransformPlugin} from "../base/MiniBundlerTransformPlugin.mjs";
+// @ts-ignore
+import type {OnLoadArgs, PluginBuild} from "esbuild";
 
 export interface GlslTransformerOptions {
     minify?: boolean;
 }
 
-export class GlslTransformerPlugin {
+export class GlslTransformerPlugin implements MiniBundlerTransformPlugin {
 
     private readonly minify: boolean;
 
@@ -13,22 +16,17 @@ export class GlslTransformerPlugin {
         this.minify = options.minify ?? true;
     }
 
-    async onBuildStarted(_build: esbuild.PluginBuild): Promise<void> {
+    async onBuildStarted(build: PluginBuild): Promise<void> {
     }
 
-    async onBuildFinished(_build: esbuild.PluginBuild): Promise<void> {
+    async onBuildFinished(_build: PluginBuild): Promise<void> {
     }
 
-    async transform(
-        code: string,
-        _build: esbuild.PluginBuild,
-        _args: esbuild.OnLoadArgs
-    ): Promise<string> {
+    async transform(code: string, build: PluginBuild, args: OnLoadArgs) {
         if (!this.minify) {
-            return code;
+            return {code};
         }
-
-        return this.transformGlsl(code);
+        return {code:this.transformGlsl(code)};
     }
 
     private transformGlsl(code: string): string {

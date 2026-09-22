@@ -7,10 +7,11 @@ export class FrameAnimationPlayer implements IUpdateable {
     private completed: boolean;
 
     public play(fa: FrameAnimation) {
-        if (fa===this.currentAnimation) return;
+        if (fa===this.currentAnimation) return false;
         fa.reset();
         this.completed = false;
         this.currentAnimation = fa;
+        return true;
     }
 
     public stop() {

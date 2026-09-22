@@ -243,6 +243,9 @@ export class TestCharacterScene extends Scene {
         if (this.input.keyboard.isPressed(KeyboardKey.Z)) {
             this.hero.animationStateMachine.sendCommand('attack');
         }
+        if (this.input.keyboard.isPressed(KeyboardKey.A)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('fire');
+        }
 
         if (
             this.input.keyboard.isPressed(KeyboardKey.SPACE) &&
