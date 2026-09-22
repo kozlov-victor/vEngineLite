@@ -1,97 +1,12 @@
 import * as esbuild from 'esbuild';
-import fs from 'node:fs/promises';
-import {ImportCssPlugin} from './node_tools/ImportCssPlugin.mts';
-import {TsxIdTransformerPlugin} from './node_tools/TsxIdTransformerPlugin.mts';
-import {spawn} from 'node:child_process';
+import {ImportCssPlugin} from './node_tools/plugins/transform/ImportCssPlugin.mts';
+import {TsxIdTransformerPlugin} from './node_tools/plugins/transform/TsxIdTransformerPlugin.mts';
+import {IndexHtmlPlugin} from './node_tools/plugins/post_transform/IndexHtmlPlugin.mts';
+import {CustomTransformerPlugin} from "./node_tools/CustomTransformerPlugin.mts";
 
 const dev = process.argv.includes('--dev');
 
 
-
-class CustomTransformerPlugin {
-
-    constructor() {
-
-
-    }
-
-    _checkTypeScript() {
-        return new Promise((resolve) => {
-            const tsc = spawn(
-                process.execPath,
-                [
-                    './node_modules/typescript/bin/tsc',
-                    '--project', './tsconfig.json',
-                    '--noEmit',
-                    '--incremental', 'false',
-                ],
-                { stdio: 'inherit' }
-            );
-
-            tsc.on('error', (error) => {
-                resolve({
-                    errors: [{
-                        text: `Не вдалося запустити TypeScript: ${error.message}`
-                    }]
-                });
-            });
-
-            tsc.on('close', (code) => {
-                resolve(code === 0
-                    ? {}
-                    : {
-                        errors: [{
-                            text: 'Перевірка TypeScript завершилася з помилками'
-                        }]
-                    }
-                );
-            });
-        });
-    }
-
-    pipe(...transformers) {
-        const self = this;
-        return {
-            name: 'custom-transformer',
-            setup(build) {
-
-                build.onStart(async () => {
-                    console.log('Збірка розпочалася...');
-                    for (const transformer of transformers) {
-                        await transformer.onBuildStarted(build);
-                    }
-                    return await self._checkTypeScript();
-                });
-
-                build.onLoad({ filter: /\.(ts|tsx)$/ }, async (args) => {
-                    let code = await fs.readFile(args.path, 'utf8');
-
-                    for (const transformer of transformers) {
-                        code = await transformer.transform(code,build,args);
-                    }
-
-                    return {
-                        contents: code,
-                        loader: args.path.endsWith('.tsx') ? 'tsx' : 'ts',
-                        watchFiles: [args.path]
-                    };
-                });
-
-                build.onEnd(async (result) => {
-                    if (result.errors.length > 0) {
-                        console.error('Помилка збірки:', result.errors);
-                    } else {
-                        for (const transformer of transformers) {
-                            await transformer.onBuildFinished(build);
-                        }
-                        console.log(`[${new Date().toLocaleTimeString()}] Бандл успішно оновлено!`);
-                    }
-                });
-            }
-        }
-    }
-
-}
 
 const ctx = await esbuild.context({
     entryPoints: ['src/index.ts','src/editor/main.tsx'],
@@ -105,10 +20,20 @@ const ctx = await esbuild.context({
         BUILD_ID: JSON.stringify(`${new Date().getTime()}`),
     },
     plugins: [
-        new CustomTransformerPlugin().pipe(
+        new CustomTransformerPlugin().
+        transformers(
             new ImportCssPlugin({output: 'editor/all.css'}),
             new TsxIdTransformerPlugin(),
-        )
+        ).
+        postTransformers(
+            new IndexHtmlPlugin({
+                files: ['src/editor/editor.html', 'src/test1/index.html'],
+                variables: {
+                    BUILD_ID: `${new Date().getTime()}`,
+                }
+            })
+        ).
+        createPluginContext()
     ]
 });
 

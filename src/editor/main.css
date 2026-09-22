@@ -21,3 +21,7 @@ html, body {
 button, label, input[type='checkbox'] {
     cursor: pointer;
 }
+
+button, select, input {
+    padding: 5px;
+}

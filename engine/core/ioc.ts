@@ -58,7 +58,6 @@ export const DI = {
                 if (!injectToken) {
                     throw new Error(`not injectable: consider adding @Injectable() decorator to class ${clazz.name}`);
                 }
-                //console.log(`inject ${injectToken} to ${thisToken}`);
                 Object.defineProperty(this, context.name, {
                     get: () => {
                         if (!DIContext[injectToken]) {
