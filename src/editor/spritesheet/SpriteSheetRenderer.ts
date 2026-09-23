@@ -3,15 +3,11 @@ import {IPackedSpriteSheet} from "./SpriteSheetPacker";
 
 export class SpriteSheetRenderer {
 
-    public render(
-       sheet: IPackedSpriteSheet,
-    ): HTMLCanvasElement {
+    public render(sheet: IPackedSpriteSheet) {
 
-        const canvas =
-            document.createElement("canvas");
+        const canvas = document.createElement("canvas");
 
         canvas.width = sheet.width;
-
         canvas.height = sheet.height;
 
         const ctx = canvas.getContext("2d")!;
@@ -33,8 +29,8 @@ export class SpriteSheetRenderer {
 
             ctx.putImageData(
                 imageData,
-                frame.x + layer.left,
-                frame.y + layer.top
+                frame.x + (sheet.trim?0:layer.left),
+                frame.y + (sheet.trim?0:layer.top)
             );
         }
 
@@ -50,17 +46,10 @@ export class SpriteSheetRenderer {
             return null;
         }
 
-        const visibleLeft =
-            Math.max(0, layer.left);
-
-        const visibleTop =
-            Math.max(0, layer.top);
-
-        const visibleRight =
-            Math.min(header.width, layer.right);
-
-        const visibleBottom =
-            Math.min(header.height, layer.bottom);
+        const visibleLeft = Math.max(0, layer.left);
+        const visibleTop = Math.max(0, layer.top);
+        const visibleRight = Math.min(header.width, layer.right);
+        const visibleBottom = Math.min(header.height, layer.bottom);
 
         // Повністю за межами документа
         if (

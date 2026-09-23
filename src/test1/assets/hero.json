@@ -1,132 +1,168 @@
 {
-    "width": 512,
+    "width": 256,
     "height": 256,
     "frames": [
         {
-            "name": "hero_fire2",
-            "width": 64,
-            "height": 64,
+            "name": "hero_step4",
+            "width": 20,
+            "height": 66,
             "x": 0,
-            "y": 0
+            "y": 0,
+            "left": 18,
+            "top": 1
+        },
+        {
+            "name": "hero_fire2",
+            "width": 30,
+            "height": 64,
+            "x": 21,
+            "y": 0,
+            "left": 18,
+            "top": 0
         },
         {
             "name": "hero_fire1",
-            "width": 64,
+            "width": 29,
             "height": 64,
-            "x": 65,
-            "y": 0
-        },
-        {
-            "name": "hero_attack4",
-            "width": 64,
-            "height": 64,
-            "x": 130,
-            "y": 0
-        },
-        {
-            "name": "hero_attack3",
-            "width": 64,
-            "height": 64,
-            "x": 195,
-            "y": 0
-        },
-        {
-            "name": "hero_attack2",
-            "width": 64,
-            "height": 64,
-            "x": 260,
-            "y": 0
-        },
-        {
-            "name": "hero_attack1",
-            "width": 64,
-            "height": 64,
-            "x": 325,
-            "y": 0
-        },
-        {
-            "name": "hero_sit_down2",
-            "width": 64,
-            "height": 64,
-            "x": 390,
-            "y": 0
-        },
-        {
-            "name": "hero_sit_down1",
-            "width": 64,
-            "height": 64,
-            "x": 0,
-            "y": 65
-        },
-        {
-            "name": "hero_step4",
-            "width": 64,
-            "height": 64,
-            "x": 65,
-            "y": 65
-        },
-        {
-            "name": "hero_step3",
-            "width": 64,
-            "height": 64,
-            "x": 130,
-            "y": 65
-        },
-        {
-            "name": "hero_step2",
-            "width": 64,
-            "height": 64,
-            "x": 195,
-            "y": 65
+            "x": 52,
+            "y": 0,
+            "left": 15,
+            "top": 1
         },
         {
             "name": "hero_step1",
-            "width": 64,
+            "width": 24,
             "height": 64,
-            "x": 260,
-            "y": 65
+            "x": 82,
+            "y": 0,
+            "left": 18,
+            "top": 0
+        },
+        {
+            "name": "hero_attack4",
+            "width": 29,
+            "height": 63,
+            "x": 107,
+            "y": 0,
+            "left": 19,
+            "top": 1
+        },
+        {
+            "name": "hero_attack3",
+            "width": 32,
+            "height": 63,
+            "x": 137,
+            "y": 0,
+            "left": 15,
+            "top": 1
+        },
+        {
+            "name": "hero_attack2",
+            "width": 30,
+            "height": 63,
+            "x": 170,
+            "y": 0,
+            "left": 16,
+            "top": 1
+        },
+        {
+            "name": "hero_attack1",
+            "width": 30,
+            "height": 63,
+            "x": 201,
+            "y": 0,
+            "left": 16,
+            "top": 1
+        },
+        {
+            "name": "hero_step3",
+            "width": 22,
+            "height": 63,
+            "x": 232,
+            "y": 0,
+            "left": 16,
+            "top": 1
         },
         {
             "name": "hero_idle2",
-            "width": 64,
-            "height": 64,
-            "x": 325,
-            "y": 65
+            "width": 20,
+            "height": 63,
+            "x": 0,
+            "y": 67,
+            "left": 18,
+            "top": 1
         },
         {
             "name": "hero_idle1",
-            "width": 64,
-            "height": 64,
-            "x": 390,
-            "y": 65
-        },
-        {
-            "name": "hero_fall2",
-            "width": 64,
-            "height": 64,
-            "x": 0,
-            "y": 130
+            "width": 20,
+            "height": 63,
+            "x": 21,
+            "y": 67,
+            "left": 18,
+            "top": 1
         },
         {
             "name": "hero_fall1",
-            "width": 64,
-            "height": 64,
-            "x": 65,
-            "y": 130
+            "width": 20,
+            "height": 63,
+            "x": 42,
+            "y": 67,
+            "left": 18,
+            "top": 1
+        },
+        {
+            "name": "hero_step2",
+            "width": 24,
+            "height": 62,
+            "x": 63,
+            "y": 67,
+            "left": 18,
+            "top": 2
+        },
+        {
+            "name": "hero_fall2",
+            "width": 20,
+            "height": 62,
+            "x": 88,
+            "y": 67,
+            "left": 18,
+            "top": 2
         },
         {
             "name": "hero_look-up1",
-            "width": 64,
-            "height": 64,
-            "x": 130,
-            "y": 130
+            "width": 25,
+            "height": 61,
+            "x": 109,
+            "y": 67,
+            "left": 12,
+            "top": 3
         },
         {
             "name": "hero_look-up2",
-            "width": 64,
-            "height": 64,
-            "x": 195,
-            "y": 130
+            "width": 25,
+            "height": 61,
+            "x": 135,
+            "y": 67,
+            "left": 12,
+            "top": 3
+        },
+        {
+            "name": "hero_sit_down2",
+            "width": 21,
+            "height": 55,
+            "x": 161,
+            "y": 67,
+            "left": 18,
+            "top": 12
+        },
+        {
+            "name": "hero_sit_down1",
+            "width": 21,
+            "height": 55,
+            "x": 183,
+            "y": 67,
+            "left": 18,
+            "top": 12
         }
     ]
 }

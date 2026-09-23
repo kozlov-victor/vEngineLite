@@ -2,9 +2,9 @@ import {Texture} from "../vEngineLight/rendering/Texture";
 import {MathEx} from "../vEngineLight/utils/MathEx";
 import {Color} from "../vEngineLight/rendering/Color";
 import {Scene} from "../vEngineLight/application/Scene";
-import {ImageSprite} from "../vEngineLight/gameObject/ImageSprite";
+import {Sprite} from "../vEngineLight/gameObject/Sprite";
 
-export class Particle extends ImageSprite {
+export class Particle extends Sprite {
 
     constructor(scene: Scene, texture: Texture) {
         super(scene, texture);

@@ -12,19 +12,22 @@ export interface IPackedSpriteSheet extends SpriteSheet {
     height: number;
     padding: number;
     frames:IPackedLayerInfo[];
+    trim:boolean;
 }
 
 export class SpriteSheetPacker {
 
-    private createFrames(psd: Psd,padding: number) {
+    private createFrames(psd: Psd,padding: number, trim: boolean) {
         const frames:IPackedLayerInfo[] = [];
         for (const layer of psd.layers) {
             frames.push({
                 x: 0,
                 y: 0,
-                width: psd.header.width + padding,
-                height: psd.header.height + padding,
+                width: (trim?(layer.right-layer.left):psd.header.width) + padding,
+                height: (trim?(layer.bottom-layer.top):psd.header.height) + padding,
                 name: layer.name,
+                left: trim?layer.left:0,
+                top: trim?layer.top:0,
                 layer,
                 psd
             })
@@ -33,9 +36,9 @@ export class SpriteSheetPacker {
     }
 
 
-    public packSpriteSheet(psd: Psd, padding = 1): IPackedSpriteSheet {
+    public packSpriteSheet(psd: Psd, padding: number, trim:boolean): IPackedSpriteSheet {
 
-        const frames = this.createFrames(psd,padding);
+        const frames = this.createFrames(psd,padding,trim);
 
         const texturePacker = new TexturePacker(frames);
         const result = texturePacker.pack();
@@ -43,12 +46,13 @@ export class SpriteSheetPacker {
         return {
             width: result.width,
             height: result.height,
-            frames, padding
+            frames, padding, trim
         };
     }
 
-    public packTileMap(psd: Psd, cols: number, padding = 0): IPackedSpriteSheet {
-        const frames = this.createFrames(psd,padding);
+    public packTileMap(psd: Psd, cols: number): IPackedSpriteSheet {
+        const padding = 0;
+        const frames = this.createFrames(psd,padding,false);
         let x = 0;
         let y = 0;
         let currY = y;
@@ -68,7 +72,8 @@ export class SpriteSheetPacker {
             width,
             height,
             frames,
-            padding
+            padding,
+            trim: false,
         }
     }
 
@@ -80,7 +85,9 @@ export class SpriteSheetPacker {
                 width: packedFrame.width - packed.padding,
                 height: packedFrame.height - packed.padding,
                 x: packedFrame.x,
-                y: packedFrame.y
+                y: packedFrame.y,
+                left: packedFrame.left,
+                top: packedFrame.top,
             })
         }
         return {

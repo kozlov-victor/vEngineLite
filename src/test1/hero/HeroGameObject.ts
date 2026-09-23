@@ -4,7 +4,6 @@ import {FrameAnimationPlayer} from "../../vEngineLight/animation/FrameAnimationP
 import {Scene} from "../../vEngineLight/application/Scene";
 import {IFrame, SpriteSheet} from "../../vEngineLight/types";
 import {ArcadeRigidBody, ArcadeRigidBodyType} from "../../vEngineLight/physics/ArcadePhysics";
-import {ImageSprite} from "../../vEngineLight/gameObject/ImageSprite";
 import {AnimationStateMachine} from "../../vEngineLight/animation/stateMachine/AnimationStateMachine";
 import {HeroIdleState} from "./states/HeroIdleState";
 import {HeroLookUpState} from "./states/HeroLookUpState";
@@ -13,8 +12,9 @@ import {HeroFallState} from "./states/HeroFallState";
 import {HeroSitState} from "./states/HeroSitState";
 import {HeroAttackState} from "./states/HeroAttackState";
 import {HeroFireState} from "./states/HeroFireState";
+import {Sprite} from "../../vEngineLight/gameObject/Sprite";
 
-export class HeroGameObject extends ImageSprite {
+export class HeroGameObject extends Sprite {
 
     public readonly walkVelocity = 100;
     public readonly walkAnimation:FrameAnimation;

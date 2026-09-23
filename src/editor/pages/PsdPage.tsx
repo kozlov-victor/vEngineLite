@@ -24,6 +24,7 @@ export class PsdPage extends BaseTsxComponent {
 
     public packType: tPackType = 'spriteSheet';
     public cols:number|undefined = 8;
+    public trim = true;
 
     @Reactive.Method()
     private async openPsd() {
@@ -55,7 +56,7 @@ export class PsdPage extends BaseTsxComponent {
         const packer = new SpriteSheetPacker();
         let spriteSheet: IPackedSpriteSheet;
         if (this.packType==='spriteSheet') {
-            spriteSheet = packer.packSpriteSheet(filteredPsd);
+            spriteSheet = packer.packSpriteSheet(filteredPsd, 1, this.trim);
         }
         else {
             spriteSheet = packer.packTileMap(filteredPsd, this.cols ?? 8);
@@ -108,6 +109,13 @@ export class PsdPage extends BaseTsxComponent {
                                     {()=>
                                         <>
                                             cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
+                                        </>
+                                    }
+                                </If>
+                                <If condition={this.packType === 'spriteSheet'}>
+                                    {()=>
+                                        <>
+                                            trim: <input type={'checkbox'} {...this.service.bind(this, 'trim', Boolean)}/>
                                         </>
                                     }
                                 </If>

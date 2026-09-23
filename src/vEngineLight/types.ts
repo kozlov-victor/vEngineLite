@@ -15,6 +15,8 @@ export interface IFrame {
 
 export interface SpriteFrame extends IFrame {
     name: string;
+    left: number;
+    top: number;
 }
 
 export interface SpriteSheet {

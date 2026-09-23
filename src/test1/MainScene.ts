@@ -8,7 +8,7 @@ import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
 import {SpriteSheet} from "../vEngineLight/types";
 import {ColorPerVertexRectangle} from "../vEngineLight/gameObject/shapes/ColorPerVertexRectangle";
-import {ImageSprite} from "../vEngineLight/gameObject/ImageSprite";
+import {Sprite} from "../vEngineLight/gameObject/Sprite";
 
 export class MainScene extends Scene {
 
@@ -87,7 +87,7 @@ export class MainScene extends Scene {
         gradient.position.xy(200,10);
         this.addObject(gradient);
 
-        const testImage = new ImageSprite(this,GLUtils.createTextureFromImage(this.app.assetManager.getImage('testImage')));
+        const testImage = new Sprite(this,GLUtils.createTextureFromImage(this.app.assetManager.getImage('testImage')));
         testImage.position.xy(150,200);
         testImage.size.wh(50,30);
         this.addObject(testImage);
