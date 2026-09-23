@@ -77,7 +77,7 @@ export class HeroGameObject extends Sprite {
         this.attackAnimation =
             new FrameAnimation(
                 this,
-                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack1','hero_attack2','hero_attack3','hero_attack4']),
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack1','hero_attack2']),
                 500, 1
             );
         this.fireAnimation =

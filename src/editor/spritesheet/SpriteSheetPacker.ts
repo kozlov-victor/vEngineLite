@@ -1,6 +1,7 @@
 import {Psd, PsdLayer} from "../psd/PsdParser";
 import {SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
 import {TexturePacker} from "./TexturePacker";
+import {MathEx} from "../../vEngineLight/utils/MathEx";
 
 export interface IPackedLayerInfo extends SpriteFrame {
     layer: PsdLayer,
@@ -23,16 +24,30 @@ export class SpriteSheetPacker {
             frames.push({
                 x: 0,
                 y: 0,
-                width: (trim?(layer.right-layer.left):psd.header.width) + padding,
-                height: (trim?(layer.bottom-layer.top):psd.header.height) + padding,
+                width: this.calcLayerRealWidth(layer,psd,trim) + padding,
+                height: this.calcLayerRealHeight(layer,psd,trim) + padding,
                 name: layer.name,
-                left: trim?layer.left:0,
-                top: trim?layer.top:0,
+                left: trim?MathEx.clamp(layer.left,0,psd.header.width):0,
+                top: trim?MathEx.clamp(layer.top,0,psd.header.height):0,
                 layer,
                 psd
             })
         }
         return frames;
+    }
+
+    private calcLayerRealWidth(layer: PsdLayer, psd: Psd, trim: boolean) {
+        if (!trim) return layer.width;
+        const left = MathEx.clamp(layer.left,0,psd.header.width);
+        const right = MathEx.clamp(layer.right,0,psd.header.width);
+        return right - left;
+    }
+
+    private calcLayerRealHeight(layer: PsdLayer, psd: Psd, trim: boolean) {
+        if (!trim) return layer.height;
+        const top = MathEx.clamp(layer.top,0,psd.header.height);
+        const bottom = MathEx.clamp(layer.bottom,0,psd.header.height);
+        return bottom - top;
     }
 
 
