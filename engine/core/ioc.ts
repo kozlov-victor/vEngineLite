@@ -63,7 +63,7 @@ export const DI = {
                         if (!DIContext[injectToken]) {
                             const constructorArgumentsLength = (clazz as any).__constructorArgumentsLength as number;
                             if (constructorArgumentsLength>0) {
-                                throw new Error(`can not inject ${injectToken}: constructor without arguments is not provided`);
+                                throw new Error(`can not inject ${injectToken}: no default constructor`);
                             }
                             DIContext[injectToken] = new clazz();
                         }

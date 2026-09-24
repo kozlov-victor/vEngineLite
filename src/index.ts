@@ -1,8 +1,8 @@
 import {VEngineLiteApplication} from "./vEngineLight/application/VEngineLiteApplication";
-import {TestCharacterScene} from "./test1/TestCharacterScene";
 import {Size} from "./vEngineLight/utils/Size";
 import {ScaleStrategyFitCanvasToScreen} from "./vEngineLight/rendering/scaleStrategy/ScaleStrategyFitCanvasToScreen";
 import {MainScene} from "./test1/MainScene";
+import {Test2Scene} from "./test2/Test2Scene";
 
 
 const app =
@@ -11,7 +11,7 @@ const app =
         new Size(640, 480),
         new ScaleStrategyFitCanvasToScreen()
     );
-app.runScene(new TestCharacterScene(app));
+app.runScene(new Test2Scene(app));
 
 const fpsElem = document.querySelector("#fps")!;
 fpsElem.textContent = `-`;

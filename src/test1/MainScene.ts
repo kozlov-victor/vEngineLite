@@ -1,117 +1,265 @@
 import {Scene} from "../vEngineLight/application/Scene";
-import {GLUtils} from "../vEngineLight/utils/GLUtils";
-import {TileMap} from "../vEngineLight/gameObject/TileMap";
 import {HeroGameObject} from "./hero/HeroGameObject";
-import {Particle} from "./Particle";
+import {GLUtils} from "../vEngineLight/utils/GLUtils";
+import {Vector2} from "../vEngineLight/utils/Vector2";
 import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
-import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
 import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
+import {MathEx} from "../vEngineLight/utils/MathEx";
+import {ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
 import {SpriteSheet} from "../vEngineLight/types";
-import {ColorPerVertexRectangle} from "../vEngineLight/gameObject/shapes/ColorPerVertexRectangle";
-import {Sprite} from "../vEngineLight/gameObject/Sprite";
+import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
+import {TileMap} from "../vEngineLight/gameObject/TileMap";
+import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFollowStrategy";
+import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
+import {Font} from "../vEngineLight/gameObject/text/Font";
+import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
 
 export class MainScene extends Scene {
 
-    private delta = 1;
     private hero: HeroGameObject;
+    private cameraFollowStrategy = new LookAheadFollowStrategy(
+        100,
+        6,
+        4
+    );
+
+
+    constructor(app: VEngineLiteApplication) {
+        super(app);
+        this.bgColor.rgb(122,122,122);
+    }
 
     override onPreloadStarted() {
         this.app.assetManager
             .setBaseUrl('../src/test1/')
-            .add('lava', 'image', 'assets/lava.png')
-            .add('tileset', 'image', 'assets/tiles2.png')
+            .add('tileset', 'image', 'assets/tiles.png')
+            .add('tilemap', 'json', 'assets/map.json')
             .add('cat', 'image', 'assets/hero.png')
-            .add('testImage', 'image', 'assets/testImage.png')
-            .add('cat-sprite-sheet', 'json', 'assets/hero.json')
+            .add('cat-sprite-sheet', 'json', 'assets/hero.json');
     }
 
     override onProgress(percents: number) {
+        super.onProgress(percents);
         console.log(percents);
     }
 
     override onReady() {
-        super.onReady();
-        const lava = this.app.assetManager.getImage('lava');
-        const lavaTexture = GLUtils.createTextureFromImage(lava);
-        const tileMapImage = this.app.assetManager.getImage('tileset');
-        const tileMapTexture = GLUtils.createTextureFromImage(tileMapImage);
-
-        const tileMap = new TileMap(
-            this,
-            [ // map data
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                1, 0, 0, 2, 3, 4, 0, 0, 0, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-            ],
-            10, // map width in tiles
-            12,  // tileset columns
-            13,  // tileset rows
-            tileMapTexture
-        );
-        // Рухаємо всю карту трохи вбік
-        tileMap.position.xy(150, 50);
-
-        const NUM_SPRITES = 1000;
-        for (let i = 0; i < NUM_SPRITES; i++) {
-            const p = new Particle(this,lavaTexture);
-            this.addObject(p);
-        }
-
-        this.addObject(tileMap);
-
-        const r = new Rectangle(this);
-        r.color.rgba(255,0,0,255);
-        r.size.wh(150,150);
-        r.position.xy(120,60);
-        this.addObject(r);
-
-        const ellipse = new Ellipse(this,26,12);
-        ellipse.position.xy(120,120);
-        ellipse.color.rgb(0,0,255);
-        this.addObject(ellipse);
-
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
         const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
         this.addObject(animatedCat);
+
+        this.app.camera.followTarget = animatedCat;
+        this.app.camera.followStrategy = this.cameraFollowStrategy;
+
         this.hero = animatedCat;
 
-        const gradient = new ColorPerVertexRectangle(this);
-        gradient.colorA.fromCssColor('#ac4949');
-        gradient.colorB.fromCssColor('#ac4949');
-        gradient.colorC.fromCssColor('#759c3b');
-        gradient.colorD.fromCssColor('#759c3b');
-        gradient.size.wh(200,300);
-        gradient.position.xy(200,10);
-        this.addObject(gradient);
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(400,50);
+            platform.position.xy(100,450);
+            platform.color.rgb(120,0,0);
+            platform.body = this.app.physics.createRigidBody({
+                type: ArcadeRigidBodyType.STATIC,
+                target: platform,
+            });
+        }
 
-        const testImage = new Sprite(this,GLUtils.createTextureFromImage(this.app.assetManager.getImage('testImage')));
-        testImage.position.xy(150,200);
-        testImage.size.wh(50,30);
-        this.addObject(testImage);
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,50);
+            platform.position.xy(230,250);
+            platform.color.rgb(120,0,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
+        }
 
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(310,210);
+            platform.color.rgb(120,0,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
+        }
+
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(310,210);
+            platform.color.rgb(120,0,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.KINEMATIC,
+                velocity: new Vector2(10,0),
+            });
+        }
+
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(90,210);
+            platform.color.rgb(0,233,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.KINEMATIC,
+                velocity: new Vector2(0,-10),
+            });
+        }
+
+        {
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(100,200);
+            platform.color.rgb(0,233,0);
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.KINEMATIC,
+                velocity: new Vector2(0,10),
+            });
+        }
+
+        const tileTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('tileset'));
+        const tiledData = TileMaps.fromTiledTileMap(
+            this.app.assetManager.getJson('tilemap'),
+            'Tile Layer 1','tiles'
+        );
+        const tileMap = new TileMap(
+            this,tiledData.data,tiledData.mapWidthInTiles,
+            tiledData.tilesetCols,tiledData.tilesetRows,
+            tileTexture
+        );
+        this.addObject(tileMap);
+
+        {
+
+            const rect = new Rectangle(this);
+            this.addObject(rect);
+            rect.size.wh(400,250);
+            rect.position.xy(200,200);
+            rect.color.fromCssColor('#8f8f8f33');
+            this.addObject(rect);
+
+            const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
+            const textLabel = new TextLabel(this,font);
+            textLabel.setText(
+                '😍Hello World\n💁👌це 🎍демо\nтекст! Нам дуже подобається оце от все. Перевірка вирівнювання тесту. Тут довгий тест новий. І ще слово одне'
+            );
+            const parameters = textLabel.getTextParameters();
+            parameters.wrap = true;
+            parameters.textAlign = 'justify';
+            parameters.verticalAlign = 'center';
+            textLabel.setTextParameters(parameters);
+            textLabel.position.from(rect.position);
+            textLabel.size.from(rect.size);
+            textLabel.color.fromCssColor('#45D800');
+            this.addObject(textLabel);
+        }
+
+        this.calculateBounds();
+
+        this.input.keyboard.onKeyDown(KeyboardKey.X, ()=>{
+            const platform = new Rectangle(this);
+            this.addObject(platform);
+            platform.size.wh(50,30);
+            platform.position.xy(MathEx.randomInt(0,this.size.w),MathEx.randomInt(0,50));
+            platform.color.rgba(MathEx.randomInt(100,255),MathEx.randomInt(100,255),MathEx.randomInt(100,255),MathEx.randomInt(100,255));
+            platform.body = this.app.physics.createRigidBody({
+                target: platform,
+                type: ArcadeRigidBodyType.DYNAMIC,
+            });
+        });
     }
+
 
     override onUpdate(dt: number) {
         super.onUpdate(dt);
-        // Рухаємо камеру для скролінгу
-        // this.app.camera.transform.position.x += this.delta;
-        if (this.app.camera.position.x > 800 || this.app.camera.position.x < -100) {
-            this.delta*=-1;
-        }
-        if (this.input.keyboard.isPressed(KeyboardKey.UP)) {
-            this.hero.position.y-=1;
-        }
-        if (this.input.keyboard.isPressed(KeyboardKey.DOWN)) {
-            this.hero.position.y+=1;
-        }
-        if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
-            this.hero.position.x-=1;
-        }
+
+        if (!this.hero) return;
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
-            this.hero.position.x+=1;
+            this.hero.scale.x = 1;
+            this.hero.pivot.x = 0;
+            const accepted = this.hero.animationStateMachine.sendCommand('walk');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionX = 'right';
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
         }
+        else if (this.input.keyboard.justReleased(KeyboardKey.RIGHT)) {
+            this.hero.animationStateMachine.sendCommand('stop');
+            this.hero.getRigidBody().velocity.x = 0;
+        }
+
+        if (this.input.keyboard.isPressed(KeyboardKey.LEFT)) {
+            this.hero.scale.x = -1;
+            this.hero.pivot.x = 64;
+            const accepted = this.hero.animationStateMachine.sendCommand('walk');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionX = 'left';
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
+        }
+        else if (this.input.keyboard.justReleased(KeyboardKey.LEFT)) {
+            this.hero.animationStateMachine.sendCommand('stop');
+            this.hero.getRigidBody().velocity.x = 0;
+        }
+
+        if (this.input.keyboard.isPressed(KeyboardKey.DOWN)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('sit');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'bottom';
+            }
+        }
+        else if (this.input.keyboard.justReleased(KeyboardKey.DOWN)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('stopSit');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
+        }
+
+        if (this.input.keyboard.isPressed(KeyboardKey.UP)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('lookUp');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'top';
+            }
+        }
+        else if (this.input.keyboard.justReleased(KeyboardKey.UP)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('stopLookUp');
+            if (accepted) {
+                this.cameraFollowStrategy.lookDirectionY = 'none';
+            }
+        }
+
+        if (this.input.keyboard.isPressed(KeyboardKey.Z)) {
+            this.hero.animationStateMachine.sendCommand('attack');
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.A)) {
+            const accepted = this.hero.animationStateMachine.sendCommand('fire');
+        }
+
+        if (
+            this.input.keyboard.isPressed(KeyboardKey.SPACE) &&
+            this.hero.getRigidBody().onGround()
+        ) {
+            this.hero.getRigidBody().jump(-350);
+        }
+
+        if (this.hero.getRigidBody().onGround()) {
+            this.hero.animationStateMachine.sendCommand('ground');
+        }
+        else {
+            this.hero.animationStateMachine.sendCommand('unground');
+        }
+
     }
 }

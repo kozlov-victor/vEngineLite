@@ -17,7 +17,6 @@ interface INode {
 }
 
 declare namespace JSX {
-    // tslint:disable-next-line:interface-name
     export interface IntrinsicElements {
         a: TCommonElement<HTMLAnchorElement>;
         abbr: TCommonElement<HTMLElement>;
