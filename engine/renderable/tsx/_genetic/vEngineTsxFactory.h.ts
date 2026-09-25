@@ -47,14 +47,20 @@ export class VEngineTsxFactory {
         if (node===null || node===undefined) {
             node = new VirtualFragment([]);
         }
-        else if (node.type==='virtualNode') {
+        else if (node.type==='virtualNode') { //це звичайний елемент
             node = new VirtualFragment([node]);
         }
-        else if (node.type!=='virtualFragment') {
+        else if (node.type!=='virtualFragment') { // це текст
             node = new VirtualFragment([new VirtualTextNode(String(node))]);
         }
         const commentNode = new VirtualCommentNode(props,`cid:${getComponentUuid(props)}`);
         commentNode.parentComponent = instance;
+        // for (const child of node.children) {
+        //     if (child.type==='virtualNode') {
+        //         (child as any).props.classNames ??={};
+        //         (child as any).props.classNames[(instance.constructor as any).__injectable] = true;
+        //     }
+        // }
         node.children.unshift(commentNode);
         return node;
     }
@@ -65,7 +71,6 @@ export class VEngineTsxFactory {
         ...children: (VirtualNode|VirtualFragment|string|number|any)[]
     ):JSX.Element {
         if (props===null) props = {};
-
 
         const flattenedChildren:(VirtualNode|VirtualFragment)[] =
             flattenDeep(children).
@@ -115,10 +120,7 @@ export class VEngineTsxFactory {
     }
 
     public static destroyComponent(el:VirtualNode) {
-        VEngineTsxFactory.clearCachedInstance((el.parentComponent as any)?.props);
-    }
-
-    public static clearCachedInstance(props:Record<string, any>) {
+        const props: Record<string, any> = (el.parentComponent as any)?.props;
         if (!props) return;
         const uuid = getComponentUuid(props);
         delete this.componentInstances[uuid];

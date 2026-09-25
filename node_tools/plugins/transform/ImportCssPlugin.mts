@@ -4,6 +4,8 @@ import * as path from 'node:path';
 import type {OnLoadArgs, PluginBuild} from 'esbuild';
 // @ts-ignore
 import type {MiniBundlerTransformPlugin} from "../base/MiniBundlerTransformPlugin.mts";
+// @ts-ignore
+import {CssSelectorPreprocessor} from "./CssSelectorPreprocessor.mts";
 
 export interface ImportCssOptions{
     output: string;
@@ -23,16 +25,17 @@ export class ImportCssPlugin implements MiniBundlerTransformPlugin {
     }
 
     async transform(code: string, build: PluginBuild, args: OnLoadArgs) {
-        const cssPaths = extractCssPaths(code, 'CSS');
+        const decoratorData = extractCssDecoratorData(code, 'CSS');
 
         const watchFiles: string[] = [];
-        for (const relativePath of cssPaths) {
+        for (const item of decoratorData) {
             const cssPath = path.resolve(
                 path.dirname(args.path),
-                relativePath
+                item.path
             );
 
-            const source = await fs.readFile(cssPath, 'utf8');
+            let source = await fs.readFile(cssPath, 'utf8');
+            //source = CssSelectorPreprocessor.scope(source, item.className);
 
             this.fileContents.push(source);
             watchFiles.push(cssPath);
@@ -60,31 +63,24 @@ export class ImportCssPlugin implements MiniBundlerTransformPlugin {
 
 }
 
-function extractCssPaths(source: string, decoratorName: string) {
-
-    const result = [];
-
-    /*
-     * Шукаємо:
-     *
-     * @DI.CSS('./main.css')
-     *
-     * і взагалі:
-     *
-     * DI.CSS('./main.css')
-     */
+function extractCssDecoratorData(source: string, decoratorName: string) {
+    const result: {path: string; className: string}[] = [];
 
     const escapedName = escapeRegExp(decoratorName);
 
     const regex = new RegExp(
-        `\\bDI\\.${escapedName}\\s*\\(\\s*(['"])(.*?)\\1\\s*\\)`,
+        `\\bDI\\.${escapedName}\\s*\\(\\s*(['"])(.*?)\\1\\s*\\)` +
+        `\\s*(?:export\\s+)?(?:default\\s+)?(?:abstract\\s+)?class\\s+(\\w+)`,
         'g'
     );
 
-    let match;
+    let match: RegExpExecArray | null;
 
     while ((match = regex.exec(source)) !== null) {
-        result.push(match[2]);
+        result.push({
+            path: match[2],
+            className: match[3]
+        });
     }
 
     return result;
