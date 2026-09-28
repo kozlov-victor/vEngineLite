@@ -3,7 +3,7 @@ import {HeroIdleState} from "./HeroIdleState";
 import {Scene} from "@vEngineLite/application/Scene";
 import {HeroAbstractMovingState} from "./abstracts/HeroAbstractMovingState";
 
-export class HeroFireState extends HeroAbstractMovingState {
+export class HeroAttack2State extends HeroAbstractMovingState {
 
     constructor(private readonly scene: Scene, private readonly hero: HeroGameObject) {
         super(scene, hero);
@@ -11,11 +11,7 @@ export class HeroFireState extends HeroAbstractMovingState {
 
     override onEnter() {
         this.setHeroVelocity();
-        return this.hero.fireAnimation;
-    }
-
-    override onAnimationStarted() {
-        this.hero.getRigidBody().velocity.x = -100 * this.hero.scale.x; // віддача
+        return this.hero.attack2Animation;
     }
 
     override onAnimationCompleted(): string | null {
@@ -24,7 +20,7 @@ export class HeroFireState extends HeroAbstractMovingState {
 
     receiveCommand(command: string): string | null {
         switch (command) {
-            case 'walk': return HeroFireState.name;
+            case 'walk': return HeroAttack2State.name;
         }
         return null;
     }

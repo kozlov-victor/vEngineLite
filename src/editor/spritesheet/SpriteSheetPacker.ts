@@ -1,7 +1,7 @@
 import {Psd, PsdLayer} from "../psd/PsdParser";
-import {SpriteFrame, SpriteSheet} from "../../vEngineLight/types";
+import {SpriteFrame, SpriteSheet} from "@vEngineLite/types";
 import {TexturePacker} from "./TexturePacker";
-import {MathEx} from "../../vEngineLight/utils/MathEx";
+import {MathEx} from "@vEngineLite/utils/MathEx";
 
 export interface IPackedLayerInfo extends SpriteFrame {
     layer: PsdLayer,

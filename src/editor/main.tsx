@@ -1,4 +1,4 @@
-import {Router} from "./router";
+import {Router} from "@engine/renderable/router";
 import {VEngineTsxFactory} from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 import {DomRootComponent} from "@engine/renderable/tsx/dom/domRootComponent";
 import {DI} from "@engine/core/ioc";

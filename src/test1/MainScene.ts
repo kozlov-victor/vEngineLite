@@ -1,18 +1,18 @@
-import {Scene} from "../vEngineLight/application/Scene";
+import {Scene} from "@vEngineLite/application/Scene";
 import {HeroGameObject} from "./hero/HeroGameObject";
-import {GLUtils} from "../vEngineLight/utils/GLUtils";
-import {Vector2} from "../vEngineLight/utils/Vector2";
-import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
-import {KeyboardKey} from "../vEngineLight/inputControl/KeyboardKey";
-import {MathEx} from "../vEngineLight/utils/MathEx";
-import {ArcadeRigidBodyType} from "../vEngineLight/physics/ArcadePhysics";
-import {SpriteSheet} from "../vEngineLight/types";
-import {TileMaps} from "../vEngineLight/gameObject/TileMaps";
-import {TileMap} from "../vEngineLight/gameObject/TileMap";
-import {LookAheadFollowStrategy} from "../vEngineLight/camera/follow/LookAheadFollowStrategy";
-import {VEngineLiteApplication} from "../vEngineLight/application/VEngineLiteApplication";
-import {Font} from "../vEngineLight/gameObject/text/Font";
-import {TextLabel} from "../vEngineLight/gameObject/text/TextLabel";
+import {GLUtils} from "@vEngineLite/utils/GLUtils";
+import {Vector2} from "@vEngineLite/utils/Vector2";
+import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
+import {KeyboardKey} from "@vEngineLite/inputControl/KeyboardKey";
+import {MathEx} from "@vEngineLite/utils/MathEx";
+import {ArcadeRigidBodyType} from "@vEngineLite/physics/ArcadePhysics";
+import {SpriteSheet} from "@vEngineLite/types";
+import {TileMaps} from "@vEngineLite/gameObject/TileMaps";
+import {TileMap} from "@vEngineLite/gameObject/TileMap";
+import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollowStrategy";
+import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
+import {Font} from "@vEngineLite/gameObject/text/Font";
+import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
 
 export class MainScene extends Scene {
 
@@ -241,10 +241,13 @@ export class MainScene extends Scene {
         }
 
         if (this.input.keyboard.isPressed(KeyboardKey.Z)) {
-            this.hero.animationStateMachine.sendCommand('attack');
+            this.hero.animationStateMachine.sendCommand('attack1');
+        }
+        if (this.input.keyboard.isPressed(KeyboardKey.X)) {
+            this.hero.animationStateMachine.sendCommand('attack2');
         }
         if (this.input.keyboard.isPressed(KeyboardKey.A)) {
-            const accepted = this.hero.animationStateMachine.sendCommand('fire');
+            this.hero.animationStateMachine.sendCommand('fire');
         }
 
         if (

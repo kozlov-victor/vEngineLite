@@ -1,18 +1,19 @@
-import {Texture} from "../../vEngineLight/rendering/Texture";
-import {FrameAnimation} from "../../vEngineLight/animation/FrameAnimation";
-import {FrameAnimationPlayer} from "../../vEngineLight/animation/FrameAnimationPlayer";
-import {Scene} from "../../vEngineLight/application/Scene";
-import {IFrame, SpriteSheet} from "../../vEngineLight/types";
-import {ArcadeRigidBody, ArcadeRigidBodyType} from "../../vEngineLight/physics/ArcadePhysics";
-import {AnimationStateMachine} from "../../vEngineLight/animation/stateMachine/AnimationStateMachine";
+import {Texture} from "@vEngineLite/rendering/Texture";
+import {FrameAnimation} from "@vEngineLite/animation/FrameAnimation";
+import {FrameAnimationPlayer} from "@vEngineLite/animation/FrameAnimationPlayer";
+import {Scene} from "@vEngineLite/application/Scene";
+import {IFrame, SpriteSheet} from "@vEngineLite/types";
+import {ArcadeRigidBody, ArcadeRigidBodyType} from "@vEngineLite/physics/ArcadePhysics";
+import {AnimationStateMachine} from "@vEngineLite/animation/stateMachine/AnimationStateMachine";
 import {HeroIdleState} from "./states/HeroIdleState";
 import {HeroLookUpState} from "./states/HeroLookUpState";
 import {HeroWalkState} from "./states/HeroWalkState";
 import {HeroFallState} from "./states/HeroFallState";
 import {HeroSitState} from "./states/HeroSitState";
-import {HeroAttackState} from "./states/HeroAttackState";
+import {HeroAttack1State} from "./states/HeroAttack1State";
 import {HeroFireState} from "./states/HeroFireState";
-import {Sprite} from "../../vEngineLight/gameObject/Sprite";
+import {Sprite} from "@vEngineLite/gameObject/Sprite";
+import {HeroAttack2State} from "./states/HeroAttack2State";
 
 export class HeroGameObject extends Sprite {
 
@@ -22,7 +23,8 @@ export class HeroGameObject extends Sprite {
     public readonly lookUpAnimation:FrameAnimation;
     public readonly fallAnimation:FrameAnimation;
     public readonly sitAnimation:FrameAnimation;
-    public readonly attackAnimation:FrameAnimation;
+    public readonly attack1Animation:FrameAnimation;
+    public readonly attack2Animation:FrameAnimation;
     public readonly fireAnimation:FrameAnimation;
 
     public readonly animationPlayer = new FrameAnimationPlayer();
@@ -74,10 +76,16 @@ export class HeroGameObject extends Sprite {
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_look-up1','hero_look-up2']),
                 1600
             );
-        this.attackAnimation =
+        this.attack1Animation =
             new FrameAnimation(
                 this,
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack1','hero_attack2']),
+                500, 1
+            );
+        this.attack2Animation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_attack3','hero_attack4']),
                 500, 1
             );
         this.fireAnimation =
@@ -89,7 +97,8 @@ export class HeroGameObject extends Sprite {
 
         this.animationStateMachine.addStates(
             new HeroIdleState(this.scene, this), new HeroLookUpState(this.scene, this), new HeroWalkState(this.scene, this),
-            new HeroFallState(this.scene, this), new HeroSitState(this.scene, this), new HeroAttackState(this.scene, this),
+            new HeroFallState(this.scene, this), new HeroSitState(this.scene, this),
+            new HeroAttack1State(this.scene, this), new HeroAttack2State(this.scene, this),
             new HeroFireState(this.scene, this),
         )
         this.animationStateMachine.setInitialState(HeroIdleState.name);

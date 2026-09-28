@@ -1,8 +1,8 @@
-import {Texture} from "../vEngineLight/rendering/Texture";
-import {MathEx} from "../vEngineLight/utils/MathEx";
-import {Color} from "../vEngineLight/rendering/Color";
-import {Scene} from "../vEngineLight/application/Scene";
-import {Sprite} from "../vEngineLight/gameObject/Sprite";
+import {Texture} from "@vEngineLite/rendering/Texture";
+import {MathEx} from "@vEngineLite/utils/MathEx";
+import {Color} from "@vEngineLite/rendering/Color";
+import {Scene} from "@vEngineLite/application/Scene";
+import {Sprite} from "@vEngineLite/gameObject/Sprite";
 
 export class Particle extends Sprite {
 

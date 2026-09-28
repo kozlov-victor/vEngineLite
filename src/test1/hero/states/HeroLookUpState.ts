@@ -1,8 +1,8 @@
-import {AnimationState} from "../../../vEngineLight/animation/stateMachine/AnimationState";
+import {AnimationState} from "@vEngineLite/animation/stateMachine/AnimationState";
 import {HeroGameObject} from "../HeroGameObject";
 import {HeroIdleState} from "./HeroIdleState";
 import {HeroFallState} from "./HeroFallState";
-import {Scene} from "../../../vEngineLight/application/Scene";
+import {Scene} from "@vEngineLite/application/Scene";
 
 export class HeroLookUpState extends AnimationState {
 

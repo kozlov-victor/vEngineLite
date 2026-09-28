@@ -1,10 +1,10 @@
-import {Scene} from "../vEngineLight/application/Scene";
-import {GLUtils} from "../vEngineLight/utils/GLUtils";
-import {TileMap} from "../vEngineLight/gameObject/TileMap";
-import {Rectangle} from "../vEngineLight/gameObject/shapes/Rectangle";
-import {Ellipse} from "../vEngineLight/gameObject/shapes/Ellipse";
-import {ColorPerVertexRectangle} from "../vEngineLight/gameObject/shapes/ColorPerVertexRectangle";
-import {Sprite} from "../vEngineLight/gameObject/Sprite";
+import {Scene} from "../vEngineLite/application/Scene";
+import {GLUtils} from "../vEngineLite/utils/GLUtils";
+import {TileMap} from "../vEngineLite/gameObject/TileMap";
+import {Rectangle} from "../vEngineLite/gameObject/shapes/Rectangle";
+import {Ellipse} from "../vEngineLite/gameObject/shapes/Ellipse";
+import {ColorPerVertexRectangle} from "../vEngineLite/gameObject/shapes/ColorPerVertexRectangle";
+import {Sprite} from "../vEngineLite/gameObject/Sprite";
 import {Particle} from "./Particle";
 
 export class Test2Scene extends Scene {

@@ -15,6 +15,8 @@ export class PsdLayerComponent extends BaseTsxComponent {
     override onRendered() {
         const ctx = this.el.getContext("2d");
         if (!ctx) return;
+
+        ctx.clearRect(0, 0, this.el.width, this.el.height);
         const layer = this.props.layer;
         const imageData = new ImageData(
             new Uint8ClampedArray(layer.pixels),

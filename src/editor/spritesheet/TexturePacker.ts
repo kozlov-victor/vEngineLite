@@ -1,4 +1,4 @@
-import {IFrame} from "../../vEngineLight/types";
+import {IFrame} from "@vEngineLite/types";
 
 
 const nextPowerOfTwo = (num:number) => {

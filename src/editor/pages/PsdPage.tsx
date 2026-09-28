@@ -8,7 +8,7 @@ import {DI} from "@engine/core/ioc";
 import {PsdLayerComponent} from "./PsdLayerComponent";
 import {SpriteSheetRenderer} from "../spritesheet/SpriteSheetRenderer";
 import {IPackedSpriteSheet, SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
-import {InputSetterService, Numeric} from "@engine/renderable/tsx/dom/utils/input.setter.service";
+import {InputSetterService, Numeric} from "@engine/renderable/tsx/dom/forms/input.setter.service";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
 
 type tPackType = 'spriteSheet'|'tileMap';
