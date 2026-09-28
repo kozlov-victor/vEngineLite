@@ -1,7 +1,7 @@
 import {BaseTsxComponent} from "@engine/renderable/tsx/base/baseTsxComponent";
-import {VEngineTsxFactory} from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 import {PsdHeader, PsdLayer} from "../psd/PsdParser";
 import {IBaseProps} from "@engine/renderable/tsx/_genetic/virtualNode";
+import { VEngineTsxFactory } from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 
 export class PsdLayerComponent extends BaseTsxComponent {
 

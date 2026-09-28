@@ -55,12 +55,11 @@ export class VEngineTsxFactory {
         }
         const commentNode = new VirtualCommentNode(props,`cid:${getComponentUuid(props)}`);
         commentNode.parentComponent = instance;
-        // for (const child of node.children) {
-        //     if (child.type==='virtualNode') {
-        //         (child as any).props.classNames ??={};
-        //         (child as any).props.classNames[(instance.constructor as any).__injectable] = true;
-        //     }
-        // }
+        for (const child of node.children) {
+            if (child.type==='virtualNode') {
+                child.scope = (instance.constructor as any).__scope;
+            }
+        }
         node.children.unshift(commentNode);
         return node;
     }

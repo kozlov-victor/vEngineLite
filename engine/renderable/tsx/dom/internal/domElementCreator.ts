@@ -58,6 +58,9 @@ export class DomElementCreator extends AbstractElementCreator<tDomElement>{
 
     setProps(el: tDomElement, virtualNode:VirtualNode,oldVirtualNode:Optional<VirtualNode>,parent:tDomElement): void {
         const props = virtualNode.props;
+        if (virtualNode.scope) {
+            (virtualNode.props as any).className = (virtualNode.props as any).className ? `${virtualNode.scope} ${(virtualNode.props as any).className}` : virtualNode.scope;
+        }
         if (el.nodeType==8) { // comment node
             return;
         }
@@ -77,6 +80,7 @@ export class DomElementCreator extends AbstractElementCreator<tDomElement>{
 
             const htmlEl = el as HTMLElement;
             for (const key of Object.keys(props)) {
+                if (key==='key') continue;
                 if (key.indexOf('on')===0) {// events
                     (htmlEl as Record<string, any>)[key] = props[key];
                 }
