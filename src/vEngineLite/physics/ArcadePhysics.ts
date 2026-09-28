@@ -149,6 +149,11 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         const bTop    = bPos.y + b.rect.y;
         const bBottom = bTop + b.rect.height;
 
+        const aCenterX = (aLeft + aRight) * 0.5;
+        const bCenterX = (bLeft + bRight) * 0.5;
+        const aCenterY = (aTop + aBottom) * 0.5;
+        const bCenterY = (bTop + bBottom) * 0.5;
+
         // ---------------------------------------
         // Перевіряємо, чи є перетин
         // ---------------------------------------
@@ -175,7 +180,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // значить розсувати об'єкти треба по X.
         if (overlapX < overlapY) {
             // A знаходиться лівіше B
-            if (aPos.x < bPos.x) {
+            if (aCenterX < bCenterX) {
                 return {
                     normal: new Vector2(-1, 0),
                     depth: overlapX
@@ -192,7 +197,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // Інакше розсуваємо по Y.
 
         // A знаходиться вище B
-        if (aPos.y < bPos.y) {
+        if (aCenterY < bCenterY) {
             return {
                 normal: new Vector2(0, -1),
                 depth: overlapY
@@ -371,8 +376,12 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // 3. Collision impulse
         // ---------------------------------------
 
+        const restitution = (a.restitution + b.restitution)/2;
+
         const impulseMagnitude =
-            -velocityAlongNormal / invMassSum;
+            -(1 + restitution) *
+            velocityAlongNormal /
+            invMassSum;
 
         const impulseX =
             normal.x * impulseMagnitude;

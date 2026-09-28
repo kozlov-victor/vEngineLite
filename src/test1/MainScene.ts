@@ -198,11 +198,13 @@ export class MainScene extends Scene {
                     ),
                     collideWithGroup: groundGroup,
                     ignoreCollisionWithGroup: particleGroup,
+                    mass: 0.001,
+                    restitution: 0.3,
                 });
                 return particle;
             },
             capacity: 1000,
-            velocity: {from: 0, to: -100}
+            velocity: {from: 0, to: -100},
         });
         this.addObject(this.testParticleEmitter);
 
