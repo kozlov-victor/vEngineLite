@@ -197,14 +197,15 @@ export class MainScene extends Scene {
                         groundGroup, particleGroup
                     ),
                     collideWithGroup: groundGroup,
-                    ignoreCollisionWithGroup: particleGroup,
+                    //ignoreCollisionWithGroup: particleGroup,
                     mass: 0.001,
                     restitution: 0.3,
                 });
                 return particle;
             },
-            capacity: 1000,
+            capacity: 500,
             velocity: {from: 0, to: -100},
+            lifetime: {from: 1000, to: 5000},
         });
         this.addObject(this.testParticleEmitter);
 
