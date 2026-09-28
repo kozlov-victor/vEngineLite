@@ -84,7 +84,7 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: particleGroup,
+                collisionGroup: groundGroup,
                 collideWithGroup: groundGroup,
             });
         }
@@ -192,11 +192,17 @@ export class MainScene extends Scene {
                 particle.color.rgb(120,0,0);
                 particle.body = this.app.physics.createRigidBody({
                     target: particle,
-                    type: ArcadeRigidBodyType.KINEMATIC
+                    type: ArcadeRigidBodyType.DYNAMIC,
+                    collisionGroup: CollisionGroupManager.combine(
+                        groundGroup, particleGroup
+                    ),
+                    collideWithGroup: groundGroup,
+                    ignoreCollisionWithGroup: particleGroup,
                 });
                 return particle;
             },
             capacity: 1000,
+            velocity: {from: 0, to: -100}
         });
         this.addObject(this.testParticleEmitter);
 

@@ -22,7 +22,7 @@ export class CollisionGroupManager {
         return new CollisionGroup(result);
     }
 
-    public static combine(categories: CollisionGroup[]) {
+    public static combine(...categories: CollisionGroup[]) {
         let result = 0;
         for (const category of categories) {
             result|=category.bitMask;
