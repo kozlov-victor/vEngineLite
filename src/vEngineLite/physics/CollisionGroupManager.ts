@@ -31,8 +31,13 @@ export class CollisionGroupManager {
     }
 
     private static defaultGroup = new CollisionGroup(1);
+    private static noneGroup = new CollisionGroup(0);
 
     public static getDefaultGroup() {
         return this.defaultGroup;
+    }
+
+    public static getNoneGroup() {
+        return this.noneGroup;
     }
 }

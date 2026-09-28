@@ -25,7 +25,7 @@ class ArcadeRigidBody extends RigidBody {
     friction: number; // px/s²
 
     constructor(params: ArcadeRigidBodyParams, id: number) {
-        super(params.target, params.rect,params.velocity ?? new Vector2());
+        super(params);
         this.id = id;
         this.type = params.type;
         this.mass = params.mass || 1;

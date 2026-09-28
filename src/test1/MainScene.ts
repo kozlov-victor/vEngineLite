@@ -13,10 +13,17 @@ import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollo
 import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
 import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
+import {ParticleEmitter} from "@vEngineLite/particle/ParticleEmitter";
+import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
+
+const col = new CollisionGroupManager();
+export const groundGroup = col.nextGroup();
+export const particleGroup = col.nextGroup();
 
 export class MainScene extends Scene {
 
     private hero: HeroGameObject;
+    private testParticleEmitter: ParticleEmitter;
     private cameraFollowStrategy = new LookAheadFollowStrategy(
         100,
         6,
@@ -63,6 +70,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 type: ArcadeRigidBodyType.STATIC,
                 target: platform,
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -75,6 +84,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
+                collisionGroup: particleGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -87,6 +98,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -100,6 +113,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(10,0),
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -113,6 +128,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,-10),
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -126,6 +143,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,10),
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
         }
 
@@ -166,6 +185,21 @@ export class MainScene extends Scene {
             this.addObject(textLabel);
         }
 
+        this.testParticleEmitter = new ParticleEmitter(this,{
+            factory: ()=>{
+                const particle = new Rectangle(this);
+                particle.size.wh(5,5);
+                particle.color.rgb(120,0,0);
+                particle.body = this.app.physics.createRigidBody({
+                    target: particle,
+                    type: ArcadeRigidBodyType.KINEMATIC
+                });
+                return particle;
+            },
+            capacity: 1000,
+        });
+        this.addObject(this.testParticleEmitter);
+
         this.calculateBounds();
 
         this.input.keyboard.onKeyDown(KeyboardKey.X, ()=>{
@@ -178,6 +212,7 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
             });
+            platform.body.collisionGroup = particleGroup;
         });
     }
 
@@ -186,6 +221,10 @@ export class MainScene extends Scene {
         super.onUpdate(dt);
 
         if (!this.hero) return;
+
+        this.testParticleEmitter.update(dt);
+        this.testParticleEmitter.emitAt(100,100);
+
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;
             this.hero.pivot.x = 0;

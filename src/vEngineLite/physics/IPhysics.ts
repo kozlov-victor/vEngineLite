@@ -1,10 +1,15 @@
 import {Vector2} from "../utils/Vector2";
 import {IFrame, IGeometry} from "../types";
 import {Size} from "../utils/Size";
-import {CollisionGroupManager} from "./CollisionGroupManager";
+import {CollisionGroup, CollisionGroupManager} from "./CollisionGroupManager";
 
 export interface IRigidBodyParams {
     target: IGeometry;
+    rect?: IFrame;
+    velocity?: Vector2;
+    collisionGroup?: CollisionGroup;
+    collideWithGroup?: CollisionGroup;
+    ignoreCollisionWithGroup?: CollisionGroup;
 }
 
 export abstract class RigidBody {
@@ -12,20 +17,26 @@ export abstract class RigidBody {
     public readonly target: {size:Size,position:Vector2};
     public rect: IFrame;
     public readonly velocity: Vector2;
-    public collisionGroup = CollisionGroupManager.getDefaultGroup();
-    public collideWithGroups = CollisionGroupManager.getDefaultGroup();
+    public collisionGroup: CollisionGroup;
+    public collideWithGroup: CollisionGroup;
+    public ignoreCollisionWithGroup: CollisionGroup;
 
-    protected constructor(target: IGeometry, rect: IFrame | undefined, velocity: Vector2) {
-        if (!rect) {
-            rect = {
+    protected constructor(params: IRigidBodyParams) {
+        if (!params.rect) {
+            this.rect = {
                 x: 0, y: 0,
-                width: target.size.w,
-                height: target.size.h,
+                width: params.target.size.w,
+                height: params.target.size.h,
             }
         }
-        this.target = target;
-        this.rect = rect;
-        this.velocity = velocity;
+        else {
+            this.rect = {...params.rect};
+        }
+        this.target = params.target;
+        this.velocity = params.velocity ?? new Vector2();
+        this.collisionGroup = params.collisionGroup ?? CollisionGroupManager.getDefaultGroup();
+        this.collideWithGroup = params.collideWithGroup ?? CollisionGroupManager.getDefaultGroup();
+        this.ignoreCollisionWithGroup = params.ignoreCollisionWithGroup ?? CollisionGroupManager.getNoneGroup();
     }
 }
 

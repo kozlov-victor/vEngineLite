@@ -2,10 +2,9 @@ import {RenderableContainer} from "@vEngineLite/gameObject/base/RenderableContai
 
 export class Particle {
 
-    public active = false;
     public target: RenderableContainer;
+    public lifetime: number;
 
-    reset(): void {
-        this.active = false;
-    }
+    public active: boolean;
+    public time = 0;
 }

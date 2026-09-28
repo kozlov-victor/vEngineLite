@@ -14,6 +14,7 @@ import {HeroAttack1State} from "./states/HeroAttack1State";
 import {HeroFireState} from "./states/HeroFireState";
 import {Sprite} from "@vEngineLite/gameObject/Sprite";
 import {HeroAttack2State} from "./states/HeroAttack2State";
+import {groundGroup, particleGroup} from "../MainScene";
 
 export class HeroGameObject extends Sprite {
 
@@ -41,7 +42,10 @@ export class HeroGameObject extends Sprite {
         const body = scene.app.physics.createRigidBody({
             type: ArcadeRigidBodyType.DYNAMIC,
             target: this,
-            rect: this.regularBodyRect
+            rect: this.regularBodyRect,
+            collisionGroup: groundGroup,
+            collideWithGroup: groundGroup,
+            ignoreCollisionWithGroup: particleGroup,
         });
         this.body = body;
         this.bodyRef = body;

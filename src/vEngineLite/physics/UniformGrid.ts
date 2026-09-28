@@ -46,8 +46,14 @@ export class UniformGrid {
                     }
 
                     const canCollide =
-                        (a.collisionGroup.bitMask & b.collideWithGroups.bitMask)!==0 ||
-                        (a.collideWithGroups.bitMask & b.collisionGroup.bitMask)!==0;
+                        (
+                            (a.collisionGroup.bitMask & b.collideWithGroup.bitMask)!==0 || (b.collisionGroup.bitMask & a.collideWithGroup.bitMask)!==0
+                        )
+                        &&
+                        (
+                            (a.collisionGroup.bitMask & b.ignoreCollisionWithGroup.bitMask)===0 && (b.collisionGroup.bitMask & a.ignoreCollisionWithGroup.bitMask)===0
+                        )
+                    ;
 
                     if (!canCollide) continue;
 
