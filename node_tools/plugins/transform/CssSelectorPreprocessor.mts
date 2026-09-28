@@ -55,7 +55,7 @@ export class CssSelectorPreprocessor {
                 result += this.scopeSelectors(header, scope);
                 result += '{';
                 result += body;
-                result += '}';
+                result += '}\n';
             }
 
             position = closeBrace + 1;
@@ -77,14 +77,14 @@ export class CssSelectorPreprocessor {
                 if (!trimmed) {
                     return selector;
                 }
-
-                return `${this.createScopeSelector(scope)}${trimmed}`;
+                const scopedSelector = this.createScopeSelector(scope);
+                return `${trimmed}${scopedSelector}, ${scopedSelector} ${trimmed}`;
             })
             .join(',');
     }
 
     private static createScopeSelector(scope: string): string {
-        return `[data-scope="${scope}"]`;
+        return `.${scope}`;
     }
 
     private static splitSelectors(source: string): string[] {

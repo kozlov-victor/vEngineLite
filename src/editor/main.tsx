@@ -9,7 +9,7 @@ root.id = 'root';
 document.body.appendChild(root);
 
 @DI.Injectable()
-@DI.CSS('./main.css')
+@DI.CSS('./main.css', {global: true})
 class RootComponent extends DomRootComponent {
 
     @DI.Inject(Router) private readonly router: Router;

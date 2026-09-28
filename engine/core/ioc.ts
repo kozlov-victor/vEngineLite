@@ -4,7 +4,8 @@ const DIContext:Record<string, any> = {};
 
 export const DI = {
     CSS: (
-        filePath: string
+        filePath: string,
+        params?: { global?: boolean }
     )=>{
         return function ClassDecorator<C extends Constructor>(
             target: C,
@@ -12,7 +13,9 @@ export const DI = {
         ) {
             return class extends target {
                 public static readonly __injectable = target.prototype.constructor.__injectable ?? target.name;
-                public readonly __cssScoped = true;
+                public static readonly __scope =
+                    params?.global? undefined :
+                    target.prototype.constructor.__injectable ?? target.name;
             };
         };
     },
