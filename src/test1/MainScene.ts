@@ -189,7 +189,7 @@ export class MainScene extends Scene {
         this.testParticleEmitter = new ParticleEmitter(this,{
             factory: ()=>{
                 const particle = new Rectangle(this);
-                particle.size.wh(5,5);
+                particle.size.wh(10);
                 particle.color.rgb(120,0,0);
                 particle.body = this.app.physics.createRigidBody({
                     target: particle,
@@ -203,9 +203,9 @@ export class MainScene extends Scene {
                 });
                 return particle;
             },
-            capacity: 500,
+            capacity: 300,
             velocity: {from: 0, to: -100},
-            lifetime: {from: 1000, to: 5000},
+            lifetime: {from: 1000, to: 15000},
         });
         this.addObject(this.testParticleEmitter);
 
@@ -223,7 +223,6 @@ export class MainScene extends Scene {
                 collisionGroup: groundGroup,
                 collideWithGroup: groundGroup,
             });
-            platform.body.collisionGroup = particleGroup;
         });
     }
 
