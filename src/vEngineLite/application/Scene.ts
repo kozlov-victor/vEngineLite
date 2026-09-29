@@ -63,6 +63,10 @@ export abstract class Scene {
         this.objects.push(obj);
     }
 
+    public prependObject(obj: Container) {
+        this.objects.unshift(obj);
+    }
+
     public removeObject(obj: Container) {
         this.objects.splice(this.objects.indexOf(obj), 1);
     }

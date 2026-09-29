@@ -328,18 +328,13 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         const invMassSum = invMassA + invMassB;
 
-        // Обидва static
-        if (invMassSum === 0) {
-            return;
-        }
-
 
         // ---------------------------------------
         // 1. Position correction
         // ---------------------------------------
 
         const SLOP = 0.001;
-        const PERCENT = 1.0;
+        const PERCENT = 0.8;
 
         const correctionDepth =
             Math.max(depth - SLOP, 0) * PERCENT;
