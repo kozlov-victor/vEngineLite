@@ -197,8 +197,8 @@ export class MainScene extends Scene {
                         groundGroup, particleGroup
                     ),
                     collideWithGroup: groundGroup,
-                    mass: 0.0001,
-                    restitution: 0.6,
+                    mass: 0.01,
+                    restitution: 0,
                 });
                 return particle;
             },
