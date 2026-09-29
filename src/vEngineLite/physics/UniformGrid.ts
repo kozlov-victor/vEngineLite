@@ -48,6 +48,8 @@ export class UniformGrid {
                     const canCollide =
                         (
                             (a.collisionGroup.bitMask & b.collideWithGroup.bitMask)!==0 || (b.collisionGroup.bitMask & a.collideWithGroup.bitMask)!==0
+                            || (a.collisionGroup.bitMask & b.nonBlockingCollisionWithGroup.bitMask)!==0
+                            || (b.collisionGroup.bitMask & a.nonBlockingCollisionWithGroup.bitMask)!==0
                         )
                         &&
                         (

@@ -54,6 +54,7 @@ export class MainScene extends Scene {
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
         const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
+        animatedCat.getRigidBody().nonBlockingCollisionWithGroup = particleGroup;
         this.addObject(animatedCat);
 
         this.app.camera.followTarget = animatedCat;
@@ -193,11 +194,8 @@ export class MainScene extends Scene {
                 particle.body = this.app.physics.createRigidBody({
                     target: particle,
                     type: ArcadeRigidBodyType.DYNAMIC,
-                    collisionGroup: CollisionGroupManager.combine(
-                        groundGroup, particleGroup
-                    ),
+                    collisionGroup: particleGroup,
                     collideWithGroup: groundGroup,
-                    //ignoreCollisionWithGroup: particleGroup,
                     mass: 0.001,
                     restitution: 0.3,
                 });

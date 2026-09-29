@@ -28,7 +28,7 @@ class ArcadeRigidBody extends RigidBody {
         super(params);
         this.id = id;
         this.type = params.type;
-        this.mass = params.mass || 1;
+        this.mass = params.mass ?? 1;
         this.friction = params.friction ?? 800;
     }
 
@@ -59,7 +59,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
     private nextId = 0;
     private readonly carried  = new Set<number>();
     private readonly uniformGrid = new UniformGrid(128);
-    private allRigidBodies: ArcadeRigidBody[] = [];
+    private readonly allRigidBodies: ArcadeRigidBody[] = [];
 
     public createRigidBody(params: ArcadeRigidBodyParams): ArcadeRigidBody {
         return new ArcadeRigidBody(params,this.nextId++);
@@ -311,6 +311,10 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         b: ArcadeRigidBody,
         collision: Collision
     ) {
+        if (this.isNonBlockingCollision(a, b)) {
+            return;
+        }
+
         const { normal, depth } = collision;
 
         const invMassA = this.getInverseMass(a);
@@ -401,6 +405,13 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         b.velocity.y -=
             impulseY * invMassB;
+    }
+
+    private isNonBlockingCollision(a: ArcadeRigidBody, b: ArcadeRigidBody) {
+        return (
+            (a.collisionGroup.bitMask & b.nonBlockingCollisionWithGroup.bitMask) !== 0 ||
+            (b.collisionGroup.bitMask & a.nonBlockingCollisionWithGroup.bitMask) !== 0
+        );
     }
 
     private applySupportMovement(

@@ -11,6 +11,7 @@ export interface IRigidBodyParams {
     collisionGroup?: CollisionGroup;
     collideWithGroup?: CollisionGroup;
     ignoreCollisionWithGroup?: CollisionGroup;
+    nonBlockingCollisionWithGroup?: CollisionGroup;
 }
 
 export abstract class RigidBody {
@@ -21,6 +22,7 @@ export abstract class RigidBody {
     public collisionGroup: CollisionGroup;
     public collideWithGroup: CollisionGroup;
     public ignoreCollisionWithGroup: CollisionGroup;
+    public nonBlockingCollisionWithGroup: CollisionGroup;
     public restitution: number;
 
     protected constructor(params: IRigidBodyParams) {
@@ -39,6 +41,7 @@ export abstract class RigidBody {
         this.collisionGroup = params.collisionGroup ?? CollisionGroupManager.getDefaultGroup();
         this.collideWithGroup = params.collideWithGroup ?? CollisionGroupManager.getDefaultGroup();
         this.ignoreCollisionWithGroup = params.ignoreCollisionWithGroup ?? CollisionGroupManager.getNoneGroup();
+        this.nonBlockingCollisionWithGroup = params.nonBlockingCollisionWithGroup ?? CollisionGroupManager.getNoneGroup();
         this.restitution = params.restitution ?? 0;
     }
 }
