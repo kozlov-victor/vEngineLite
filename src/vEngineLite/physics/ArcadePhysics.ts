@@ -52,6 +52,8 @@ export interface ArcadeRigidBodyParams extends IRigidBodyParams {
     friction?: number; // px/s²
 }
 
+const cachedNormal = new Vector2();
+
 export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigidBody> {
 
     public gravity = 300;
@@ -181,13 +183,15 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         if (overlapX < overlapY) {
             // A знаходиться лівіше B
             if (aCenterX < bCenterX) {
+                cachedNormal.xy(-1, 0);
                 return {
-                    normal: new Vector2(-1, 0),
+                    normal: cachedNormal,
                     depth: overlapX
                 }
             } else {
+                cachedNormal.xy(1, 0);
                 return {
-                    normal: new Vector2(1, 0), // todo cache
+                    normal: cachedNormal,
                     depth: overlapX
                 }
             }
@@ -198,13 +202,15 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         // A знаходиться вище B
         if (aCenterY < bCenterY) {
+            cachedNormal.xy(0, -1);
             return {
-                normal: new Vector2(0, -1),
+                normal: cachedNormal,
                 depth: overlapY
             }
         } else {
+            cachedNormal.xy(0, 1);
             return {
-                normal: new Vector2(0, 1),
+                normal: cachedNormal,
                 depth: overlapY
             }
         }

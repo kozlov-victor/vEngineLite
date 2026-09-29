@@ -1,7 +1,6 @@
 
 export class ObjectPool<T> {
 
-    private readonly collection: T[] = [];
     private readonly free: T[] = [];
 
     constructor(
@@ -11,7 +10,6 @@ export class ObjectPool<T> {
         for (let i = 0; i < capacity; i++) {
             const item = factory();
             this.free.push(item);
-            this.collection.push(item);
         }
     }
 
@@ -21,10 +19,6 @@ export class ObjectPool<T> {
 
     public release(object: T): void {
         this.free.push(object);
-    }
-
-    public getAll() {
-        return this.collection as ReadonlyArray<T>;
     }
 
 }

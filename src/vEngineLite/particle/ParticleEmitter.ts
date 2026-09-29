@@ -33,7 +33,7 @@ export class ParticleEmitter extends Container {
 
     private readonly pool: ObjectPool<Particle>;
     private readonly params: ParticleEmitterParametersNormalized;
-    private active = false;
+    private readonly activeParticles: Particle[] = [];
 
     constructor(scene: Scene, parameters: ParticleEmitterParameters) {
         super(scene);
@@ -67,8 +67,7 @@ export class ParticleEmitter extends Container {
         for (let i = 0; i < amount; i++) {
             const particle = this.pool.acquire();
             if (!particle) return;
-
-            this.active = true;
+            this.activeParticles.push(particle);
             const emissionRadius = this.rnd(this.params.emissionRadius);
             const angle = MathEx.randomInt(0,Math.PI*2);
             particle.target.position.x = emissionRadius*Math.cos(angle) + x;
@@ -80,31 +79,28 @@ export class ParticleEmitter extends Container {
                 particle.target.body.velocity.y = velocityY;
             }
 
-            particle.active = true;
             particle.time = 0;
             particle.lifetime = this.rnd(this.params.lifetime);
         }
     }
 
     public override update(dt: number) {
-        if (!this.active) return;
-        this.active = false;
-        for (const particle of this.pool.getAll()) {
-            if (!particle.active) continue;
-            this.active = true;
-            particle.time+=dt;
+        for (let i = 0; i < this.activeParticles.length; i++) {
+            const particle = this.activeParticles[i];
+
+            particle.time += dt;
             particle.target.update(dt);
-            if (particle.time > particle.lifetime) {
-                particle.active = false;
+
+            if (particle.time >= particle.lifetime) {
+                this.activeParticles[i] = this.activeParticles[this.activeParticles.length - 1];
+                this.activeParticles.pop();
                 this.pool.release(particle);
             }
         }
     }
 
     override enterFrame(renderer: TriangleBatchRenderer) {
-        if (!this.active) return;
-        for (const particle of this.pool.getAll()) {
-            if (!particle.active) continue;
+        for (const particle of this.activeParticles) {
             particle.target.enterFrame(renderer);
         }
     }
