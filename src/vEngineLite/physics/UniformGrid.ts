@@ -4,72 +4,40 @@ type BodyPair = [ArcadeRigidBody, ArcadeRigidBody];
 
 export class UniformGrid {
 
-    private readonly cells = new Map<string, ArcadeRigidBody[]>();
-    private readonly pairKeys = new Set<string>();
+    private readonly cells = new Map<number, Map<number, ArcadeRigidBody[]>>();
+    private readonly pairKeys = new Set<number>();
+    private readonly pairs: BodyPair[] = [];
+    private readonly inverseCellSize: number;
 
     constructor(
         private readonly cellSize: number
-    ) {}
+    ) {
+        this.inverseCellSize = 1 / cellSize;
+    }
 
     public getPotentialPairs(bodies: ArcadeRigidBody[]): BodyPair[] {
 
         this.cells.clear();
         this.pairKeys.clear();
+        this.pairs.length = 0;
+
+        let maxBodyId = 0;
 
         for (const body of bodies) {
             this.insertBody(body);
+            if (body.id > maxBodyId) {
+                maxBodyId = body.id;
+            }
         }
 
-        const pairs: BodyPair[] = [];
+        const pairStride = maxBodyId + 1;
+        const pairs = this.pairs;
         const pairKeys = this.pairKeys;
 
-        this.cells.forEach(cellBodies => {
-            for (
-                let i = 0;
-                i < cellBodies.length;
-                i++
-            ) {
-                for (
-                    let j = i + 1;
-                    j < cellBodies.length;
-                    j++
-                ) {
-
-                    const a = cellBodies[i];
-                    const b = cellBodies[j];
-
-                    if (
-                        a.type !== ArcadeRigidBodyType.DYNAMIC &&
-                        b.type !== ArcadeRigidBodyType.DYNAMIC
-                    ) {
-                        continue;
-                    }
-
-                    const canCollide =
-                        (
-                            (a.collisionGroup.bitMask & b.collideWithGroup.bitMask)!==0 || (b.collisionGroup.bitMask & a.collideWithGroup.bitMask)!==0
-                            || (a.collisionGroup.bitMask & b.nonBlockingCollisionWithGroup.bitMask)!==0
-                            || (b.collisionGroup.bitMask & a.nonBlockingCollisionWithGroup.bitMask)!==0
-                        )
-                        &&
-                        (
-                            (a.collisionGroup.bitMask & b.ignoreCollisionWithGroup.bitMask)===0 && (b.collisionGroup.bitMask & a.ignoreCollisionWithGroup.bitMask)===0
-                        )
-                    ;
-
-                    if (!canCollide) continue;
-
-                    const pairKey = this.getPairKey(a, b);
-
-                    if (pairKeys.has(pairKey)) {
-                        continue;
-                    }
-
-                    pairKeys.add(pairKey);
-
-                    pairs.push([a, b]);
-                }
-            }
+        this.cells.forEach(column => {
+            column.forEach(cellBodies => {
+                this.collectCellPairs(cellBodies, pairStride, pairKeys, pairs);
+            });
         });
 
         return pairs;
@@ -77,20 +45,21 @@ export class UniformGrid {
 
 
     private insertBody(body: ArcadeRigidBody) {
+        const inverseCellSize = this.inverseCellSize;
 
         const posX = body.target.position.x + body.rect.x;
         const posY = body.target.position.y + body.rect.y;
 
         const minCellX =
             Math.floor(
-                posX /
-                this.cellSize
+                posX *
+                inverseCellSize
             );
 
         const minCellY =
             Math.floor(
-                posY /
-                this.cellSize
+                posY *
+                inverseCellSize
             );
 
         const maxCellX =
@@ -98,8 +67,8 @@ export class UniformGrid {
                 (
                     posX +
                     body.rect.width
-                ) /
-                this.cellSize
+                ) *
+                inverseCellSize
             );
 
         const maxCellY =
@@ -107,8 +76,8 @@ export class UniformGrid {
                 (
                     posY +
                     body.rect.height
-                ) /
-                this.cellSize
+                ) *
+                inverseCellSize
             );
 
         for (
@@ -121,18 +90,18 @@ export class UniformGrid {
                 cellY <= maxCellY;
                 cellY++
             ) {
+                let column = this.cells.get(cellX);
 
-                const key =
-                    this.getCellKey(
-                        cellX,
-                        cellY
-                    );
+                if (!column) {
+                    column = new Map<number, ArcadeRigidBody[]>();
+                    this.cells.set(cellX, column);
+                }
 
-                let cell = this.cells.get(key);
+                let cell = column.get(cellY);
 
                 if (!cell) {
                     cell = [];
-                    this.cells.set(key, cell);
+                    column.set(cellY, cell);
                 }
 
                 cell.push(body);
@@ -140,24 +109,76 @@ export class UniformGrid {
         }
     }
 
+    private collectCellPairs(
+        cellBodies: ArcadeRigidBody[],
+        pairStride: number,
+        pairKeys: Set<number>,
+        pairs: BodyPair[]
+    ) {
+        for (
+            let i = 0;
+            i < cellBodies.length;
+            i++
+        ) {
+            for (
+                let j = i + 1;
+                j < cellBodies.length;
+                j++
+            ) {
+                const a = cellBodies[i];
+                const b = cellBodies[j];
 
-    private getCellKey(
-        x: number,
-        y: number
-    ): string {
-        return `${x}:${y}`;
+                if (!this.canBodiesSharePair(a, b)) {
+                    continue;
+                }
+
+                const pairKey = this.getPairKey(a, b, pairStride);
+
+                if (pairKeys.has(pairKey)) {
+                    continue;
+                }
+
+                pairKeys.add(pairKey);
+                pairs.push([a, b]);
+            }
+        }
+    }
+
+    private canBodiesSharePair(a: ArcadeRigidBody, b: ArcadeRigidBody) {
+        if (
+            a.type !== ArcadeRigidBodyType.DYNAMIC &&
+            b.type !== ArcadeRigidBodyType.DYNAMIC
+        ) {
+            return false;
+        }
+
+        const aCollisionGroup = a.collisionGroup.bitMask;
+        const bCollisionGroup = b.collisionGroup.bitMask;
+
+        const ignored =
+            (aCollisionGroup & b.ignoreCollisionWithGroup.bitMask) !== 0 ||
+            (bCollisionGroup & a.ignoreCollisionWithGroup.bitMask) !== 0;
+
+        if (ignored) {
+            return false;
+        }
+
+        return (
+            (aCollisionGroup & b.collideWithGroup.bitMask) !== 0 ||
+            (bCollisionGroup & a.collideWithGroup.bitMask) !== 0 ||
+            (aCollisionGroup & b.nonBlockingCollisionWithGroup.bitMask) !== 0 ||
+            (bCollisionGroup & a.nonBlockingCollisionWithGroup.bitMask) !== 0
+        );
     }
 
 
     private getPairKey(
         a: ArcadeRigidBody,
-        b: ArcadeRigidBody
-    ): string {
-
-        if (a.id < b.id) {
-            return `${a.id}:${b.id}`;
-        }
-
-        return `${b.id}:${a.id}`;
+        b: ArcadeRigidBody,
+        stride: number
+    ): number {
+        const minId = a.id < b.id ? a.id : b.id;
+        const maxId = a.id < b.id ? b.id : a.id;
+        return minId * stride + maxId;
     }
 }

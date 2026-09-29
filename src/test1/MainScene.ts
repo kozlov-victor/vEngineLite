@@ -194,7 +194,9 @@ export class MainScene extends Scene {
                 particle.body = this.app.physics.createRigidBody({
                     target: particle,
                     type: ArcadeRigidBodyType.DYNAMIC,
-                    collisionGroup: particleGroup,
+                    collisionGroup: CollisionGroupManager.combine(
+                        groundGroup, particleGroup
+                    ),
                     collideWithGroup: groundGroup,
                     mass: 0.001,
                     restitution: 0.3,
@@ -218,6 +220,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
+                collisionGroup: groundGroup,
+                collideWithGroup: groundGroup,
             });
             platform.body.collisionGroup = particleGroup;
         });
