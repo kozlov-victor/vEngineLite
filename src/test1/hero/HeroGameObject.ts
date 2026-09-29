@@ -45,7 +45,7 @@ export class HeroGameObject extends Sprite {
             rect: this.regularBodyRect,
             collisionGroup: groundGroup,
             collideWithGroup: groundGroup,
-            ignoreCollisionWithGroup: particleGroup,
+            //ignoreCollisionWithGroup: particleGroup,
             restitution: 0.2,
         });
         this.body = body;

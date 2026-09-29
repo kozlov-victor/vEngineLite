@@ -104,14 +104,14 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // 3. Collision solver
         // ---------------------------------------
 
-        const pairs = this.uniformGrid.getPotentialPairs(bodies);
-        const SOLVER_ITERATIONS = 10;
+        const SOLVER_ITERATIONS = 4;
 
         for (
             let iteration = 0;
             iteration < SOLVER_ITERATIONS;
             iteration++
         ) {
+            const pairs = this.uniformGrid.getPotentialPairs(bodies);
             for (const [a, b] of pairs) {
                 const collision = this.detectCollision(a, b);
                 if (!collision) continue;

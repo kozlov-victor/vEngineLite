@@ -54,7 +54,6 @@ export class MainScene extends Scene {
         const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
         const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
         const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
-        animatedCat.getRigidBody().nonBlockingCollisionWithGroup = particleGroup;
         this.addObject(animatedCat);
 
         this.app.camera.followTarget = animatedCat;
@@ -190,7 +189,7 @@ export class MainScene extends Scene {
             factory: ()=>{
                 const particle = new Rectangle(this);
                 particle.size.wh(10);
-                particle.color.rgb(120,0,0);
+                particle.color.fromCssColor('#01cdfb');
                 particle.body = this.app.physics.createRigidBody({
                     target: particle,
                     type: ArcadeRigidBodyType.DYNAMIC,
@@ -198,14 +197,14 @@ export class MainScene extends Scene {
                         groundGroup, particleGroup
                     ),
                     collideWithGroup: groundGroup,
-                    mass: 0.001,
-                    restitution: 0.3,
+                    mass: 0.0001,
+                    restitution: 0.6,
                 });
                 return particle;
             },
             capacity: 300,
             velocity: {from: 0, to: -100},
-            lifetime: {from: 1000, to: 15000},
+            lifetime: {from: 1000, to: 5000},
         });
         this.addObject(this.testParticleEmitter);
 
