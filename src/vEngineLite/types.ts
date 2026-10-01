@@ -2,7 +2,6 @@ import {Size} from "./utils/Size";
 import {Vector2} from "./utils/Vector2";
 import {Mat2d} from "./utils/Mat2d";
 
-export type n9 = [number, number, number, number, number, number, number, number, number];
 export type n2 = [number, number];
 export type n4 = [number, number,number, number];
 

@@ -1,13 +1,11 @@
 import {GLUtils} from "../utils/GLUtils";
-import {Camera} from "../camera/Camera";
 import {Size} from "../utils/Size";
 import {Texture} from "./Texture";
 import {TextureInfo} from "../components/TextureInfo";
-import {n2, n9, Triangle, Vertex} from "../types";
+import {n2, Triangle, Vertex} from "../types";
 import {Mat2d} from "../utils/Mat2d";
 import {Color} from "./Color";
 import {VEngineLiteApplication} from "../application/VEngineLiteApplication";
-
 
 
 export class TriangleBatchRenderer {
@@ -35,13 +33,13 @@ export class TriangleBatchRenderer {
     private readonly projMatrix = new Mat2d();
     private readonly viewMatrix = new Mat2d();
     private readonly viewProjMatrix = new Mat2d();
-    private readonly mat3: n9 = [0,0,0,0,0,0,0,0,0];
     private readonly point: n2 = [0,0];
     private readonly triangle: Triangle = {
         v1: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
         v2: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
         v3: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
     };
+    private readonly viewProjMatrixValues = new Float32Array(9);
 
     constructor(private readonly app: VEngineLiteApplication) {
         this.vertexData = new Float32Array(
@@ -244,20 +242,25 @@ export class TriangleBatchRenderer {
         gl.clear(gl.COLOR_BUFFER_BIT);
     }
 
+    private updateViewProjectionMatrix() {
+        const cameraMatrix = this.app.camera.getWorldMatrix();
+        cameraMatrix.invert(this.viewMatrix);
+        this.projMatrix.multiply(this.viewMatrix, this.viewProjMatrix);
+        this.viewProjMatrix.toFloat32Matrix3(this.viewProjMatrixValues);
+    }
+
     public flush() {
         if (this.currentTriangle === 0) return;
         const gl = GLUtils.getContext();
 
-        const cameraMatrix = this.app.camera.getWorldMatrix();
-        cameraMatrix.invert(this.viewMatrix);
-        this.projMatrix.multiply(this.viewMatrix, this.viewProjMatrix);
+        this.updateViewProjectionMatrix();
 
-        gl.uniformMatrix3fv(this.viewProjectionUniformLocation, false, this.viewProjMatrix.toN9(this.mat3));
+        gl.uniformMatrix3fv(this.viewProjectionUniformLocation, false, this.viewProjMatrixValues);
         gl.uniform2f(this.textureSizeUniformLocation, this.currentTexture.width, this.currentTexture.height);
         gl.bindTexture(gl.TEXTURE_2D, this.currentTexture.glTexture);
 
-        const dataView = this.vertexData.subarray(0, this.currentTriangle * TriangleBatchRenderer.VERTICES_IN_TRIANGLE * TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX);
-        gl.bufferSubData(gl.ARRAY_BUFFER, 0, dataView);
+        const floatCount = this.currentTriangle * TriangleBatchRenderer.VERTICES_IN_TRIANGLE * TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX;
+        gl.bufferSubData(gl.ARRAY_BUFFER, 0, this.vertexData.subarray(0, floatCount));
 
         const vertexCount = this.currentTriangle * TriangleBatchRenderer.VERTICES_IN_TRIANGLE;
         gl.drawArrays(gl.TRIANGLES, 0, vertexCount);

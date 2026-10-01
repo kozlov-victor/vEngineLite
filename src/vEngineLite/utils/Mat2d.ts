@@ -1,4 +1,4 @@
-import {n2, n9} from "../types";
+import {n2} from "../types";
 
 
 export class Mat2d {
@@ -115,7 +115,7 @@ export class Mat2d {
         );
     }
 
-    public toN9(out :n9 = [0,0,0,0,0,0,0,0,0]): n9 {
+    public toFloat32Matrix3(out = new Float32Array(9)): Float32Array {
         const a = this.values[0];
         const b = this.values[1];
         const c = this.values[2];
