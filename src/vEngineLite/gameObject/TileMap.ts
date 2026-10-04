@@ -1,7 +1,6 @@
 import {TriangleBatchRenderer} from "../rendering/TriangleBatchRenderer";
 import {Size} from "../utils/Size";
 import {Vector2} from "../utils/Vector2";
-import {Mat2d} from "../utils/Mat2d";
 import {Texture} from "../rendering/Texture";
 import {TextureInfo} from "../components/TextureInfo";
 import {Color} from "../rendering/Color";
