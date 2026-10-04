@@ -11,30 +11,37 @@ import {RigidBody} from "../physics/IPhysics";
 import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
 import {IGeometry} from "../types";
 
-const epsilon = 0.5;
+export interface ITileLayer {
+    data: number[];
+}
 
-// Спрощена структура для зберігання даних тайла
 interface Tile extends IGeometry {
     readonly size: Size;
     readonly position: Vector2;
     readonly uv: Vector2;
 }
 
+interface RenderableLayer {
+    readonly tiles: Tile[];
+}
+
 export class TileMap extends RenderableContainer {
 
-    private readonly tiles: Tile[] = [];
+    public override readonly position: never;
+    public override readonly scale: never;
+    public override readonly pivot: never;
+
+    private readonly renderableLayers: RenderableLayer[] = [];
     private readonly spriteRenderer: TextureInfo;
     private readonly tileSize: Size;
     private readonly bodies:RigidBody[] = [];
+    private readonly mapHeightInTiles: number;
 
-    // Матриці для розрахунків, щоб не створювати їх у циклі render
-    private readonly localTileMatrix = new Mat2d();
-    private readonly worldTileMatrix = new Mat2d();
 
     constructor(
         scene: Scene,
-        data: number[],
-        mapWidthInTiles: number,
+        private readonly layers: ITileLayer[],
+        private readonly mapWidthInTiles: number,
         tilesetCols: number,
         tilesetRows: number,
         texture: Texture
@@ -42,21 +49,42 @@ export class TileMap extends RenderableContainer {
         super(scene);
         const tileWidth = Math.floor(texture.width / tilesetCols);
         const tileHeight = Math.floor(texture.height / tilesetRows);
-        const mapHeightInTiles = Math.ceil(data.length / mapWidthInTiles);
+        this.mapHeightInTiles = Math.ceil(layers[0].data.length / this.mapWidthInTiles);
 
         this.spriteRenderer = {
             texture,
             rect: {
                 uv: new Vector2(),
-                size: new Size(tileWidth, tileHeight),
+                size: new Size(Math.max(0, tileWidth - 1), Math.max(0, tileHeight - 1)),
             },
             color: Color.WHITE(),
         }
-        this.tileSize = new Size(tileWidth + epsilon, tileHeight + epsilon);
+        this.tileSize = new Size(tileWidth, tileHeight);
 
-        this.createTiles(data, mapWidthInTiles, tilesetCols, tileWidth, tileHeight);
-        this.createMergedCollisionBodies(data, mapWidthInTiles, mapHeightInTiles, tileWidth, tileHeight);
-        this.size.wh(mapWidthInTiles * tileWidth, mapHeightInTiles * tileHeight)
+        for (const layer of layers) {
+            const tiles = this.createTiles(
+                layer.data,
+                mapWidthInTiles,
+                tilesetCols,
+                tileWidth,
+                tileHeight
+            );
+            this.renderableLayers.push({tiles});
+        }
+
+        this.size.wh(mapWidthInTiles * tileWidth, this.mapHeightInTiles * tileHeight)
+    }
+
+    public createCollisionBodies(solidTiles: number[]) {
+        for (const layer of this.layers) {
+            this.createMergedCollisionBodies(
+                layer.data, this.mapWidthInTiles,
+                this.mapHeightInTiles,
+                this.tileSize.w,
+                this.tileSize.h,
+                solidTiles
+            );
+        }
     }
 
 
@@ -68,23 +96,17 @@ export class TileMap extends RenderableContainer {
     }
 
     public override render(renderer: TriangleBatchRenderer) {
-        // 1. Отримуємо світову матрицю для всієї карти ОДИН РАЗ
-        const tilemapWorldMatrix = this.getWorldMatrix();
-
-        for (const tile of this.tiles) {
-            // 2. Створюємо локальну матрицю для тайла (без створення нових об'єктів)
-            Mat2d.fromTranslation(tile.position.x, tile.position.y, this.localTileMatrix);
-
-            // 3. Множимо матрицю карти на локальну матрицю тайла
-            tilemapWorldMatrix.multiply(this.localTileMatrix, this.worldTileMatrix);
-
-            // 4. Відправляємо в рендерер фінальну матрицю
-            this.spriteRenderer.rect.uv.uv(tile.uv.u, tile.uv.v);
-            renderer.batchSprite(
-                this.tileSize,
-                this.spriteRenderer,
-                this.worldTileMatrix
-            );
+        const worldMatrix = this.getWorldMatrix();
+        for (const layer of this.renderableLayers) {
+            for (const tile of layer.tiles) {
+                this.spriteRenderer.rect.uv.uv(tile.uv.u + 0.5, tile.uv.v + 0.5);
+                renderer.batchSprite(
+                    this.tileSize,
+                    this.spriteRenderer,
+                    worldMatrix,
+                    tile.position.x, tile.position.y
+                );
+            }
         }
     }
 
@@ -96,6 +118,7 @@ export class TileMap extends RenderableContainer {
         tileWidth: number,
         tileHeight: number
     ) {
+        const tiles: Tile[] = [];
         for (let i = 0; i < data.length; i++) {
             let tileIndex = data[i];
             if (tileIndex === 0) continue; // Припускаємо, що 0 - це порожній тайл
@@ -112,9 +135,9 @@ export class TileMap extends RenderableContainer {
                 ),
                 size: this.tileSize,
             };
-
-            this.tiles.push(tile);
+            tiles.push(tile);
         }
+        return tiles;
     }
 
     private createMergedCollisionBodies(
@@ -122,7 +145,8 @@ export class TileMap extends RenderableContainer {
         mapWidthInTiles: number,
         mapHeightInTiles: number,
         tileWidth: number,
-        tileHeight: number
+        tileHeight: number,
+        solidTiles: number[]
     ) {
         const visited =
             new Array(data.length).fill(false);
@@ -144,7 +168,7 @@ export class TileMap extends RenderableContainer {
                 y * mapWidthInTiles + x;
 
             return (
-                data[index] !== 0 &&
+                solidTiles.includes(data[index]) &&
                 !visited[index]
             );
         };

@@ -33,7 +33,7 @@ export class MainScene extends Scene {
 
     constructor(app: VEngineLiteApplication) {
         super(app);
-        this.bgColor.rgb(122,122,122);
+        this.bgColor.fromCssColor('#686868');
     }
 
     override onPreloadStarted() {
@@ -51,15 +51,46 @@ export class MainScene extends Scene {
     }
 
     override onReady() {
-        const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
-        const catSpriteSheet: SpriteSheet = this.app.assetManager.getJson('cat-sprite-sheet');
-        const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
-        this.addObject(animatedCat);
 
-        this.app.camera.followTarget = animatedCat;
-        this.app.camera.followStrategy = this.cameraFollowStrategy;
+        {
+            const tileTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('tileset'));
+            const tiledData = TileMaps.fromTiledTileMap(
+                this.app.assetManager.getJson('tilemap'),
+                ['backgroundLayer','foregroundLayer'],'tiles'
+            );
+            const tileMap = new TileMap(
+                this,tiledData.layers,tiledData.mapWidthInTiles,
+                tiledData.tilesetCols,tiledData.tilesetRows,
+                tileTexture
+            );
+            tileMap.createCollisionBodies([1,2]);
+            this.addObject(tileMap);
+        }
 
-        this.hero = animatedCat;
+        {
+            this.testParticleEmitter = new ParticleEmitter(this,{
+                factory: ()=>{
+                    const particle = new Rectangle(this);
+                    particle.size.wh(10);
+                    particle.color.fromCssColor('#01cdfb');
+                    particle.body = this.app.physics.createRigidBody({
+                        target: particle,
+                        type: ArcadeRigidBodyType.DYNAMIC,
+                        collisionGroup: CollisionGroupManager.combine(
+                            groundGroup, particleGroup
+                        ),
+                        collideWithGroup: groundGroup,
+                        mass: 0.01,
+                        restitution: 0,
+                    });
+                    return particle;
+                },
+                capacity: 300,
+                velocity: {from: 0, to: -100},
+                lifetime: {from: 1000, to: 5000},
+            });
+            this.addObject(this.testParticleEmitter);
+        }
 
         {
             const platform = new Rectangle(this);
@@ -148,18 +179,6 @@ export class MainScene extends Scene {
             });
         }
 
-        const tileTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('tileset'));
-        const tiledData = TileMaps.fromTiledTileMap(
-            this.app.assetManager.getJson('tilemap'),
-            'Tile Layer 1','tiles'
-        );
-        const tileMap = new TileMap(
-            this,tiledData.data,tiledData.mapWidthInTiles,
-            tiledData.tilesetCols,tiledData.tilesetRows,
-            tileTexture
-        );
-        this.addObject(tileMap);
-
         {
 
             const rect = new Rectangle(this);
@@ -185,28 +204,15 @@ export class MainScene extends Scene {
             this.addObject(textLabel);
         }
 
-        this.testParticleEmitter = new ParticleEmitter(this,{
-            factory: ()=>{
-                const particle = new Rectangle(this);
-                particle.size.wh(10);
-                particle.color.fromCssColor('#01cdfb');
-                particle.body = this.app.physics.createRigidBody({
-                    target: particle,
-                    type: ArcadeRigidBodyType.DYNAMIC,
-                    collisionGroup: CollisionGroupManager.combine(
-                        groundGroup, particleGroup
-                    ),
-                    collideWithGroup: groundGroup,
-                    mass: 0.01,
-                    restitution: 0,
-                });
-                return particle;
-            },
-            capacity: 300,
-            velocity: {from: 0, to: -100},
-            lifetime: {from: 1000, to: 5000},
-        });
-        this.prependObject(this.testParticleEmitter);
+        const catTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('cat'));
+        const catSpriteSheet = this.app.assetManager.getJson<SpriteSheet>('cat-sprite-sheet');
+        const animatedCat = new HeroGameObject(this,catTexture,catSpriteSheet);
+        this.addObject(animatedCat);
+
+        this.app.camera.followTarget = animatedCat;
+        this.app.camera.followStrategy = this.cameraFollowStrategy;
+
+        this.hero = animatedCat;
 
         this.calculateBounds();
 

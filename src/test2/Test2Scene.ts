@@ -30,20 +30,22 @@ export class Test2Scene extends Scene {
 
         const tileMap = new TileMap(
             this,
-            [ // map data
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-                1, 0, 0, 2, 3, 4, 0, 0, 0, 1,
-                1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+            [
+                {
+                    data: [
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+                        1, 0, 0, 2, 3, 4, 0, 0, 0, 1,
+                        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+                    ]
+                }
             ],
             10, // map width in tiles
             12,  // tileset columns
             13,  // tileset rows
             tileMapTexture
         );
-        // Рухаємо всю карту трохи вбік
-        tileMap.position.xy(150, 50);
 
         const NUM_SPRITES = 1000;
         for (let i = 0; i < NUM_SPRITES; i++) {

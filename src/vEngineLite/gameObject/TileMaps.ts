@@ -1,6 +1,6 @@
+import {ITileLayer} from "@vEngineLite/gameObject/TileMap";
 
-export interface ITileMapLayer {
-    data: number[];
+export interface ITiledMapLayer {
     height: number;
     width: number;
     id: number;
@@ -12,7 +12,7 @@ export interface ITileMapLayer {
     y: number;
 }
 
-export interface ITileMapTileSet {
+export interface ITiledMapTileSet {
     columns: number;
     firstgid: number;
     image: string;
@@ -26,18 +26,18 @@ export interface ITileMapTileSet {
     tilewidth:number;
 }
 
-export interface TiledTileMap {
+export interface ITiledTileMap {
     compressionlevel: number;
     height:number;
     infinite:boolean;
-    layers:ITileMapLayer[];
+    layers:ITiledMapLayer[];
     nextlayerid:number;
     nextobjectid:number;
     orientation:string;
     renderorder:string;
     tiledversion:string;
     tileheight:number;
-    tilesets:ITileMapTileSet[];
+    tilesets:ITiledMapTileSet[];
     tilewidth:number;
     type:string;
     version:string;
@@ -46,14 +46,20 @@ export interface TiledTileMap {
 
 export class TileMaps {
 
-    public static fromTiledTileMap(map:TiledTileMap, layerName: string, tileSetName: string): {data: number[],mapWidthInTiles: number,tilesetCols: number,tilesetRows: number} {
-        const layer = map.layers.find(layer => layer.name == layerName);
-        if (!layer) throw new Error(`Layer ${layerName} not found!`);
+    public static fromTiledTileMap(map:ITiledTileMap, layerNames: string[], tileSetName: string): {layers: ITileLayer[],mapWidthInTiles: number,tilesetCols: number,tilesetRows: number} {
+        const layers: ITileLayer[] = [];
+        for (const layerName of layerNames) {
+            const layer = map.layers.find(layer => layer.name == layerName);
+            if (!layer) throw new Error(`Layer ${layerName} not found!`);
+            layers.push({
+                data: (layer as any).data,
+            });
+        }
         const tileSet = map.tilesets.find(tileset => tileset.name == tileSetName);
         if (!tileSet) throw new Error(`Tile set ${tileSetName} not found!`);
         return {
-            data: layer.data,
-            mapWidthInTiles: layer.width,
+            layers,
+            mapWidthInTiles: map.width,
             tilesetRows: tileSet.imageheight / tileSet.tileheight,
             tilesetCols: tileSet.columns,
         }
