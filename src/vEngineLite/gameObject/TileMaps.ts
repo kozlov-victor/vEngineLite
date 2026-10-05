@@ -1,6 +1,7 @@
 import {ITileLayer} from "@vEngineLite/gameObject/TileMap";
 
 export interface ITiledMapLayer {
+    data: number[];
     height: number;
     width: number;
     id: number;
@@ -10,6 +11,10 @@ export interface ITiledMapLayer {
     visible: boolean;
     x: number;
     y: number;
+    offsetx?: number;
+    offsety?: number;
+    parallaxx?: number;
+    parallaxy?: number;
 }
 
 export interface ITiledMapTileSet {
@@ -52,7 +57,9 @@ export class TileMaps {
             const layer = map.layers.find(layer => layer.name == layerName);
             if (!layer) throw new Error(`Layer ${layerName} not found!`);
             layers.push({
-                data: (layer as any).data,
+                data: layer.data,
+                parallaxX: layer.parallaxx ?? 1,
+                parallaxY: layer.parallaxy ?? 1,
             });
         }
         const tileSet = map.tilesets.find(tileset => tileset.name == tileSetName);

@@ -12,6 +12,9 @@ import {IGeometry} from "../types";
 
 export interface ITileLayer {
     data: number[];
+    parallax?: number;
+    parallaxX?: number;
+    parallaxY?: number;
 }
 
 interface Tile extends IGeometry {
@@ -22,6 +25,8 @@ interface Tile extends IGeometry {
 
 interface RenderableLayer {
     readonly tiles: Tile[];
+    readonly parallaxX: number;
+    readonly parallaxY: number;
 }
 
 export class TileMap extends RenderableContainer {
@@ -68,7 +73,11 @@ export class TileMap extends RenderableContainer {
                 tileWidth,
                 tileHeight
             );
-            this.renderableLayers.push({tiles});
+            this.renderableLayers.push({
+                tiles,
+                parallaxX: layer.parallaxX ?? layer.parallax ?? 1,
+                parallaxY: layer.parallaxY ?? layer.parallax ?? 1,
+            });
         }
 
         this.size.wh(mapWidthInTiles * tileWidth, this.mapHeightInTiles * tileHeight)
@@ -97,13 +106,17 @@ export class TileMap extends RenderableContainer {
     public override render(renderer: TriangleBatchRenderer) {
         const worldMatrix = this.getWorldMatrix();
         for (const layer of this.renderableLayers) {
+            const parallaxOffsetX =
+                this.scene.app.camera.position.x * (1 - layer.parallaxX);
+            const parallaxOffsetY =
+                this.scene.app.camera.position.y * (1 - layer.parallaxY);
             for (const tile of layer.tiles) {
-                this.spriteRenderer.rect.uv.uv(tile.uv.u + 0.5, tile.uv.v + 0.5);
+                this.spriteRenderer.rect.uv.from(tile.uv);
                 renderer.batchSprite(
                     this.tileSize,
                     this.spriteRenderer,
                     worldMatrix,
-                    tile.position.x, tile.position.y
+                    tile.position.x + parallaxOffsetX, tile.position.y + parallaxOffsetY
                 );
             }
         }
@@ -129,8 +142,8 @@ export class TileMap extends RenderableContainer {
                     Math.floor(i / mapWidthInTiles) * tileHeight
                 ),
                 uv: new Vector2(
-                    (tileIndex % tilesetCols) * tileWidth,
-                    Math.floor(tileIndex / tilesetCols) * tileHeight
+                    (tileIndex % tilesetCols) * tileWidth + 0.5,
+                    Math.floor(tileIndex / tilesetCols) * tileHeight + 0.5
                 ),
                 size: this.tileSize,
             };
@@ -167,7 +180,7 @@ export class TileMap extends RenderableContainer {
                 y * mapWidthInTiles + x;
 
             return (
-                solidTiles.includes(data[index]) &&
+                solidTiles.includes(data[index] - 1) &&
                 !visited[index]
             );
         };

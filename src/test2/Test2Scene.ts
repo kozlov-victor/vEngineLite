@@ -38,7 +38,8 @@ export class Test2Scene extends Scene {
                         1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
                         1, 0, 0, 2, 3, 4, 0, 0, 0, 1,
                         1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-                    ]
+                    ],
+                    parallax: 1
                 }
             ],
             10, // map width in tiles

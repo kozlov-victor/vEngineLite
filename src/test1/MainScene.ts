@@ -63,7 +63,7 @@ export class MainScene extends Scene {
                 tiledData.tilesetCols,tiledData.tilesetRows,
                 tileTexture
             );
-            tileMap.createCollisionBodies([1,2]);
+            tileMap.createCollisionBodies([0,1,6,7,8,9]);
             this.addObject(tileMap);
         }
 
