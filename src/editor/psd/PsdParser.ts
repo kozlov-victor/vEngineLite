@@ -76,7 +76,7 @@ export class PsdParser {
         this.skipSection();
 
         // Layer and Mask Information
-        const layers = this.readLayerAndMaskInfo();
+        const layers = this.readLayerAndMaskInfo().filter(l=>l.pixels.buffer.byteLength > 0);
         const name = this.name.replace('.psd','');
         return {name, header, layers};
     }
