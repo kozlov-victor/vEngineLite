@@ -29,7 +29,6 @@ export class Ellipse extends RenderableContainer {
                 size: new Size(1)
             }
         }
-        this.size.wh(radiusX*2, radiusY*2);
     }
 
     public radiusXY(radiusX: number, radiusY = radiusX) {
@@ -40,6 +39,7 @@ export class Ellipse extends RenderableContainer {
     set radiusX(radius: number) {
         this.dirty = this.dirty || this._radiusX!==radius;
         this._radiusX = radius;
+        this.size.w = this.radiusX * 2;
     }
 
     get radiusX(): number {
@@ -53,6 +53,7 @@ export class Ellipse extends RenderableContainer {
     set radiusY(radius: number) {
         this.dirty = this.dirty || this._radiusY!==radius;
         this._radiusY = radius;
+        this.size.h = this.radiusY * 2;
     }
 
     override render(renderer: TriangleBatchRenderer) {
