@@ -15,6 +15,7 @@ import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
 import {ParticleEmitter} from "@vEngineLite/particle/ParticleEmitter";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
+import {Ellipse} from "@vEngineLite/gameObject/shapes/Ellipse";
 
 const col = new CollisionGroupManager();
 export const groundGroup = col.nextGroup();
@@ -70,7 +71,7 @@ export class MainScene extends Scene {
         {
             this.testParticleEmitter = new ParticleEmitter(this,{
                 factory: ()=>{
-                    const particle = new Rectangle(this);
+                    const particle = new Ellipse(this, 10);
                     particle.size.wh(10);
                     particle.color.fromCssColor('#01cdfb');
                     particle.body = this.app.physics.createRigidBody({
@@ -81,7 +82,7 @@ export class MainScene extends Scene {
                         ),
                         collideWithGroup: groundGroup,
                         mass: 0.01,
-                        restitution: 0,
+                        restitution: 0.9,
                     });
                     return particle;
                 },

@@ -8,7 +8,7 @@ import {Test2Scene} from "./test2/Test2Scene";
 const app =
     new VEngineLiteApplication(
         document.querySelector("#c") as HTMLCanvasElement,
-        new Size(640, 480),
+        new Size(740, 480),
         new ScaleStrategyFitCanvasToScreen()
     );
 app.runScene(new MainScene(app));

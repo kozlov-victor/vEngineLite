@@ -29,6 +29,7 @@ export class Ellipse extends RenderableContainer {
                 size: new Size(1)
             }
         }
+        this.size.wh(radiusX*2, radiusY*2);
     }
 
     public radiusXY(radiusX: number, radiusY = radiusX) {
