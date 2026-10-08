@@ -6,7 +6,7 @@ import {TextureInfo} from "../components/TextureInfo";
 import {Color} from "../rendering/Color";
 import {RenderableContainer} from "./base/RenderableContainer";
 import {Scene} from "../application/Scene";
-import {RigidBody} from "../physics/IPhysics";
+import {IRigidBodyParamsBase, RigidBody} from "../physics/IPhysics";
 import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
 import {IGeometry} from "../types";
 
@@ -83,14 +83,14 @@ export class TileMap extends RenderableContainer {
         this.size.wh(mapWidthInTiles * tileWidth, this.mapHeightInTiles * tileHeight)
     }
 
-    public createCollisionBodies(solidTiles: number[]) {
+    public createCollisionBodies(solidTiles: number[], params?: IRigidBodyParamsBase) {
         for (const layer of this.layers) {
             this.createMergedCollisionBodies(
                 layer.data, this.mapWidthInTiles,
                 this.mapHeightInTiles,
                 this.tileSize.w,
                 this.tileSize.h,
-                solidTiles
+                solidTiles, params
             );
         }
     }
@@ -158,7 +158,8 @@ export class TileMap extends RenderableContainer {
         mapHeightInTiles: number,
         tileWidth: number,
         tileHeight: number,
-        solidTiles: number[]
+        solidTiles: number[],
+        params?: IRigidBodyParamsBase
     ) {
         const visited =
             new Array(data.length).fill(false);
@@ -284,7 +285,8 @@ export class TileMap extends RenderableContainer {
                     x * tileWidth,
                     y * tileHeight,
                     width * tileWidth,
-                    height * tileHeight
+                    height * tileHeight,
+                    params
                 );
             }
         }
@@ -294,7 +296,8 @@ export class TileMap extends RenderableContainer {
         x: number,
         y: number,
         width: number,
-        height: number
+        height: number,
+        params: IRigidBodyParamsBase = {}
     ) {
         const target: IGeometry = {
             position: new Vector2(x, y),
@@ -303,6 +306,7 @@ export class TileMap extends RenderableContainer {
 
         this.bodies.push(
             this.scene.app.physics.createRigidBody({
+                ...params,
                 type: ArcadeRigidBodyType.STATIC,
                 target
             })

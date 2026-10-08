@@ -31,6 +31,12 @@ export interface ITiledMapTileSet {
     tilewidth:number;
 }
 
+export interface ITiledMapProperty {
+    name: string;
+    type: 'string'|'int'|'float'|'bool'|'list'|'color'|'file'|'object';
+    value: any;
+}
+
 export interface ITiledTileMap {
     compressionlevel: number;
     height:number;
@@ -47,6 +53,7 @@ export interface ITiledTileMap {
     type:string;
     version:string;
     width:number;
+    properties?: ITiledMapProperty[];
 }
 
 export class TileMaps {
@@ -70,6 +77,13 @@ export class TileMaps {
             tilesetRows: tileSet.imageheight / tileSet.tileheight,
             tilesetCols: tileSet.columns,
         }
+    }
+
+    public static getTiledMapCustomProperty(map: ITiledTileMap, propertyName: string): ITiledMapProperty | undefined {
+        if (!map.properties) return undefined;
+        const res = map.properties.find(prop => prop.name === propertyName);
+        if (!res) throw new Error(`Property ${propertyName} not found!`);
+        return res;
     }
 
 }

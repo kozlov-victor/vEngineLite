@@ -10,6 +10,7 @@ import {SpriteSheetRenderer} from "../spritesheet/SpriteSheetRenderer";
 import {IPackedSpriteSheet, SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
 import {InputSetterService, Numeric} from "@engine/renderable/tsx/dom/forms/input.setter.service";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
+import {ReactiveForm} from "@engine/renderable/tsx/dom/forms/reactive.form";
 
 type tPackType = 'spriteSheet'|'tileMap';
 
@@ -17,14 +18,17 @@ type tPackType = 'spriteSheet'|'tileMap';
 export class PsdPage extends BaseTsxComponent {
 
     @DI.Inject(InputSetterService)
-    private readonly service: InputSetterService;
+    private readonly setterService: InputSetterService;
+
+    private readonly form =
+        ReactiveForm.defineControls({
+            cols: {value: 8, required: false},
+            trim: {value: true, required: false},
+            packType: {value: 'spriteSheet' as tPackType, required: true}
+        });
 
     private psd: Psd;
     private selected:PsdLayer[] = [];
-
-    public packType: tPackType = 'spriteSheet';
-    public cols:number|undefined = 8;
-    public trim = true;
 
     @Reactive.Method()
     private async openPsd() {
@@ -47,6 +51,11 @@ export class PsdPage extends BaseTsxComponent {
     }
 
     @Reactive.Method()
+    private applySortByName() {
+        this.psd.layers.sort((a,b)=>Number.parseInt(a.name) - Number.parseInt(b.name));
+    }
+
+    @Reactive.Method()
     private async export() {
         const filteredPsd: Psd = {
             name: this.psd.name,
@@ -55,14 +64,14 @@ export class PsdPage extends BaseTsxComponent {
         }
         const packer = new SpriteSheetPacker();
         let spriteSheet: IPackedSpriteSheet;
-        if (this.packType==='spriteSheet') {
-            spriteSheet = packer.packSpriteSheet(filteredPsd, 1, this.trim);
+        if (this.form.packType==='spriteSheet') {
+            spriteSheet = packer.packSpriteSheet(filteredPsd, 1, this.form.trim);
         }
         else {
-            spriteSheet = packer.packTileMap(filteredPsd, this.cols ?? 8);
+            spriteSheet = packer.packTileMap(filteredPsd, this.form.cols ?? 8);
         }
 
-        if (this.packType==='spriteSheet') {
+        if (this.form.packType==='spriteSheet') {
             await Files.saveToFile(JSON.stringify(packer.asRegularSpriteSheet(spriteSheet),undefined,4),`${filteredPsd.name}.json`);
         }
 
@@ -101,21 +110,26 @@ export class PsdPage extends BaseTsxComponent {
                                 }
                             </Loop>
                             <div>
-                                <select {...this.service.bind(this, 'packType', v => v as tPackType)}>
+                                <select {...this.setterService.bind(this.form, 'packType', v => v as tPackType)}>
                                     <option value={'spriteSheet'}>spriteSheet</option>
                                     <option value={'tileMap'}>tileMap</option>
                                 </select>
-                                <If condition={this.packType === 'tileMap'}>
+                                <If condition={this.form.packType === 'tileMap'}>
                                     {()=>
                                         <>
-                                            cols: <input {...this.service.bind(this, 'cols', Numeric)}/>
+                                            <div>
+                                                cols: <input {...this.setterService.bind(this.form, 'cols', Numeric)}/>
+                                            </div>
+                                            <div>
+                                                sortByName: <button onclick={this.applySortByName}>sort by name</button>
+                                            </div>
                                         </>
                                     }
                                 </If>
-                                <If condition={this.packType === 'spriteSheet'}>
+                                <If condition={this.form.packType === 'spriteSheet'}>
                                     {()=>
                                         <>
-                                            trim: <input type={'checkbox'} {...this.service.bind(this, 'trim', Boolean)}/>
+                                            trim: <input type={'checkbox'} {...this.setterService.bind(this.form, 'trim', Boolean)}/>
                                         </>
                                     }
                                 </If>

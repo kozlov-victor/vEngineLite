@@ -7,7 +7,7 @@ import {KeyboardKey} from "@vEngineLite/inputControl/KeyboardKey";
 import {MathEx} from "@vEngineLite/utils/MathEx";
 import {ArcadeRigidBodyType} from "@vEngineLite/physics/ArcadePhysics";
 import {SpriteSheet} from "@vEngineLite/types";
-import {TileMaps} from "@vEngineLite/gameObject/TileMaps";
+import {ITiledTileMap, TileMaps} from "@vEngineLite/gameObject/TileMaps";
 import {TileMap} from "@vEngineLite/gameObject/TileMap";
 import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollowStrategy";
 import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
@@ -54,9 +54,10 @@ export class MainScene extends Scene {
     override onReady() {
 
         {
+            const tiledFile = this.app.assetManager.getJson<ITiledTileMap>('tilemap');
             const tileTexture = GLUtils.createTextureFromImage(this.app.assetManager.getImage('tileset'));
             const tiledData = TileMaps.fromTiledTileMap(
-                this.app.assetManager.getJson('tilemap'),
+                tiledFile,
                 ['backgroundLayer','foregroundLayer'],'tiles'
             );
             const tileMap = new TileMap(
@@ -64,7 +65,13 @@ export class MainScene extends Scene {
                 tiledData.tilesetCols,tiledData.tilesetRows,
                 tileTexture
             );
-            tileMap.createCollisionBodies([0,1,6,7,8,9]);
+            const solidTiles = JSON.parse(TileMaps.getTiledMapCustomProperty(tiledFile, 'solidTiles')?.value as string ?? '') as number[];
+            tileMap.createCollisionBodies(
+                solidTiles,
+                {
+                    collisionGroup: groundGroup
+                }
+            );
             this.addObject(tileMap);
         }
 
@@ -73,7 +80,7 @@ export class MainScene extends Scene {
                 factory: ()=>{
                     const particle = new Ellipse(this, 10);
                     particle.size.wh(10);
-                    particle.color.fromCssColor('#01cdfb');
+                    particle.color.fromCssColor('#057fe3');
                     particle.body = this.app.physics.createRigidBody({
                         target: particle,
                         type: ArcadeRigidBodyType.DYNAMIC,

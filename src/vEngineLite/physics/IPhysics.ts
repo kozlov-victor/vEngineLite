@@ -3,15 +3,18 @@ import {IFrame, IGeometry} from "../types";
 import {Size} from "../utils/Size";
 import {CollisionGroup, CollisionGroupManager} from "./CollisionGroupManager";
 
-export interface IRigidBodyParams {
-    target: IGeometry;
-    rect?: IFrame;
-    velocity?: Vector2;
+export interface IRigidBodyParamsBase {
     restitution?: number;
     collisionGroup?: CollisionGroup;
     collideWithGroup?: CollisionGroup;
     ignoreCollisionWithGroup?: CollisionGroup;
     nonBlockingCollisionWithGroup?: CollisionGroup;
+}
+
+export interface IRigidBodyParams extends IRigidBodyParamsBase {
+    target: IGeometry;
+    rect?: IFrame;
+    velocity?: Vector2;
 }
 
 export abstract class RigidBody {

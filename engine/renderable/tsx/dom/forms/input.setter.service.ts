@@ -1,5 +1,6 @@
 import {Reactive} from "@engine/renderable/tsx/decorator/reactive";
 import {DI} from "@engine/core/ioc";
+import {IFormChangeListener} from "@engine/renderable/tsx/dom/forms/IFormChangeListener";
 
 export type tInputEvent =
     Event & {target: HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement};
@@ -7,8 +8,21 @@ export type tInputEvent =
 @DI.Injectable()
 export class InputSetterService {
 
+    private listeners: IFormChangeListener[] = [];
+
+    public addListener(l: IFormChangeListener): void {
+        this.listeners.push(l);
+    }
+
+    public removeListener(l: IFormChangeListener): void {
+        const index = this.listeners.indexOf(l);
+        if (index !== -1) {
+            this.listeners.splice(index, 1);
+        }
+    }
+
     @Reactive.Method()
-    public setValue<K extends keyof U,U>(e: tInputEvent, model: U,key: K, parser: (raw: string) => U[K]) {
+    private setValue<K extends keyof U,U>(e: tInputEvent, model: U,key: K, parser: (raw: string) => U[K]) {
         if ((parser as any)===Boolean) {
             model[key] = (e.target  as any).checked
         }
@@ -35,6 +49,6 @@ export class InputSetterService {
 }
 
 export const Numeric = (val:string)=>{
-    if (!val) return undefined;
+    if (!val) return NaN;
     return +val;
 }
