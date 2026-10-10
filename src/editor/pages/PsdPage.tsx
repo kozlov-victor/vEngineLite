@@ -18,9 +18,9 @@ export class PsdPage extends BaseTsxComponent {
 
     private readonly form =
         ReactiveForm.defineControls({
-            cols: {value: 8, required: true, numeric: true, maxLength: 3, min: 1, max: 100},
-            trim: {value: true, required: false},
-            packType: {value: 'spriteSheet' as tPackType, required: true}
+            cols: {initialValue: 8, required: true, numeric: true, maxLength: 3, min: 1, max: 100},
+            trim: {initialValue: true, required: false},
+            packType: {initialValue: 'spriteSheet' as tPackType, required: true}
         });
 
     private psd: Psd;

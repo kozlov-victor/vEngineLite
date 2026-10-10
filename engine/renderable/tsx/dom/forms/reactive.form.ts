@@ -4,7 +4,7 @@ type tInputEvent =
     Event & {target: HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement};
 
 export interface IReactiveFormControlDesc<U> {
-    value: U;
+    initialValue: U;
     required?: boolean;
     numeric?: boolean;
     minLength?: number;
@@ -35,20 +35,20 @@ export class ReactiveForm<U> {
 
     public static defineControls<TControls extends Record<string, IReactiveFormControlDesc<unknown>>>(
         controls: TControls
-    ): ReactiveForm<{[P in keyof TControls]: TControls[P]['value']}>
-        & {[P in keyof TControls]: TControls[P]['value']} {
-        const form = new ReactiveForm<{[P in keyof TControls]: TControls[P]['value']}>();
+    ): ReactiveForm<{[P in keyof TControls]: TControls[P]['initialValue']}>
+        & {[P in keyof TControls]: TControls[P]['initialValue']} {
+        const form = new ReactiveForm<{[P in keyof TControls]: TControls[P]['initialValue']}>();
         form.controls = controls;
         form.initializeValues();
-        return form as ReactiveForm<{[P in keyof TControls]: TControls[P]['value']}>
-            & {[P in keyof TControls]: TControls[P]['value']};
+        return form as ReactiveForm<{[P in keyof TControls]: TControls[P]['initialValue']}>
+            & {[P in keyof TControls]: TControls[P]['initialValue']};
     }
 
     private initializeValues() {
         for (const key in this.controls) {
             const control = this.controls[key];
-            (this as any)[key] = control.value;
-            this.values[key] = control.value;
+            (this as any)[key] = control.initialValue;
+            this.values[key] = control.initialValue;
         }
     }
 
