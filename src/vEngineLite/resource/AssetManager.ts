@@ -11,6 +11,16 @@ interface AssetManifestItem {
 type ProgressCallback = (progress: number) => void;
 type CompleteCallback = () => void;
 
+const joinUrl = (base: string, path: string): string => {
+    if (!base.endsWith('/')) {
+        base += '/';
+    }
+    if (path.startsWith('/')) {
+        path = path.substring(1);
+    }
+    return base + path;
+}
+
 export class AssetManager {
     private readonly cache = new Map<string, any>();
     private readonly manifest: AssetManifestItem[] = [];
@@ -22,7 +32,7 @@ export class AssetManager {
     }
 
     public add(key: string, type: AssetType, path: string): this {
-        path = this.baseUrl + path;
+        path = joinUrl(this.baseUrl, path);
         this.manifest.push({ key, type, path });
         return this;
     }

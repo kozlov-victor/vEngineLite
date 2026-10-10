@@ -5,6 +5,7 @@ import {IndexHtmlPlugin} from './node_tools/plugins/post_transform/IndexHtmlPlug
 import {CustomTransformerPlugin} from "./node_tools/CustomTransformerPlugin.mts";
 import {GlslTransformerPlugin} from "./node_tools/plugins/transform/GlslTransformerPlugin.mts";
 import {DefinePlugin} from "./node_tools/plugins/post_transform/DefinePlugin.mts";
+import {AssetsPlugin} from "./node_tools/plugins/post_transform/AssetsPlugin.mts";
 
 const dev = process.argv.includes('--dev');
 
@@ -34,7 +35,11 @@ const ctx = await esbuild.context({
             }),
             new DefinePlugin({
                 BUILD_ID: ()=>`${new Date().getTime()}`,
-            })
+            }),
+            new AssetsPlugin([
+                {from: 'src/test1/assets', to: 'test1/assets'},
+                {from: 'src/test2/assets', to: 'test2/assets'},
+            ])
         ).
         createPluginContext()
     ]

@@ -25,3 +25,32 @@ button, label, input[type='checkbox'] {
 button, select, input {
     padding: 5px;
 }
+
+input, select, textarea {
+    display: block;
+    width: 100%;
+}
+
+input[type=checkbox] {
+    display: inline-block;
+    width: 20px;
+    height: 20px;
+}
+
+input.invalid {
+    border: 1px solid #ffc1c1;
+}
+
+table.form-table {
+    border-collapse: collapse;
+    min-width: 500px;
+}
+
+table.form-table td {
+    padding: 5px;
+}
+
+.error {
+    color: #980000;
+    font-size: 10px;
+}

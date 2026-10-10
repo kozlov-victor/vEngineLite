@@ -8,7 +8,6 @@ import {DI} from "@engine/core/ioc";
 import {PsdLayerComponent} from "./PsdLayerComponent";
 import {SpriteSheetRenderer} from "../spritesheet/SpriteSheetRenderer";
 import {IPackedSpriteSheet, SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
-import {InputSetterService, Numeric} from "@engine/renderable/tsx/dom/forms/input.setter.service";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
 import {ReactiveForm} from "@engine/renderable/tsx/dom/forms/reactive.form";
 
@@ -17,12 +16,9 @@ type tPackType = 'spriteSheet'|'tileMap';
 @DI.CSS('PsdPage.css')
 export class PsdPage extends BaseTsxComponent {
 
-    @DI.Inject(InputSetterService)
-    private readonly setterService: InputSetterService;
-
     private readonly form =
         ReactiveForm.defineControls({
-            cols: {value: 8, required: false},
+            cols: {value: 8, required: true, numeric: true, maxLength: 3, min: 1, max: 100},
             trim: {value: true, required: false},
             packType: {value: 'spriteSheet' as tPackType, required: true}
         });
@@ -57,6 +53,7 @@ export class PsdPage extends BaseTsxComponent {
 
     @Reactive.Method()
     private async export() {
+
         const filteredPsd: Psd = {
             name: this.psd.name,
             header: this.psd.header,
@@ -78,7 +75,10 @@ export class PsdPage extends BaseTsxComponent {
         const spriteSheetRenderer = new SpriteSheetRenderer();
         const canvas = spriteSheetRenderer.render(spriteSheet);
         canvas.toBlob(async (blob)=>{
-            if (!blob) return;
+            if (!blob) {
+                console.error('Failed to export sprite sheet');
+                return;
+            }
             await Files.saveToFile(blob, `${filteredPsd.name}.png`);
         },'image/png');
     }
@@ -91,54 +91,84 @@ export class PsdPage extends BaseTsxComponent {
                 </div>
                 <If condition={Boolean(this.psd)}>
                     {()=>
-                        <div>
-                            <Loop array={this.psd.layers}>
-                                {(l:PsdLayer,i:number)=>
-                                    <div
-                                        onclick={_ => this.toggleSelection(l)}
-                                        classNames={{'psd-frame': true, selected: this.selected.includes(l)}}
-                                        key={i}>
-                                        <PsdLayerComponent
-                                            header={this.psd.header}
-                                            trackBy={`_${i}`}
-                                            layer={l}
-                                        />
-                                        <div className={'psd-layer-name'}>
-                                            {l.name}
-                                        </div>
-                                    </div>
-                                }
-                            </Loop>
+                        <>
                             <div>
-                                <select {...this.setterService.bind(this.form, 'packType', v => v as tPackType)}>
-                                    <option value={'spriteSheet'}>spriteSheet</option>
-                                    <option value={'tileMap'}>tileMap</option>
-                                </select>
+                                <Loop array={this.psd.layers}>
+                                    {(l:PsdLayer,i:number)=>
+                                        <div
+                                            onclick={_ => this.toggleSelection(l)}
+                                            classNames={{'psd-frame': true, selected: this.selected.includes(l)}}
+                                            key={i}>
+                                            <PsdLayerComponent
+                                                header={this.psd.header}
+                                                trackBy={`_${i}`}
+                                                layer={l}
+                                            />
+                                            <div className={'psd-layer-name'}>
+                                                {l.name}
+                                            </div>
+                                        </div>
+                                    }
+                                </Loop>
+                            </div>
+                            <table className={'form-table'}>
+                                <tr>
+                                    <td>Тип</td>
+                                    <td>
+                                        <select {...this.form.bindSelect('packType')}>
+                                            <option value={'spriteSheet'}>spriteSheet</option>
+                                            <option value={'tileMap'}>tileMap</option>
+                                        </select>
+                                        <div className={'error'}>
+                                            &nbsp;{this.form.getError('packType')}
+                                        </div>
+                                    </td>
+                                </tr>
                                 <If condition={this.form.packType === 'tileMap'}>
                                     {()=>
                                         <>
-                                            <div>
-                                                cols: <input {...this.setterService.bind(this.form, 'cols', Numeric)}/>
-                                            </div>
-                                            <div>
-                                                sortByName: <button onclick={this.applySortByName}>sort by name</button>
-                                            </div>
+                                            <tr>
+                                                <td>
+                                                    cols
+                                                </td>
+                                                <td>
+                                                    <input
+                                                        classNames={{invalid: this.form.isInvalid('cols')}}
+                                                        {...this.form.bindInput('cols')}/>
+                                                    <div className={'error'}>
+                                                        &nbsp;{this.form.getError('cols')}
+                                                    </div>
+                                                </td>
+                                            </tr>
+                                            <tr>
+                                                <td>sortByName</td>
+                                                <td><button onclick={this.applySortByName}>sort</button></td>
+                                                <td></td>
+                                            </tr>
                                         </>
                                     }
                                 </If>
                                 <If condition={this.form.packType === 'spriteSheet'}>
                                     {()=>
-                                        <>
-                                            trim: <input type={'checkbox'} {...this.setterService.bind(this.form, 'trim', Boolean)}/>
-                                        </>
+                                        <tr>
+                                            <td>trim</td>
+                                            <td>
+                                                <input type={'checkbox'} {...this.form.bindCheckBox('trim')}/>
+                                                <div className={'error'}>
+                                                    &nbsp;{this.form.getError('trim')}
+                                                </div>
+                                            </td>
+                                        </tr>
                                     }
                                 </If>
-                            </div>
-                            <div>
-                                <button onclick={this.export}>Експорт</button>
-                            </div>
-                        </div>
+                            </table>
+                        </>
                     }
+                    <div>
+                        <button
+                            disabled={this.form.isFormInvalid()}
+                            onclick={this.export}>Експорт</button>
+                    </div>
                 </If>
             </>
         );

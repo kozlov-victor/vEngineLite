@@ -1,9 +1,12 @@
-import {IFormChangeListener} from "@engine/renderable/tsx/dom/forms/IFormChangeListener";
-import {InputSetterService} from "@engine/renderable/tsx/dom/forms/input.setter.service";
+import {Reactive} from "@engine/renderable/tsx/decorator/reactive";
+
+type tInputEvent =
+    Event & {target: HTMLInputElement|HTMLSelectElement|HTMLTextAreaElement};
 
 export interface IReactiveFormControlDesc<U> {
     value: U;
     required?: boolean;
+    numeric?: boolean;
     minLength?: number;
     maxLength?: number;
     min?: number;
@@ -12,11 +15,20 @@ export interface IReactiveFormControlDesc<U> {
     custom?: ((value: any) => {code:string,valid:boolean,message?:string})[];
 }
 
-export class ReactiveForm<U> implements IFormChangeListener{
+const Numeric = (val:string):number=>{
+    const numeric = +val;
+    if (!val || isNaN(numeric)) {
+        return undefined!;
+    }
+    return numeric;
+}
+
+export class ReactiveForm<U> {
 
     private controls: Record<string, IReactiveFormControlDesc<unknown>>;
     private validationErrors: Record<string, any[]> = {};
     private valid = true;
+    private values: Record<string, any> = {};
 
     private constructor() {
     }
@@ -32,29 +44,38 @@ export class ReactiveForm<U> implements IFormChangeListener{
             & {[P in keyof TControls]: TControls[P]['value']};
     }
 
-    public bind(inputSetter: InputSetterService) {
-        inputSetter.addListener(this);
-    }
-
-    public unbind(inputSetter: InputSetterService) {
-        inputSetter.removeListener(this);
-    }
-
     private initializeValues() {
         for (const key in this.controls) {
             const control = this.controls[key];
             (this as any)[key] = control.value;
+            this.values[key] = control.value;
         }
     }
 
     private validateControl(key: string): boolean {
         const control = this.controls[key];
         let valid = true;
-        const value = (this as any)[key];
-        if (control.required && (value === null || value === undefined || value === '')) {
+        const value = this.values[key];
+        const numericValue = control.numeric?Number(this.values[key]):undefined;
+        const valueEmpty = value === null || value === undefined || value === '';
+
+        if (!control.required && valueEmpty) {
+            // If the field is not required and the value is empty, skip further validation
+            return valid;
+        }
+
+        if (control.required && valueEmpty) {
             this.validationErrors[key] = this.validationErrors[key] || [];
             this.validationErrors[key].push({'required': true});
             valid = false;
+        }
+
+        if (control.numeric) {
+            if (typeof numericValue !== 'number' || isNaN(numericValue)) {
+                this.validationErrors[key] = this.validationErrors[key] || [];
+                this.validationErrors[key].push({'numeric': true});
+                valid = false;
+            }
         }
         if (control.minLength !== undefined && typeof value === 'string' && value.length < control.minLength) {
             this.validationErrors[key] = this.validationErrors[key] || [];
@@ -66,12 +87,12 @@ export class ReactiveForm<U> implements IFormChangeListener{
             this.validationErrors[key].push({maxLength: control.maxLength});
             valid = false;
         }
-        if (control.min !== undefined && typeof value === 'number' && value < control.min) {
+        if (control.min !== undefined && numericValue!==undefined && numericValue < control.min) {
             this.validationErrors[key] = this.validationErrors[key] || [];
             this.validationErrors[key].push({min: control.min});
             valid = false;
         }
-        if (control.max !== undefined && typeof value === 'number' && value > control.max) {
+        if (control.max !== undefined && numericValue!==undefined && numericValue > control.max) {
             this.validationErrors[key] = this.validationErrors[key] || [];
             this.validationErrors[key].push({max: control.max});
             valid = false;
@@ -110,9 +131,17 @@ export class ReactiveForm<U> implements IFormChangeListener{
         return this.valid;
     }
 
+    public isFormInvalid() {
+        return !this.valid;
+    }
+
     public isValid(key: keyof U) {
         const k = key as string;
         return !this.validationErrors[k] || this.validationErrors[k].length === 0;
+    }
+
+    public isInvalid(key: keyof U) {
+        return !this.isValid(key);
     }
 
     public getErrors() {
@@ -128,6 +157,8 @@ export class ReactiveForm<U> implements IFormChangeListener{
         switch (errorCode) {
             case 'required':
                 return 'This field is required';
+            case 'numeric':
+                return 'This field must be a number';
             case 'minLength':
                 return `Minimum length is ${errorCodeObj[errorCode]}`;
             case 'maxLength':
@@ -142,9 +173,60 @@ export class ReactiveForm<U> implements IFormChangeListener{
         return errorCodeObj[errorCode];
     }
 
-    onFormChange(key: string, value: any): void {
+    private setSerializedFormValue(key: string) {
+        let value = this.values[key];
+        if (this.controls[key].numeric) {
+            value = Numeric(value);
+        }
         (this as any)[key] = value;
+        return value;
+    }
+
+    private onFormChange(key: string): void {
+        this.setSerializedFormValue(key);
         this.validate();
+    }
+
+    @Reactive.Method()
+    private setInputValue(e: tInputEvent, key: string) {
+        this.values[key] = e.target.value;
+        this.onFormChange(key as string);
+    }
+
+    @Reactive.Method()
+    private setCheckBoxValue(e: tInputEvent, key: string) {
+        this.values[key] = (e.target as any).checked;
+        this.onFormChange(key as string);
+    }
+
+    public bindSelect(key: keyof U) {
+        return {
+            value: this.values[key as string] as string,
+            onchange: (e: tInputEvent)=>this.setInputValue(e,key as string),
+        }
+    }
+
+    public bindInput(key: keyof U, phase:'onchange'|'oninput' = 'oninput') {
+        return {
+            value: this.values[key as string] as string,
+            [phase]: (e: tInputEvent)=>this.setInputValue(e,key as string),
+        }
+    }
+
+    public bindCheckBox(key: keyof U) {
+        return {
+            checked: this.values[key as string] as boolean,
+            onchange: (e: tInputEvent)=>this.setCheckBoxValue(e,key as string),
+        }
+    }
+
+    public serialize(): U {
+        const result:Record<string, any> = {};
+        const keys = Object.keys(this.controls);
+        for (const key of keys) {
+            result[key] = this.setSerializedFormValue(key);
+        }
+        return result as U;
     }
 
 }

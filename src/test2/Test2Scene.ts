@@ -1,20 +1,20 @@
-import {Scene} from "../vEngineLite/application/Scene";
-import {GLUtils} from "../vEngineLite/utils/GLUtils";
-import {TileMap} from "../vEngineLite/gameObject/TileMap";
-import {Rectangle} from "../vEngineLite/gameObject/shapes/Rectangle";
-import {Ellipse} from "../vEngineLite/gameObject/shapes/Ellipse";
-import {ColorPerVertexRectangle} from "../vEngineLite/gameObject/shapes/ColorPerVertexRectangle";
-import {Sprite} from "../vEngineLite/gameObject/Sprite";
+import {Scene} from "@vEngineLite/application/Scene";
+import {GLUtils} from "@vEngineLite/utils/GLUtils";
+import {TileMap} from "@vEngineLite/gameObject/TileMap";
+import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
+import {Ellipse} from "@vEngineLite/gameObject/shapes/Ellipse";
+import {ColorPerVertexRectangle} from "@vEngineLite/gameObject/shapes/ColorPerVertexRectangle";
+import {Sprite} from "@vEngineLite/gameObject/Sprite";
 import {Particle} from "./Particle";
 
 export class Test2Scene extends Scene {
 
     override onPreloadStarted() {
         this.app.assetManager
-            .setBaseUrl('../src/test2/')
-            .add('lava', 'image', 'assets/lava.png')
-            .add('tileset', 'image', 'assets/tiles2.png')
-            .add('testImage', 'image', 'assets/testImage.png')
+            .setBaseUrl('test2/assets/')
+            .add('lava', 'image', 'lava.png')
+            .add('tileset', 'image', 'tiles2.png')
+            .add('testImage', 'image', 'testImage.png')
     }
 
     override onProgress(percents: number) {

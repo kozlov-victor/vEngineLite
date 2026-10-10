@@ -39,11 +39,11 @@ export class MainScene extends Scene {
 
     override onPreloadStarted() {
         this.app.assetManager
-            .setBaseUrl('../src/test1/')
-            .add('tileset', 'image', 'assets/tiles.png')
-            .add('tilemap', 'json', 'assets/map.json')
-            .add('cat', 'image', 'assets/hero.png')
-            .add('cat-sprite-sheet', 'json', 'assets/hero.json');
+            .setBaseUrl('test1/assets')
+            .add('tileset', 'image', 'tiles.png')
+            .add('tilemap', 'json', 'map.json')
+            .add('cat', 'image', 'hero.png')
+            .add('cat-sprite-sheet', 'json', 'hero.json');
     }
 
     override onProgress(percents: number) {
