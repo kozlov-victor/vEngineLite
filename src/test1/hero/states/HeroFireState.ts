@@ -15,6 +15,7 @@ export class HeroFireState extends HeroAbstractMovingState {
     }
 
     override onAnimationStarted() {
+        this.hero.shoot(); // постріл
         this.hero.getRigidBody().velocity.x = -100 * this.hero.scale.x; // віддача
     }
 

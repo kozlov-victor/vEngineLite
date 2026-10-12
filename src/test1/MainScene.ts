@@ -18,13 +18,14 @@ import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager"
 import {Ellipse} from "@vEngineLite/gameObject/shapes/Ellipse";
 
 const col = new CollisionGroupManager();
-export const groundGroup = col.nextGroup();
+export const rigidBodyGroup = col.nextGroup();
+export const bulletGroup = col.nextGroup();
 export const particleGroup = col.nextGroup();
 
 export class MainScene extends Scene {
 
     private hero: HeroGameObject;
-    private testParticleEmitter: ParticleEmitter;
+    private waterParticleEmitter: ParticleEmitter;
     private cameraFollowStrategy = new LookAheadFollowStrategy(
         100,
         6,
@@ -69,14 +70,14 @@ export class MainScene extends Scene {
             tileMap.createCollisionBodies(
                 solidTiles,
                 {
-                    collisionGroup: groundGroup
+                    collisionGroup: rigidBodyGroup
                 }
             );
             this.addObject(tileMap);
         }
 
         {
-            this.testParticleEmitter = new ParticleEmitter(this,{
+            this.waterParticleEmitter = new ParticleEmitter(this,{
                 factory: ()=>{
                     const particle = new Ellipse(this, 10);
                     particle.size.wh(10);
@@ -85,9 +86,9 @@ export class MainScene extends Scene {
                         target: particle,
                         type: ArcadeRigidBodyType.DYNAMIC,
                         collisionGroup: CollisionGroupManager.combine(
-                            groundGroup, particleGroup
+                            rigidBodyGroup, particleGroup
                         ),
-                        collideWithGroup: groundGroup,
+                        collideWithGroup: rigidBodyGroup,
                         mass: 0.01,
                         restitution: 0.9,
                     });
@@ -97,7 +98,7 @@ export class MainScene extends Scene {
                 velocity: {from: 0, to: -100},
                 lifetime: {from: 1000, to: 5000},
             });
-            this.addObject(this.testParticleEmitter);
+            this.addObject(this.waterParticleEmitter);
         }
 
         {
@@ -109,8 +110,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 type: ArcadeRigidBodyType.STATIC,
                 target: platform,
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -123,8 +124,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -137,8 +138,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -152,8 +153,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(10,0),
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -167,8 +168,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,-10),
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -182,8 +183,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,10),
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         }
 
@@ -233,8 +234,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: groundGroup,
-                collideWithGroup: groundGroup,
+                collisionGroup: rigidBodyGroup,
+                collideWithGroup: rigidBodyGroup,
             });
         });
     }
@@ -245,8 +246,8 @@ export class MainScene extends Scene {
 
         if (!this.hero) return;
 
-        this.testParticleEmitter.update(dt);
-        this.testParticleEmitter.emitAt(100,100);
+        this.waterParticleEmitter.update(dt);
+        this.waterParticleEmitter.emitAt(100,100);
 
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;

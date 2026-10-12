@@ -14,7 +14,9 @@ import {HeroAttack1State} from "./states/HeroAttack1State";
 import {HeroFireState} from "./states/HeroFireState";
 import {Sprite} from "@vEngineLite/gameObject/Sprite";
 import {HeroAttack2State} from "./states/HeroAttack2State";
-import {groundGroup, particleGroup} from "../MainScene";
+import {rigidBodyGroup, particleGroup, bulletGroup} from "../MainScene";
+import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
+import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
 
 export class HeroGameObject extends Sprite {
 
@@ -43,8 +45,8 @@ export class HeroGameObject extends Sprite {
             type: ArcadeRigidBodyType.DYNAMIC,
             target: this,
             rect: this.regularBodyRect,
-            collisionGroup: groundGroup,
-            collideWithGroup: groundGroup,
+            collisionGroup: rigidBodyGroup,
+            collideWithGroup: rigidBodyGroup,
             ignoreCollisionWithGroup: particleGroup,
             restitution: 0.2,
         });
@@ -117,6 +119,34 @@ export class HeroGameObject extends Sprite {
 
     public getRigidBody() {
         return this.bodyRef;
+    }
+
+    public shoot() {
+        const bullet = new Rectangle(this.scene);
+        bullet.size.wh(5);
+        bullet.color.fromCssColor('#8a0101');
+        const bulletBody = this.scene.app.physics.createRigidBody({
+            type: ArcadeRigidBodyType.DYNAMIC,
+            target: bullet,
+            collisionGroup: CollisionGroupManager.combine(rigidBodyGroup, bulletGroup),
+            collideWithGroup: rigidBodyGroup,
+            ignoreCollisionWithGroup: particleGroup,
+            restitution: 0.1,
+            mass: 0.001,
+        });
+        bulletBody.velocity.x = Math.sign(this.scale.x) * 500;
+        bullet.body = bulletBody;
+        bullet.position.y = this.position.y + this.regularBodyRect.y + 28;
+        if (this.scale.x>0) {
+            bullet.position.x = this.position.x + this.regularBodyRect.x + this.regularBodyRect.width + 5;
+        }
+        else {
+            bullet.position.x = this.position.x + this.regularBodyRect.x - 5;
+        }
+        this.scene.addObject(bullet);
+        setTimeout(()=>{
+            this.scene.removeObject(bullet);
+        },5000);
     }
 
 

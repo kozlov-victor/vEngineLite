@@ -29,6 +29,7 @@ button, select, input {
 input, select, textarea {
     display: block;
     width: 100%;
+    border: 1px solid #c3c2c2;
 }
 
 input[type=checkbox] {
@@ -38,7 +39,8 @@ input[type=checkbox] {
 }
 
 input.invalid {
-    border: 1px solid #ffc1c1;
+    outline: 1px solid #ffc1c1;
+    background-color: #fff8f8;
 }
 
 table.form-table {
