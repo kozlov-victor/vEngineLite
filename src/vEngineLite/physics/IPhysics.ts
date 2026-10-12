@@ -15,6 +15,7 @@ export interface IRigidBodyParams extends IRigidBodyParamsBase {
     target: IGeometry;
     rect?: IFrame;
     velocity?: Vector2;
+    gravityFactor?: number;
 }
 
 export abstract class RigidBody {
@@ -27,6 +28,7 @@ export abstract class RigidBody {
     public ignoreCollisionWithGroup: CollisionGroup;
     public nonBlockingCollisionWithGroup: CollisionGroup;
     public restitution: number;
+    public gravityFactor: number;
 
     protected constructor(params: IRigidBodyParams) {
         if (!params.rect) {
@@ -46,6 +48,7 @@ export abstract class RigidBody {
         this.ignoreCollisionWithGroup = params.ignoreCollisionWithGroup ?? CollisionGroupManager.getNoneGroup();
         this.nonBlockingCollisionWithGroup = params.nonBlockingCollisionWithGroup ?? CollisionGroupManager.getNoneGroup();
         this.restitution = params.restitution ?? 0;
+        this.gravityFactor = params.gravityFactor ?? 1;
     }
 }
 

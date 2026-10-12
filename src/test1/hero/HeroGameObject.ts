@@ -47,7 +47,7 @@ export class HeroGameObject extends Sprite {
             rect: this.regularBodyRect,
             collisionGroup: rigidBodyGroup,
             collideWithGroup: rigidBodyGroup,
-            ignoreCollisionWithGroup: particleGroup,
+            //ignoreCollisionWithGroup: particleGroup,
             restitution: 0.2,
         });
         this.body = body;
@@ -133,6 +133,7 @@ export class HeroGameObject extends Sprite {
             ignoreCollisionWithGroup: particleGroup,
             restitution: 0.1,
             mass: 0.001,
+            gravityFactor: 0.3,
         });
         bulletBody.velocity.x = Math.sign(this.scale.x) * 500;
         bullet.body = bulletBody;

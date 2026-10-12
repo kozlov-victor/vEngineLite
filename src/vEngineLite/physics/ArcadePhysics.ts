@@ -228,7 +228,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // Gravity тільки для dynamic
         if (body.type === ArcadeRigidBodyType.DYNAMIC) {
             body.velocity.y +=
-                this.gravity * seconds;
+                this.gravity * body.gravityFactor * seconds;
         }
 
         // І dynamic, і kinematic рухаються
