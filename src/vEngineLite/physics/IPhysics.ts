@@ -30,6 +30,8 @@ export abstract class RigidBody {
     public restitution: number;
     public gravityFactor: number;
 
+    public onCollided: (body: RigidBody)=>void;
+
     protected constructor(params: IRigidBodyParams) {
         if (!params.rect) {
             this.rect = {

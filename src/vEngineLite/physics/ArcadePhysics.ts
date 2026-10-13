@@ -60,6 +60,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
     private nextId = 0;
     private readonly carried  = new Set<number>();
+    private readonly collisionEvents = new Set<string>();
     private readonly uniformGrid = new UniformGrid(128);
     private readonly allRigidBodies: ArcadeRigidBody[] = [];
 
@@ -67,9 +68,8 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         return new ArcadeRigidBody(params,this.nextId++);
     }
 
-    public updateBody(body: RigidBody, dt: number): void {
+    public updateBody(body: RigidBody, _dt: number): void {
         const arcadeRigidBody = body as ArcadeRigidBody;
-        this.integratePhysics(arcadeRigidBody, dt);
         this.allRigidBodies.push(arcadeRigidBody);
     }
 
@@ -79,53 +79,66 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
     public updateWorld(dt: number): void {
 
-        // ---------------------------------------
-        // 1. Carry through support chain
-        // ---------------------------------------
-
         const carried = this.carried;
-        carried.clear();
+        this.collisionEvents.clear();
         const bodies = this.allRigidBodies;
+        const substepCount = this.getSubstepCount(bodies, dt);
+        const substepDt = dt / substepCount;
 
-        for (const body of bodies) {
-            this.applySupportMovement(body,carried);
-        }
+        for (let substep = 0; substep < substepCount; substep++) {
+            for (const body of bodies) {
+                this.integratePhysics(body, substepDt);
+            }
 
-        // ---------------------------------------
-        // 2. Забуваємо support попереднього кадру
-        // ---------------------------------------
+            // Carry bodies by their supports before rebuilding support contacts.
+            carried.clear();
+            for (const body of bodies) {
+                this.applySupportMovement(body, carried);
+            }
 
-        for (const body of bodies) {
-            body.support = undefined;
-        }
+            for (const body of bodies) {
+                body.support = undefined;
+            }
 
 
-        // ---------------------------------------
-        // 3. Collision solver
-        // ---------------------------------------
+            const SOLVER_ITERATIONS = 4;
+            let pairs = this.uniformGrid.getPotentialPairs(bodies);
 
-        const SOLVER_ITERATIONS = 4;
-
-        for (
-            let iteration = 0;
-            iteration < SOLVER_ITERATIONS;
-            iteration++
-        ) {
-            const pairs = this.uniformGrid.getPotentialPairs(bodies);
-            for (const [a, b] of pairs) {
-                const collision = this.detectCollision(a, b);
-                if (!collision) continue;
-
-                this.resolveCollision(a,b,collision);
-
-                // ---------------------------------------
-                // Визначаємо support на останній ітерації
-                // ---------------------------------------
-
+            for (
+                let iteration = 0;
+                iteration < SOLVER_ITERATIONS;
+                iteration++
+            ) {
                 if (
-                    iteration === SOLVER_ITERATIONS - 1
+                    iteration > 0 &&
+                    this.uniformGrid.havePotentialPairsChanged(bodies)
                 ) {
+                    pairs = this.uniformGrid.getPotentialPairs(bodies);
+                }
+
+                let solverChanged = false;
+                for (const body of bodies) {
+                    body.support = undefined;
+                }
+
+                for (const [a, b] of pairs) {
+                    const collision = this.detectCollision(a, b);
+                    if (!collision) continue;
+
+                    solverChanged = this.resolveCollision(a,b,collision) || solverChanged;
+                    const pairKey = this.getCollisionPairKey(a, b);
+                    if (!this.collisionEvents.has(pairKey)) {
+                        this.collisionEvents.add(pairKey);
+                        a.onCollided?.(b);
+                        b.onCollided?.(a);
+                        solverChanged = true;
+                    }
+
                     this.resolveSupport(a,b,collision);
+                }
+
+                if (!solverChanged) {
+                    break;
                 }
             }
         }
@@ -133,6 +146,48 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         for (const body of bodies) {
             this.applyFriction(body, dt);
         }
+    }
+
+    private getCollisionPairKey(a: ArcadeRigidBody, b: ArcadeRigidBody) {
+        return a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
+    }
+
+    private getSubstepCount(bodies: ArcadeRigidBody[], dt: number) {
+        let minimumExtent = Number.POSITIVE_INFINITY;
+        let maximumMovement = 0;
+        const seconds = dt / 1000;
+
+        for (const body of bodies) {
+            if (body.rect.width <= 0 || body.rect.height <= 0) {
+                continue;
+            }
+
+            minimumExtent = Math.min(
+                minimumExtent,
+                body.rect.width,
+                body.rect.height
+            );
+
+            if (body.type === ArcadeRigidBodyType.STATIC) {
+                continue;
+            }
+
+            const velocityY = body.velocity.y +
+                (body.type === ArcadeRigidBodyType.DYNAMIC
+                    ? this.gravity * body.gravityFactor * seconds
+                    : 0);
+            maximumMovement = Math.max(
+                maximumMovement,
+                Math.abs(body.velocity.x * seconds),
+                Math.abs(velocityY * seconds)
+            );
+        }
+
+        if (!Number.isFinite(minimumExtent) || minimumExtent <= 0) {
+            return 1;
+        }
+
+        return Math.max(1, Math.ceil(maximumMovement / (minimumExtent * 0.5)));
     }
 
     private detectCollision(a: ArcadeRigidBody, b: ArcadeRigidBody): Collision | null {
@@ -316,9 +371,9 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         a: ArcadeRigidBody,
         b: ArcadeRigidBody,
         collision: Collision
-    ) {
+    ): boolean {
         if (this.isNonBlockingCollision(a, b)) {
-            return;
+            return false;
         }
 
         const { normal, depth } = collision;
@@ -354,6 +409,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         b.target.position.y -=
             normal.y * correction * invMassB;
 
+        const positionChanged = correctionDepth > 0;
 
         // ---------------------------------------
         // 2. Relative velocity
@@ -373,7 +429,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         // Якщо тіла вже розходяться —
         // нічого робити не треба.
         if (velocityAlongNormal >= 0) {
-            return;
+            return positionChanged;
         }
 
 
@@ -406,6 +462,8 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
         b.velocity.y -=
             impulseY * invMassB;
+
+        return true;
     }
 
     private isNonBlockingCollision(a: ArcadeRigidBody, b: ArcadeRigidBody) {

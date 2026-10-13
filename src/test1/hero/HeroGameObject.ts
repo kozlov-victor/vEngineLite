@@ -145,6 +145,13 @@ export class HeroGameObject extends Sprite {
             bullet.position.x = this.position.x + this.regularBodyRect.x - 5;
         }
         this.scene.addObject(bullet);
+        bulletBody.onCollided = _=>{
+            bulletBody.gravityFactor = 1;
+            bullet.color.fromCssColor('#300101');
+            setTimeout(()=>{
+                this.scene.removeObject(bullet);
+            },100);
+        }
         setTimeout(()=>{
             this.scene.removeObject(bullet);
         },5000);

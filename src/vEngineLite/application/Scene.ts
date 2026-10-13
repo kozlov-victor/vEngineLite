@@ -68,7 +68,9 @@ export abstract class Scene {
     }
 
     public removeObject(obj: Container) {
-        this.objects.splice(this.objects.indexOf(obj), 1);
+        const index = this.objects.indexOf(obj);
+        if (index<0) return;
+        this.objects.splice(index, 1);
     }
 
     public getObjects() {
