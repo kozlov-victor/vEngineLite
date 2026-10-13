@@ -13,19 +13,18 @@ import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollo
 import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
 import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
-import {ParticleEmitter} from "@vEngineLite/particle/ParticleEmitter";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
-import {Ellipse} from "@vEngineLite/gameObject/shapes/Ellipse";
 
 const col = new CollisionGroupManager();
 export const rigidBodyGroup = col.nextGroup();
+export const heroBodyGroup = col.nextGroup();
 export const bulletGroup = col.nextGroup();
 export const particleGroup = col.nextGroup();
 
 export class MainScene extends Scene {
 
     private hero: HeroGameObject;
-    private waterParticleEmitter: ParticleEmitter;
+    //private waterParticleEmitter: ParticleEmitter;
     private cameraFollowStrategy = new LookAheadFollowStrategy(
         100,
         6,
@@ -76,30 +75,30 @@ export class MainScene extends Scene {
             this.addObject(tileMap);
         }
 
-        {
-            this.waterParticleEmitter = new ParticleEmitter(this,{
-                factory: ()=>{
-                    const particle = new Ellipse(this, 10);
-                    particle.size.wh(10);
-                    particle.color.fromCssColor('#057fe3');
-                    particle.body = this.app.physics.createRigidBody({
-                        target: particle,
-                        type: ArcadeRigidBodyType.DYNAMIC,
-                        collisionGroup: CollisionGroupManager.combine(
-                            rigidBodyGroup, particleGroup
-                        ),
-                        collideWithGroup: rigidBodyGroup,
-                        mass: 0.01,
-                        restitution: 0.9,
-                    });
-                    return particle;
-                },
-                capacity: 300,
-                velocity: {from: 0, to: -100},
-                lifetime: {from: 1000, to: 5000},
-            });
-            this.addObject(this.waterParticleEmitter);
-        }
+        // {
+        //     this.waterParticleEmitter = new ParticleEmitter(this,{
+        //         factory: ()=>{
+        //             const particle = new Rectangle(this);
+        //             particle.size.wh(5);
+        //             particle.color.fromCssColor('#057fe3');
+        //             particle.body = this.app.physics.createRigidBody({
+        //                 target: particle,
+        //                 type: ArcadeRigidBodyType.DYNAMIC,
+        //                 collisionGroup: CollisionGroupManager.combine(
+        //                     rigidBodyGroup, particleGroup
+        //                 ),
+        //                 collideWithGroup: rigidBodyGroup,
+        //                 mass: 0.01,
+        //                 restitution: 0.9,
+        //             });
+        //             return particle;
+        //         },
+        //         capacity: 300,
+        //         velocity: {from: 0, to: -100},
+        //         lifetime: {from: 1000, to: 5000},
+        //     });
+        //     this.addObject(this.waterParticleEmitter);
+        // }
 
         {
             const platform = new Rectangle(this);
@@ -246,8 +245,8 @@ export class MainScene extends Scene {
 
         if (!this.hero) return;
 
-        this.waterParticleEmitter.update(dt);
-        this.waterParticleEmitter.emitAt(100,100);
+        // this.waterParticleEmitter.update(dt);
+        //this.waterParticleEmitter.emitAt(100,100);
 
         if (this.input.keyboard.isPressed(KeyboardKey.RIGHT)) {
             this.hero.scale.x = 1;

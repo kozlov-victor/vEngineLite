@@ -14,7 +14,7 @@ import {HeroAttack1State} from "./states/HeroAttack1State";
 import {HeroFireState} from "./states/HeroFireState";
 import {Sprite} from "@vEngineLite/gameObject/Sprite";
 import {HeroAttack2State} from "./states/HeroAttack2State";
-import {rigidBodyGroup, particleGroup, bulletGroup} from "../MainScene";
+import {rigidBodyGroup, particleGroup, bulletGroup, heroBodyGroup} from "../MainScene";
 import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
 
@@ -45,10 +45,10 @@ export class HeroGameObject extends Sprite {
             type: ArcadeRigidBodyType.DYNAMIC,
             target: this,
             rect: this.regularBodyRect,
-            collisionGroup: rigidBodyGroup,
+            collisionGroup: CollisionGroupManager.combine(rigidBodyGroup, heroBodyGroup),
             collideWithGroup: rigidBodyGroup,
             //ignoreCollisionWithGroup: particleGroup,
-            restitution: 0.2,
+            //restitution: 0.2,
         });
         this.body = body;
         this.bodyRef = body;
@@ -130,7 +130,7 @@ export class HeroGameObject extends Sprite {
             target: bullet,
             collisionGroup: CollisionGroupManager.combine(rigidBodyGroup, bulletGroup),
             collideWithGroup: rigidBodyGroup,
-            ignoreCollisionWithGroup: particleGroup,
+            ignoreCollisionWithGroup: CollisionGroupManager.combine(particleGroup, heroBodyGroup),
             restitution: 0.1,
             mass: 0.001,
             gravityFactor: 0.3,
@@ -139,18 +139,15 @@ export class HeroGameObject extends Sprite {
         bullet.body = bulletBody;
         bullet.position.y = this.position.y + this.regularBodyRect.y + 28;
         if (this.scale.x>0) {
-            bullet.position.x = this.position.x + this.regularBodyRect.x + this.regularBodyRect.width + 5;
+            bullet.position.x = this.position.x + this.regularBodyRect.x;
         }
         else {
-            bullet.position.x = this.position.x + this.regularBodyRect.x - 5;
+            bullet.position.x = this.position.x + this.regularBodyRect.x;
         }
-        this.scene.addObject(bullet);
+        this.scene.insertBefore(bullet,this);
         bulletBody.onCollided = _=>{
             bulletBody.gravityFactor = 1;
             bullet.color.fromCssColor('#300101');
-            setTimeout(()=>{
-                this.scene.removeObject(bullet);
-            },100);
         }
         setTimeout(()=>{
             this.scene.removeObject(bullet);

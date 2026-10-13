@@ -67,6 +67,23 @@ export abstract class Scene {
         this.objects.unshift(obj);
     }
 
+    public insertAtIndex(i: number, obj: Container) {
+        this.objects.splice( i, 0, obj );
+    }
+
+    public insertBefore(obj: Container, insertBefore: Container) {
+        const index = this.objects.indexOf(insertBefore);
+        if (index<0) return;
+        this.insertAtIndex(index, obj);
+    }
+
+    public insertAfter(obj: Container, insertAfter: Container) {
+        const index = this.objects.indexOf(insertAfter);
+        if (index<0) return;
+        if (index===this.objects.length - 1) this.objects.push(obj);
+        else this.insertAtIndex(index + 1, obj);
+    }
+
     public removeObject(obj: Container) {
         const index = this.objects.indexOf(obj);
         if (index<0) return;
