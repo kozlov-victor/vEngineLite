@@ -13,16 +13,14 @@ import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollo
 import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
 import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
-import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
+import {DI} from "@engine/core/ioc";
+import {CollisionService} from "./services/CollisionService";
 
-const col = new CollisionGroupManager();
-export const rigidBodyGroup = col.nextGroup();
-export const heroBodyGroup = col.nextGroup();
-export const bulletGroup = col.nextGroup();
-export const particleGroup = col.nextGroup();
-
+@DI.Injectable()
 export class MainScene extends Scene {
 
+    @DI.Inject(CollisionService)
+    private readonly collisionService: CollisionService;
     private hero: HeroGameObject;
     //private waterParticleEmitter: ParticleEmitter;
     private cameraFollowStrategy = new LookAheadFollowStrategy(
@@ -69,7 +67,7 @@ export class MainScene extends Scene {
             tileMap.createCollisionBodies(
                 solidTiles,
                 {
-                    collisionGroup: rigidBodyGroup
+                    collisionGroup: this.collisionService.rigidBodyGroup
                 }
             );
             this.addObject(tileMap);
@@ -109,8 +107,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 type: ArcadeRigidBodyType.STATIC,
                 target: platform,
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -123,8 +121,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -137,8 +135,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -152,8 +150,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(10,0),
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -167,8 +165,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,-10),
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -182,8 +180,8 @@ export class MainScene extends Scene {
                 target: platform,
                 type: ArcadeRigidBodyType.KINEMATIC,
                 velocity: new Vector2(0,10),
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         }
 
@@ -233,8 +231,8 @@ export class MainScene extends Scene {
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
-                collisionGroup: rigidBodyGroup,
-                collideWithGroup: rigidBodyGroup,
+                collisionGroup: this.collisionService.rigidBodyGroup,
+                collideWithGroup: this.collisionService.rigidBodyGroup,
             });
         });
     }

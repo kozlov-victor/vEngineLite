@@ -14,11 +14,16 @@ import {HeroAttack1State} from "./states/HeroAttack1State";
 import {HeroFireState} from "./states/HeroFireState";
 import {Sprite} from "@vEngineLite/gameObject/Sprite";
 import {HeroAttack2State} from "./states/HeroAttack2State";
-import {rigidBodyGroup, particleGroup, bulletGroup, heroBodyGroup} from "../MainScene";
 import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
+import {DI} from "@engine/core/ioc";
+import {CollisionService} from "../services/CollisionService";
 
+@DI.Injectable()
 export class HeroGameObject extends Sprite {
+
+    @DI.Inject(CollisionService)
+    private readonly collisionService: CollisionService;
 
     public readonly walkVelocity = 100;
     public readonly walkAnimation:FrameAnimation;
@@ -45,8 +50,8 @@ export class HeroGameObject extends Sprite {
             type: ArcadeRigidBodyType.DYNAMIC,
             target: this,
             rect: this.regularBodyRect,
-            collisionGroup: CollisionGroupManager.combine(rigidBodyGroup, heroBodyGroup),
-            collideWithGroup: rigidBodyGroup,
+            collisionGroup: CollisionGroupManager.combine(this.collisionService.rigidBodyGroup, this.collisionService.heroBodyGroup),
+            collideWithGroup: this.collisionService.rigidBodyGroup,
             //ignoreCollisionWithGroup: particleGroup,
             //restitution: 0.2,
         });
@@ -128,9 +133,9 @@ export class HeroGameObject extends Sprite {
         const bulletBody = this.scene.app.physics.createRigidBody({
             type: ArcadeRigidBodyType.DYNAMIC,
             target: bullet,
-            collisionGroup: CollisionGroupManager.combine(rigidBodyGroup, bulletGroup),
-            collideWithGroup: rigidBodyGroup,
-            ignoreCollisionWithGroup: CollisionGroupManager.combine(particleGroup, heroBodyGroup),
+            collisionGroup: CollisionGroupManager.combine(this.collisionService.rigidBodyGroup, this.collisionService.bulletGroup),
+            collideWithGroup: this.collisionService.rigidBodyGroup,
+            ignoreCollisionWithGroup: CollisionGroupManager.combine(this.collisionService.particleGroup, this.collisionService.heroBodyGroup),
             restitution: 0.1,
             mass: 0.001,
             gravityFactor: 0.3,

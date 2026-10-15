@@ -1,6 +1,6 @@
-import {AnimationState} from "../../../../vEngineLite/animation/stateMachine/AnimationState";
-import {Scene} from "../../../../vEngineLite/application/Scene";
-import {KeyboardKey} from "../../../../vEngineLite/inputControl/KeyboardKey";
+import {AnimationState} from "@vEngineLite/animation/stateMachine/AnimationState";
+import {Scene} from "@vEngineLite/application/Scene";
+import {KeyboardKey} from "@vEngineLite/inputControl/KeyboardKey";
 import {HeroGameObject} from "../../HeroGameObject";
 
 export abstract class HeroAbstractMovingState extends AnimationState {
