@@ -35,10 +35,9 @@ export class AssetsPlugin implements MiniBundlerPostTransformPlugin {
         for (const assetFolder of this.assetFolders) {
             const filters = assetFolder.filters ?? defaultFilters;
             const outputPath = path.join(this.outDir, assetFolder.to);
-            await fs.rm(outputPath, {recursive: true, force: true});
+            if (assetFolder.to !=='' && assetFolder.to !=='/') await fs.rm(outputPath, {recursive: true, force: true});
             await this.copyAssets(assetFolder.from, outputPath, filters);
         }
-        return Promise.resolve(undefined);
     }
 
     private async copyAssets(sourcePath: string, outputPath: string, filters: string[]) {
