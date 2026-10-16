@@ -171,6 +171,8 @@ export class TriangleBatchRenderer {
 
         let i = this.currentTriangle * TriangleBatchRenderer.VERTICES_IN_TRIANGLE * TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX;
         const size = TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX;
+
+
         this.batchVertex(triangle.v1, worldMatrix, i);
         this.batchVertex(triangle.v2, worldMatrix, i+size);
         this.batchVertex(triangle.v3, worldMatrix, i+size*2);

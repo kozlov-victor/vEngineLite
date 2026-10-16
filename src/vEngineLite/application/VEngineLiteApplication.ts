@@ -15,7 +15,7 @@ export class VEngineLiteApplication {
     public readonly assetManager = new AssetManager();
     public readonly camera = new Camera(this);
     public readonly physics = new ArcadePhysics();
-    public readonly viewPort = new Size(); // todo
+    public readonly viewPort = new Size();
 
     private scene: Scene;
     private running  = false;
