@@ -19,7 +19,7 @@ import {CollisionService} from "./services/CollisionService";
 @DI.Injectable()
 export class MainScene extends Scene {
 
-    @DI.Inject(CollisionService)
+    @DI.Inject()
     private readonly collisionService: CollisionService;
     private hero: HeroGameObject;
     //private waterParticleEmitter: ParticleEmitter;

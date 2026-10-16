@@ -22,8 +22,7 @@ import {CollisionService} from "../services/CollisionService";
 @DI.Injectable()
 export class HeroGameObject extends Sprite {
 
-    @DI.Inject(CollisionService)
-    private readonly collisionService: CollisionService;
+    @DI.Inject() private readonly collisionService: CollisionService;
 
     public readonly walkVelocity = 100;
     public readonly walkAnimation:FrameAnimation;
@@ -137,8 +136,8 @@ export class HeroGameObject extends Sprite {
             collideWithGroup: this.collisionService.rigidBodyGroup,
             ignoreCollisionWithGroup: CollisionGroupManager.combine(this.collisionService.particleGroup, this.collisionService.heroBodyGroup),
             restitution: 0.1,
-            mass: 0.001,
-            gravityFactor: 0.3,
+            mass: 0.0001,
+            gravityFactor: 0.05,
         });
         bulletBody.velocity.x = Math.sign(this.scale.x) * 500;
         bullet.body = bulletBody;

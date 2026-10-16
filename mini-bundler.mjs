@@ -1,6 +1,7 @@
 import * as esbuild from 'esbuild';
 import {ImportCssPlugin} from './node_tools/plugins/transform/ImportCssPlugin.mts';
 import {TsxIdTransformerPlugin} from './node_tools/plugins/transform/TsxIdTransformerPlugin.mts';
+import {InjectTransformerPlugin} from './node_tools/plugins/transform/InjectTransformerPlugin.mts';
 import {IndexHtmlPlugin} from './node_tools/plugins/post_transform/IndexHtmlPlugin.mts';
 import {CustomTransformerPlugin} from "./node_tools/CustomTransformerPlugin.mts";
 import {GlslTransformerPlugin} from "./node_tools/plugins/transform/GlslTransformerPlugin.mts";
@@ -23,6 +24,7 @@ const ctx = await esbuild.context({
         new CustomTransformerPlugin().
         transformers(
             new ImportCssPlugin({output: 'editor/all.css'}),
+            new InjectTransformerPlugin(),
             new TsxIdTransformerPlugin(),
             new GlslTransformerPlugin({minify: !dev}),
         ).
