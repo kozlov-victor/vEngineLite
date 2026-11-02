@@ -1,8 +1,9 @@
 import {VEngineLiteApplication} from "./VEngineLiteApplication";
 import {Container} from "../gameObject/base/Container";
-import {KeyboardInputControl} from "../inputControl/KeyboardInputControl";
+import {KeyboardInputControl} from "../inputControl/keyboard/KeyboardInputControl";
 import {Size} from "../utils/Size";
 import {Color} from "../rendering/Color";
+import {PointerInputControl} from "@vEngineLite/inputControl/pointer/PointerInputControl";
 
 
 export abstract class Scene {
@@ -11,7 +12,8 @@ export abstract class Scene {
     public bgColor = Color.WHITE();
 
     public readonly input = {
-        keyboard: new KeyboardInputControl()
+        keyboard: new KeyboardInputControl(),
+        pointer: new PointerInputControl(this.app)
     } as const
 
     private readonly objects:Container[] = [];
@@ -52,7 +54,7 @@ export abstract class Scene {
     }
 
     public render() {
-        this.app.renderer.clearRenderBuffer(this.bgColor);
+        this.app.renderer.clear(this.bgColor);
         for (const obj of this.objects) {
             obj.enterFrame(this.app.renderer);
         }

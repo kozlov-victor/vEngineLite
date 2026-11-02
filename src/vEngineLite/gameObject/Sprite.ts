@@ -30,6 +30,7 @@ export class Sprite extends RenderableContainer {
             this.size,
             this.textureInfo,
             this.getWorldMatrix(),
+            this,
             this.offset.x, this.offset.y,
         );
     }

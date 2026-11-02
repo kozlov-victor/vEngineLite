@@ -116,6 +116,7 @@ export class TileMap extends RenderableContainer {
                     this.tileSize,
                     this.spriteRenderer,
                     worldMatrix,
+                    undefined,
                     tile.position.x + parallaxOffsetX, tile.position.y + parallaxOffsetY
                 );
             }

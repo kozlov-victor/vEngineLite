@@ -3,7 +3,7 @@ import {HeroGameObject} from "./hero/HeroGameObject";
 import {GLUtils} from "@vEngineLite/utils/GLUtils";
 import {Vector2} from "@vEngineLite/utils/Vector2";
 import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
-import {KeyboardKey} from "@vEngineLite/inputControl/KeyboardKey";
+import {KeyboardKey} from "@vEngineLite/inputControl/keyboard/KeyboardKey";
 import {MathEx} from "@vEngineLite/utils/MathEx";
 import {ArcadeRigidBodyType} from "@vEngineLite/physics/ArcadePhysics";
 import {SpriteSheet} from "@vEngineLite/types";
@@ -15,6 +15,7 @@ import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
 import {DI} from "@engine/core/ioc";
 import {CollisionService} from "./services/CollisionService";
+import {PointerEventType} from "@vEngineLite/inputControl/pointer/PointerHitArea";
 
 @DI.Injectable()
 export class MainScene extends Scene {
@@ -117,12 +118,15 @@ export class MainScene extends Scene {
             this.addObject(platform);
             platform.size.wh(50,50);
             platform.position.xy(230,250);
-            platform.color.rgb(120,0,0);
+            platform.color.rgb(0,0,200);
             platform.body = this.app.physics.createRigidBody({
                 target: platform,
                 type: ArcadeRigidBodyType.DYNAMIC,
                 collisionGroup: this.collisionService.rigidBodyGroup,
                 collideWithGroup: this.collisionService.rigidBodyGroup,
+            });
+            platform.on(PointerEventType.MOUSE_MOVE, (event) => {
+                console.log('Mouse move event detected on platform');
             });
         }
 

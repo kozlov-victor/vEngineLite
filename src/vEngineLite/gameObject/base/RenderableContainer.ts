@@ -1,13 +1,19 @@
 import {Container} from "./Container";
 import {TextureInfo} from "../../components/TextureInfo";
 import {TriangleBatchRenderer} from "../../rendering/TriangleBatchRenderer";
-import {IMouseComponent, MouseCallback, MouseComponent, MouseEventType} from "@vEngineLite/inputControl/MouseComponent";
+import {
+    IPointerHitArea,
+    PointerCallback,
+    PointerHitArea,
+    PointerEventType,
+    IPointerEvent
+} from "@vEngineLite/inputControl/pointer/PointerHitArea";
 
 
 
-export abstract class RenderableContainer extends Container implements IMouseComponent {
+export abstract class RenderableContainer extends Container implements IPointerHitArea {
     protected textureInfo: TextureInfo;
-    private mouseComponent: MouseComponent|undefined;
+    private _pointerHitArea: PointerHitArea|undefined;
 
     public abstract render(renderer: TriangleBatchRenderer): void;
 
@@ -16,21 +22,31 @@ export abstract class RenderableContainer extends Container implements IMouseCom
         this.render(renderer);
     }
 
-    public on(event: MouseEventType, callback: MouseCallback) {
-        if (!this.mouseComponent) {
-            this.mouseComponent = new MouseComponent();
+    public on(event: PointerEventType, callback: PointerCallback) {
+        if (!this._pointerHitArea) {
+            this._pointerHitArea = new PointerHitArea();
         }
-        this.mouseComponent.on(event, callback);
+        this._pointerHitArea.on(event, callback);
     }
 
-    public off(event: MouseEventType, callback: MouseCallback) {
-        if (this.mouseComponent) {
-            this.mouseComponent.off(event, callback);
+    public off(event: PointerEventType, callback: PointerCallback) {
+        if (this._pointerHitArea) {
+            this._pointerHitArea.off(event, callback);
+        }
+    }
+
+    public triggerEvent(type: PointerEventType, pointerEvent: IPointerEvent) {
+        if (this._pointerHitArea) {
+            this._pointerHitArea.triggerEvent(type, pointerEvent);
         }
     }
 
     public get interactive() {
-        return this.mouseComponent ? this.mouseComponent.interactive : false;
+        return this._pointerHitArea ? this._pointerHitArea.interactive : false;
+    }
+
+    public get pointerHitArea() {
+        return this._pointerHitArea;
     }
 
 }

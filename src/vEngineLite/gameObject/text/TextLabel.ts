@@ -333,6 +333,7 @@ export class TextLabel extends RenderableContainer {
                 this.charSize,
                 this.textureInfo,
                 worldMatrix,
+                this,
                 letter.x + charInfo.offsetX,
                 letter.y + charInfo.offsetY
             );

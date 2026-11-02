@@ -26,7 +26,7 @@ export class VEngineLiteApplication {
     private readonly MAX_STEPS = 10;
     private accumulator = 0;
 
-    constructor(private readonly canvas: HTMLCanvasElement, public readonly size: Size, scaleStrategy:AbstractScaleStrategy = new NoopScaleStrategy()) {
+    constructor(public readonly canvas: HTMLCanvasElement, public readonly size: Size, scaleStrategy:AbstractScaleStrategy = new NoopScaleStrategy()) {
         GLUtils.createAndHoldContext(canvas);
 
         canvas.width = size.w;

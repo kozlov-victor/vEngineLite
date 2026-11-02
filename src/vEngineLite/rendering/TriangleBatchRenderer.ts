@@ -2,10 +2,11 @@ import {GLUtils} from "../utils/GLUtils";
 import {Size} from "../utils/Size";
 import {Texture} from "./Texture";
 import {TextureInfo} from "../components/TextureInfo";
-import {n2, Triangle, Vertex} from "../types";
+import {Triangle, Vertex} from "../types";
 import {Mat2d} from "../utils/Mat2d";
 import {Color} from "./Color";
 import {VEngineLiteApplication} from "../application/VEngineLiteApplication";
+import {RenderableContainer} from "@vEngineLite/gameObject/base/RenderableContainer";
 
 
 export class TriangleBatchRenderer {
@@ -39,6 +40,8 @@ export class TriangleBatchRenderer {
         v3: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0],transformedPosition: [0,0]},
     };
     private readonly viewProjMatrixValues = new Float32Array(9);
+
+    private readonly _interactiveRenderedStack: RenderableContainer[] = [];
 
     constructor(private readonly app: VEngineLiteApplication) {
         this.vertexData = new Float32Array(
@@ -181,7 +184,7 @@ export class TriangleBatchRenderer {
         this.currentTriangle++;
     }
 
-    public batchSprite(size: Size, textureInfo: TextureInfo, worldMatrix: Mat2d, x = 0, y = 0) {
+    public batchSprite(size: Size, textureInfo: TextureInfo, worldMatrix: Mat2d, target: RenderableContainer|undefined, x = 0, y = 0) {
 
         const uv = textureInfo.rect.uv;
         const objWidth = size.w, objHeight = size.h;
@@ -226,6 +229,11 @@ export class TriangleBatchRenderer {
         t.v3.colorTint = colNorm;
         worldMatrix.transformPoint(t.v3.position, t.v3.transformedPosition);
         this.batchTriangle(t,textureInfo.texture,worldMatrix);
+        if (target && target.interactive && target.pointerHitArea) {
+            target.pointerHitArea.updateHitPoint(1, t.v1.transformedPosition);
+            target.pointerHitArea.updateHitPoint(2, t.v2.transformedPosition);
+            target.pointerHitArea.updateHitPoint(3, t.v3.transformedPosition);
+        }
 
         /*
               v2|
@@ -244,14 +252,23 @@ export class TriangleBatchRenderer {
         worldMatrix.transformPoint(t.v1.position, t.v1.transformedPosition);
         // інші вершини вже були трансформовані, тому не потрібно повторно викликати transformPoint для них
         this.batchTriangle(t,textureInfo.texture,worldMatrix);
+        if (target && target.interactive && target.pointerHitArea) {
+            target.pointerHitArea.updateHitPoint(4, t.v1.transformedPosition);
+            this._interactiveRenderedStack.push(target);
+        }
     }
 
-    public clearRenderBuffer(color: Color) {
+    public clear(color: Color) {
         const gl = GLUtils.getContext();
         const normColor = color.getNormalized();
         gl.viewport(0, 0, this.app.viewPort.w, this.app.viewPort.h);
         gl.clearColor(normColor[0], normColor[1], normColor[2], normColor[3]);
         gl.clear(gl.COLOR_BUFFER_BIT);
+        this._interactiveRenderedStack.length = 0;
+    }
+
+    public get interactiveRenderedStack() {
+        return this._interactiveRenderedStack;
     }
 
     private updateViewProjectionMatrix() {

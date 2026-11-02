@@ -1,4 +1,4 @@
-import {IUpdateable} from "../types";
+import {IUpdateable} from "../../types";
 
 type Callback = ()=>void;
 
