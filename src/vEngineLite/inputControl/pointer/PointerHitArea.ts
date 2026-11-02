@@ -2,6 +2,8 @@ import {n2} from "@vEngineLite/types";
 
 export interface IPointerEvent {
     type: PointerEventType;
+    pointerId: number;
+    pointerType: string;
     x: number;
     y: number;
     mouseDown: boolean;
@@ -14,6 +16,7 @@ export enum PointerEventType {
     MOUSE_UP = 'mouseup',
     MOUSE_MOVE = 'mousemove',
     MOUSE_LEAVE = 'mouseleave',
+    POINTER_CANCEL = 'pointercancel',
 }
 
 /**
