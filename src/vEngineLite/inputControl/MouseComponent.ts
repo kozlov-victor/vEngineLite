@@ -1,3 +1,4 @@
+import {n2} from "@vEngineLite/types";
 
 export interface MouseEvent {
     type: MouseEventType;
@@ -14,6 +15,20 @@ export enum MouseEventType {
     MOUSE_MOVE = 'mousemove'
 }
 
+/**
+ p1-----------p2
+ |           |
+ |           |
+ |           |
+ p4-----------p3
+ */
+export interface HitTrapezium {
+    p1: n2;
+    p2: n2;
+    p3: n2;
+    p4: n2;
+}
+
 export interface IMouseComponent {
     on(event: MouseEventType, callback: MouseCallback): void;
     off(event: MouseEventType, callback: MouseCallback): void;
@@ -23,6 +38,12 @@ export interface IMouseComponent {
 export class MouseComponent implements IMouseComponent {
     private listeners: Map<MouseEventType, MouseCallback[]> = new Map();
     private _interactive = false;
+    private readonly hitTrapezium: HitTrapezium = {
+        p1: [0,0],
+        p2: [0,0],
+        p3: [0,0],
+        p4: [0,0]
+    };
 
     public on(event: MouseEventType, callback: MouseCallback) {
         if (!this.listeners.has(event)) {
@@ -58,6 +79,17 @@ export class MouseComponent implements IMouseComponent {
 
     public get interactive() {
         return this._interactive;
+    }
+
+    public updateHitTrapezium(p1: n2, p2: n2, p3: n2, p4: n2) {
+        this.hitTrapezium.p1[0] = p1[0];
+        this.hitTrapezium.p1[1] = p1[1];
+        this.hitTrapezium.p2[0] = p2[0];
+        this.hitTrapezium.p2[1] = p2[1];
+        this.hitTrapezium.p3[0] = p3[0];
+        this.hitTrapezium.p3[1] = p3[1];
+        this.hitTrapezium.p4[0] = p4[0];
+        this.hitTrapezium.p4[1] = p4[1];
     }
 
 }

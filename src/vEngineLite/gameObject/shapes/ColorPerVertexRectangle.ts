@@ -18,25 +18,29 @@ export class ColorPerVertexRectangle extends RenderableContainer {
     private readonly a: Vertex = {
         position: [0,0],
         textCoord: [0,0],
-        colorTint: this.colorA.getNormalized()
+        colorTint: this.colorA.getNormalized(),
+        transformedPosition: [0,0]
     }
 
     private readonly b: Vertex = {
         position: [0,0],
         textCoord: [0,0],
-        colorTint: this.colorB.getNormalized()
+        colorTint: this.colorB.getNormalized(),
+        transformedPosition: [0,0]
     }
 
     private readonly c: Vertex = {
         position: [0,0],
         textCoord: [0,0],
-        colorTint: this.colorC.getNormalized()
+        colorTint: this.colorC.getNormalized(),
+        transformedPosition: [0,0]
     }
 
     private readonly d: Vertex = {
         position: [0,0],
         textCoord: [0,0],
-        colorTint: this.colorD.getNormalized()
+        colorTint: this.colorD.getNormalized(),
+        transformedPosition: [0,0]
     }
 
     private readonly triangle1:Triangle = {

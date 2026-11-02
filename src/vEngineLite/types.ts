@@ -28,6 +28,7 @@ export interface Vertex {
     position: n2;
     textCoord: n2;
     colorTint: n4;
+    transformedPosition: n2;
 }
 
 export interface Triangle {

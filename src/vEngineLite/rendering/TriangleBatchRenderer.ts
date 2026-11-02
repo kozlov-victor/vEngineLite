@@ -33,11 +33,10 @@ export class TriangleBatchRenderer {
     private readonly projMatrix = new Mat2d();
     private readonly viewMatrix = new Mat2d();
     private readonly viewProjMatrix = new Mat2d();
-    private readonly point: n2 = [0,0];
     private readonly triangle: Triangle = {
-        v1: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
-        v2: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
-        v3: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0]},
+        v1: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0],transformedPosition: [0,0]},
+        v2: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0],transformedPosition: [0,0]},
+        v3: {position: [0,0],textCoord: [0,0],colorTint:[0,0,0,0],transformedPosition: [0,0]},
     };
     private readonly viewProjMatrixValues = new Float32Array(9);
 
@@ -150,10 +149,9 @@ export class TriangleBatchRenderer {
         gl.vertexAttribPointer(this.colorTintAttributeLocation, v4, gl.FLOAT, false, stride, offset * float32Size);
     }
 
-    private batchVertex(v: Vertex, worldMatrix: Mat2d, i: number) {
+    private batchVertex(v: Vertex, i: number) {
         const vData = this.vertexData;
-        const point = worldMatrix.transformPoint(v.position[0], v.position[1], this.point);
-        vData[i] = point[0]; vData[i + 1] = point[1]; vData[i + 2] = v.textCoord[0]; vData[i + 3] = v.textCoord[1];
+        vData[i] = v.transformedPosition[0]; vData[i + 1] = v.transformedPosition[1]; vData[i + 2] = v.textCoord[0]; vData[i + 3] = v.textCoord[1];
         vData[i + 4] = v.colorTint[0]; vData[i + 5] = v.colorTint[1]; vData[i + 6] = v.colorTint[2]; vData[i + 7] = v.colorTint[3];
     }
 
@@ -172,10 +170,13 @@ export class TriangleBatchRenderer {
         let i = this.currentTriangle * TriangleBatchRenderer.VERTICES_IN_TRIANGLE * TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX;
         const size = TriangleBatchRenderer.ATTRIBUTE_ELEMENTS_PER_VERTEX;
 
+        worldMatrix.transformPoint(triangle.v1.position, triangle.v1.transformedPosition);
+        worldMatrix.transformPoint(triangle.v2.position, triangle.v2.transformedPosition);
+        worldMatrix.transformPoint(triangle.v3.position, triangle.v3.transformedPosition);
 
-        this.batchVertex(triangle.v1, worldMatrix, i);
-        this.batchVertex(triangle.v2, worldMatrix, i+size);
-        this.batchVertex(triangle.v3, worldMatrix, i+size*2);
+        this.batchVertex(triangle.v1, i);
+        this.batchVertex(triangle.v2, i+size);
+        this.batchVertex(triangle.v3, i+size*2);
 
         this.currentTriangle++;
     }
@@ -193,6 +194,15 @@ export class TriangleBatchRenderer {
         const colNorm = textureInfo.color.getNormalized();
 
         const t = this.triangle;
+
+
+        /*
+        v1-----v2
+        |    *
+        |  *
+        v3*
+         */
+
         // triangle 1
         // v1
         t.v1.position[0] = x;
@@ -200,39 +210,39 @@ export class TriangleBatchRenderer {
         t.v1.textCoord[0] = u;
         t.v1.textCoord[1] = v;
         t.v1.colorTint = colNorm;
+        worldMatrix.transformPoint(t.v1.position, t.v1.transformedPosition);
         // v2
         t.v2.position[0] = x + objWidth;
         t.v2.position[1] = y;
         t.v2.textCoord[0] = u + texFrameWidth;
         t.v2.textCoord[1] = v;
         t.v2.colorTint = colNorm;
+        worldMatrix.transformPoint(t.v2.position, t.v2.transformedPosition);
         // v3
         t.v3.position[0] = x;
         t.v3.position[1] = y + objHeight;
         t.v3.textCoord[0] = u;
         t.v3.textCoord[1] = v + texFrameHeight;
         t.v3.colorTint = colNorm;
+        worldMatrix.transformPoint(t.v3.position, t.v3.transformedPosition);
         this.batchTriangle(t,textureInfo.texture,worldMatrix);
+
+        /*
+              v2|
+             *  |
+           *    |
+        v3*----v1
+        */
 
         // triangle 2
         // v1
-        t.v1.position[0] = x;
+        t.v1.position[0] = x + objWidth;
         t.v1.position[1] = y + objHeight;
-        t.v1.textCoord[0] = u;
+        t.v1.textCoord[0] = u + texFrameWidth;
         t.v1.textCoord[1] = v + texFrameHeight;
         //t.v1.colorTint = colNorm;
-        // v2
-        t.v2.position[0] = x + objWidth;
-        t.v2.position[1] = y;
-        t.v2.textCoord[0] = u + texFrameWidth;
-        t.v2.textCoord[1] = v;
-        //t.v2.colorTint = colNorm;
-        // v3
-        t.v3.position[0] = x + objWidth;
-        t.v3.position[1] = y + objHeight;
-        t.v3.textCoord[0] = u + texFrameWidth;
-        t.v3.textCoord[1] = v + texFrameHeight;
-        //t.v3.colorTint = colNorm;
+        worldMatrix.transformPoint(t.v1.position, t.v1.transformedPosition);
+        // інші вершини вже були трансформовані, тому не потрібно повторно викликати transformPoint для них
         this.batchTriangle(t,textureInfo.texture,worldMatrix);
     }
 

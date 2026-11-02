@@ -136,7 +136,7 @@ export class Mat2d {
         return out;
     }
 
-    public transformPoint(x: number, y: number, out: n2 = [0,0]): n2 {
+    public transformPoint([x,y]:n2, out: n2 = [0,0]): n2 {
         const [a, b, c, d, tx, ty] = this.values;
         out[0] = a * x + c * y + tx;
         out[1] = b * x + d * y + ty;

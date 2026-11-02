@@ -30,7 +30,8 @@ export class MeshFactory {
         const centerVertex: Vertex = {
             position: center,
             textCoord: [0.5, 0.5],
-            colorTint: color
+            colorTint: color,
+            transformedPosition: [0, 0]
         };
 
         const vertices: Vertex[] = [];
@@ -46,13 +47,12 @@ export class MeshFactory {
                     center[0] + cos * radiusX,
                     center[1] + sin * radiusY
                 ],
-
                 textCoord: [
                     0.5 + cos * 0.5,
                     0.5 + sin * 0.5
                 ],
-
-                colorTint: color
+                colorTint: color,
+                transformedPosition: [0, 0]
             });
         }
 
