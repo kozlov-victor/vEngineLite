@@ -126,7 +126,10 @@ export class MainScene extends Scene {
                 collideWithGroup: this.collisionService.rigidBodyGroup,
             });
             platform.on(PointerEventType.MOUSE_MOVE, (event) => {
-                console.log('Mouse move event detected on platform');
+                platform.color.r = 200;
+            });
+            platform.on(PointerEventType.MOUSE_LEAVE, (event) => {
+                platform.color.r = 0;
             });
         }
 

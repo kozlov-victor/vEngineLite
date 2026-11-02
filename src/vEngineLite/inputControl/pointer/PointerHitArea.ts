@@ -12,7 +12,8 @@ export type PointerCallback = (event: IPointerEvent) => void;
 export enum PointerEventType {
     MOUSE_DOWN = 'mousedown',
     MOUSE_UP = 'mouseup',
-    MOUSE_MOVE = 'mousemove'
+    MOUSE_MOVE = 'mousemove',
+    MOUSE_LEAVE = 'mouseleave',
 }
 
 /**
