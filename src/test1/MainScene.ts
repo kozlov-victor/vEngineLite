@@ -11,11 +11,11 @@ import {ITiledTileMap, TileMaps} from "@vEngineLite/gameObject/TileMaps";
 import {TileMap} from "@vEngineLite/gameObject/TileMap";
 import {LookAheadFollowStrategy} from "@vEngineLite/camera/follow/LookAheadFollowStrategy";
 import {VEngineLiteApplication} from "@vEngineLite/application/VEngineLiteApplication";
-import {Font} from "@vEngineLite/gameObject/text/Font";
 import {TextLabel} from "@vEngineLite/gameObject/text/TextLabel";
 import {ParticleEmitter} from "@vEngineLite/particle/ParticleEmitter";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
 import {Ellipse} from "@vEngineLite/gameObject/shapes/Ellipse";
+import {createFontFromAngelCode} from "@vEngineLite/gameObject/text/font-factory/angel-code-font-parser";
 
 const col = new CollisionGroupManager();
 export const rigidBodyGroup = col.nextGroup();
@@ -44,7 +44,13 @@ export class MainScene extends Scene {
             .add('tileset', 'image', 'tiles.png')
             .add('tilemap', 'json', 'map.json')
             .add('cat', 'image', 'hero.png')
-            .add('cat-sprite-sheet', 'json', 'hero.json');
+            .add('cat-sprite-sheet', 'json', 'hero.json')
+            .add('Norwester-Multi-32', 'text', 'Norwester-Multi-32.fnt')
+            .add('Norwester-Multi_0.png', 'image', 'Norwester-Multi_0.png')
+            .add('Norwester-Multi_1.png', 'image', 'Norwester-Multi_1.png')
+            .add('Norwester-Multi_2.png', 'image', 'Norwester-Multi_2.png')
+            .add('Norwester-Multi_3.png', 'image', 'Norwester-Multi_3.png')
+        ;
     }
 
     override onProgress(percents: number) {
@@ -197,7 +203,8 @@ export class MainScene extends Scene {
             rect.color.fromCssColor('#8f8f8f33');
             this.addObject(rect);
 
-            const font = Font.fromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
+            //const font = createFontFromCss({fontFamily:'Arial',fontSize: 25, additionalChars: '😍💁👌🎍'});
+            const font = createFontFromAngelCode(this.app.assetManager.getText('Norwester-Multi-32'),this.app.assetManager);
             const textLabel = new TextLabel(this,font);
             textLabel.setText(
                 '😍Hello World\n💁👌це 🎍демо\nтекст! Нам дуже подобається оце от все. Перевірка вирівнювання тесту. Тут довгий тест новий. І ще слово одне'

@@ -1,6 +1,6 @@
 import {UrlLoader} from "./UrlLoader";
 
-type AssetType = 'image' | 'audio' | 'json'|'text';
+type AssetType = 'image'|'audio'|'json'|'text';
 
 interface AssetManifestItem {
     key: string;
@@ -41,6 +41,10 @@ export class AssetManager {
         return this.get<HTMLImageElement>(key,'image');
     }
 
+    public getText(key: string) {
+        return this.get<string>(key,'text');
+    }
+
     public getJson<T>(key: string) {
         return this.get<T>(key,'json');
     }
@@ -78,8 +82,9 @@ export class AssetManager {
                     loadPromise = this.loadImage(item.path);
                     break;
                 case 'json':
+                case 'text':
                     loadPromise =
-                        this.loadJson(item.path,n=>{
+                        this.loadContent(item.path,item.type,n=>{
                             const progress = (loadedCount + n) / totalAssets;
                             onProgress?.(progress);
                         });
@@ -113,9 +118,9 @@ export class AssetManager {
         });
     }
 
-    private loadJson<T>(path: string,onProgress?:(n:number)=>void): Promise<T> {
+    private loadContent<T>(path: string,responseType:XMLHttpRequestResponseType,onProgress?:(n:number)=>void): Promise<T> {
         const loader = new UrlLoader();
-        return loader.load(path,"json",onProgress);
+        return loader.load(path,responseType,onProgress);
     }
 
 }

@@ -11,7 +11,7 @@ export interface AssetsFolderCopyInfo {
     filters?: string[];
 }
 
-const defaultFilters = ['png','jpg','jpeg','gif','svg','ico','webp','woff','woff2','ttf','eot','mp3','wav','ogg','json','xml','txt','csv','md','html','css','js'];
+const defaultFilters = ['png','jpg','jpeg','gif','svg','ico','webp','woff','woff2','ttf','eot','mp3','wav','ogg','json','xml','txt','csv','md','html','css','js','fnt'];
 
 export class AssetsPlugin implements MiniBundlerPostTransformPlugin {
 
