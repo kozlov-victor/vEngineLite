@@ -70,7 +70,7 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         return new ArcadeRigidBody(params,this.nextId++);
     }
 
-    public updateBody(body: RigidBody, _dt: number): void {
+    public updateBody(body: RigidBody, dt: number): void {
         const arcadeRigidBody = body as ArcadeRigidBody;
         this.allRigidBodies.push(arcadeRigidBody);
     }
