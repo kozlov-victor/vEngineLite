@@ -113,7 +113,7 @@ class PackerDH {
     }
 
     public sortByNonIncreasingHeight(rectangles:IFrame[]){
-        rectangles.sort((o1,o2)=>o2.height>o1.height?1:-1);
+        rectangles.sort((a, b) => b.height - a.height);
     }
 
 }

@@ -1,4 +1,4 @@
-import {HeroGameObject} from "../HeroGameObject";
+import {HeroGameObject, ShootType} from "../HeroGameObject";
 import {HeroIdleState} from "./HeroIdleState";
 import {Scene} from "@vEngineLite/application/Scene";
 import {HeroAbstractMovingState} from "./abstracts/HeroAbstractMovingState";
@@ -15,7 +15,7 @@ export class HeroFireState extends HeroAbstractMovingState {
     }
 
     override onAnimationStarted() {
-        this.hero.shoot(); // постріл
+        this.hero.shoot(ShootType.STAND); // постріл
         this.hero.getRigidBody().velocity.x = -100 * this.hero.scale.x; // віддача
     }
 

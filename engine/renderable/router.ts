@@ -21,7 +21,8 @@ export class Router {
 
     public setUp(map:Record<string, ()=>IElementFactoryItem>) {
         Object.keys(map).forEach((key:string) => {
-            this.registry[key] = map[key];
+            const normKey = this.normalizePath(key);
+            this.registry[normKey] = map[key];
         });
     }
 
@@ -29,7 +30,6 @@ export class Router {
         let elementFactory:()=>IElementFactoryItem;
         const path = this.getPath();
         if (this.registry[path]) elementFactory = this.registry[path];
-        else if (path==='' && this.registry['/']) elementFactory = this.registry['/'];
         else if (this.registry['*']) elementFactory = this.registry['*'];
         else throw new Error(`no component found for ${path}`);
         return elementFactory();
@@ -50,17 +50,14 @@ export class Router {
             if (urlParams===undefined) urlParams = [];
             urlParams.push(`${k}=${val}`);
         });
-        location.hash = `${path}${urlParams===undefined?'':`?${urlParams.join('&')}`}`;
+        const normPath = this.normalizePath(path);
+        location.hash = `${normPath}${urlParams===undefined?'':`?${urlParams.join('&')}`}`;
     }
 
     public getPath() {
         let path = location.hash.replace('#','');
         path = path.split('?')[0];
-        if (path==='/') path = '';
-        else if (path.startsWith('/')) {
-            path = path.substr(1);
-        }
-        return path;
+        return this.normalizePath(path);
     }
 
     public getUrlParams() {
@@ -78,6 +75,17 @@ export class Router {
             params[k] = v;
         });
         return params;
+    }
+
+    private normalizePath(path: string): string {
+        if (path==='/') path = '';
+        else if (path.startsWith('/')) {
+            path = path.slice(1);
+        }
+        if (path.endsWith('/')) {
+            path = path.slice(0,path.length-1);
+        }
+        return path;
     }
 
 }

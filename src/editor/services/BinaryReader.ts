@@ -73,4 +73,12 @@ export class BinaryReader {
     skip(length: number): void {
         this.offset += length;
     }
+
+    seek(position: number): void {
+        if (position < 0 || position > this.data.length) {
+            throw new Error(`Invalid seek position: ${position}`);
+        }
+
+        this.offset = position;
+    }
 }

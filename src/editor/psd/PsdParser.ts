@@ -1,4 +1,4 @@
-import { BinaryReader } from "./BinaryReader";
+import { BinaryReader } from "../services/BinaryReader";
 
 export interface PsdHeader {
     version: number;

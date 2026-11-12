@@ -1,13 +1,13 @@
 import {BaseTsxComponent} from "@engine/renderable/tsx/base/baseTsxComponent";
 import {VEngineTsxFactory} from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 import {Reactive} from "@engine/renderable/tsx/decorator/reactive";
-import {Files} from "../services/files";
-import {Psd, PsdLayer, PsdParser} from "../psd/PsdParser";
-import {BinaryReader} from "../psd/BinaryReader";
+import {Files} from "../../services/files";
+import {Psd, PsdLayer, PsdParser} from "../../psd/PsdParser";
+import {BinaryReader} from "../../services/BinaryReader";
 import {DI} from "@engine/core/ioc";
 import {PsdLayerComponent} from "./PsdLayerComponent";
-import {SpriteSheetRenderer} from "../spritesheet/SpriteSheetRenderer";
-import {IPackedSpriteSheet, SpriteSheetPacker} from "../spritesheet/SpriteSheetPacker";
+import {SpriteSheetRenderer} from "../../spritesheet/SpriteSheetRenderer";
+import {IPackedSpriteSheet, SpriteSheetPacker} from "../../spritesheet/SpriteSheetPacker";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
 import {ReactiveForm} from "@engine/renderable/tsx/dom/forms/reactive.form";
 

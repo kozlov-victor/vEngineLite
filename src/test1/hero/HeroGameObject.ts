@@ -18,6 +18,14 @@ import {Rectangle} from "@vEngineLite/gameObject/shapes/Rectangle";
 import {CollisionGroupManager} from "@vEngineLite/physics/CollisionGroupManager";
 import {DI} from "@engine/core/ioc";
 import {CollisionService} from "../services/CollisionService";
+import {HeroSitFireState} from "./states/HeroSitFireState";
+import {HeroLookUpFireState} from "./states/HeroLookUpFireState";
+
+export enum ShootType {
+    STAND,
+    SIT,
+    UP
+}
 
 @DI.Injectable()
 export class HeroGameObject extends Sprite {
@@ -28,8 +36,10 @@ export class HeroGameObject extends Sprite {
     public readonly walkAnimation:FrameAnimation;
     public readonly idleAnimation:FrameAnimation;
     public readonly lookUpAnimation:FrameAnimation;
+    public readonly lookUpFireAnimation:FrameAnimation;
     public readonly fallAnimation:FrameAnimation;
     public readonly sitAnimation:FrameAnimation;
+    public readonly sitFireAnimation:FrameAnimation;
     public readonly attack1Animation:FrameAnimation;
     public readonly attack2Animation:FrameAnimation;
     public readonly fireAnimation:FrameAnimation;
@@ -78,14 +88,26 @@ export class HeroGameObject extends Sprite {
         this.sitAnimation =
             new FrameAnimation(
                 this,
-                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_sit_down1','hero_sit_down2']),
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_sit-down1','hero_sit-down2']),
                 1500
+            );
+        this.sitFireAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_sit-down-fire1','hero_sit-down-fire2']),
+                450, 1
             );
         this.lookUpAnimation =
             new FrameAnimation(
                 this,
                 FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_look-up1','hero_look-up2']),
                 1600
+            );
+        this.lookUpFireAnimation =
+            new FrameAnimation(
+                this,
+                FrameAnimation.spriteSheetFramesByName(spriteSheet,['hero_look-up-fire1','hero_look-up-fire2']),
+                450, 1
             );
         this.attack1Animation =
             new FrameAnimation(
@@ -110,7 +132,8 @@ export class HeroGameObject extends Sprite {
             new HeroIdleState(this.scene, this), new HeroLookUpState(this.scene, this), new HeroWalkState(this.scene, this),
             new HeroFallState(this.scene, this), new HeroSitState(this.scene, this),
             new HeroAttack1State(this.scene, this), new HeroAttack2State(this.scene, this),
-            new HeroFireState(this.scene, this),
+            new HeroFireState(this.scene, this), new HeroSitFireState(this.scene, this),
+            new HeroLookUpFireState(this.scene, this),
         )
         this.animationStateMachine.setInitialState(HeroIdleState.name);
     }
@@ -125,7 +148,7 @@ export class HeroGameObject extends Sprite {
         return this.bodyRef;
     }
 
-    public shoot() {
+    public shoot(type: ShootType) {
         const bullet = new Rectangle(this.scene);
         bullet.size.wh(5);
         bullet.color.fromCssColor('#8a0101');
@@ -139,15 +162,29 @@ export class HeroGameObject extends Sprite {
             mass: 0.0001,
             gravityFactor: 0.05,
         });
-        bulletBody.velocity.x = Math.sign(this.scale.x) * 500;
         bullet.body = bulletBody;
-        bullet.position.y = this.position.y + this.regularBodyRect.y + 28;
-        if (this.scale.x>0) {
-            bullet.position.x = this.position.x + this.regularBodyRect.x;
+        let bulletOffsetY = 0;
+        const bulletVelocity = 500;
+        if (type === ShootType.SIT) {
+            bulletOffsetY = 36;
+            bulletBody.velocity.x = Math.sign(this.scale.x) * bulletVelocity;
+        }
+        else if (type === ShootType.STAND) {
+            bulletOffsetY = 28;
+            bulletBody.velocity.x = Math.sign(this.scale.x) * bulletVelocity;
         }
         else {
-            bullet.position.x = this.position.x + this.regularBodyRect.x;
+            bulletBody.velocity.y = -bulletVelocity;
         }
+
+        bullet.position.y = this.position.y + this.regularBodyRect.y + bulletOffsetY;
+
+        let bulletOffsetX = 0;
+        if (this.scale.x<0) {
+          bulletOffsetX = 10;
+        }
+        bullet.position.x = this.position.x + this.regularBodyRect.x + bulletOffsetX;
+
         this.scene.insertBefore(bullet,this);
         bulletBody.onCollided = _=>{
             bulletBody.gravityFactor = 1;

@@ -36,11 +36,13 @@ export class AssetsPlugin implements MiniBundlerPostTransformPlugin {
             const filters = assetFolder.filters ?? defaultFilters;
             const outputPath = path.join(this.outDir, assetFolder.to);
             if (assetFolder.to !=='' && assetFolder.to !=='/') await fs.rm(outputPath, {recursive: true, force: true});
-            await this.copyAssets(assetFolder.from, outputPath, filters);
+            const allFiles:string[] = [];
+            await this.copyAssets(assetFolder.from, outputPath, '',filters, allFiles);
+            await fs.writeFile(path.join(outputPath, 'assets.json'), JSON.stringify(allFiles, undefined, 4));
         }
     }
 
-    private async copyAssets(sourcePath: string, outputPath: string, filters: string[]) {
+    private async copyAssets(sourcePath: string, outputPath: string, localPath: string, filters: string[], allFiles: string[]) {
         const entries = await fs.readdir(sourcePath, {withFileTypes: true});
         await fs.mkdir(outputPath, {recursive: true});
 
@@ -49,10 +51,14 @@ export class AssetsPlugin implements MiniBundlerPostTransformPlugin {
             const destFile = path.join(outputPath, entry.name);
 
             if (entry.isDirectory()) {
-                await this.copyAssets(srcFile, destFile, filters);
+                await this.copyAssets(srcFile, destFile, this.joinUrlUnix(localPath, entry.name), filters, allFiles);
             } else if (entry.isFile()) {
                 const ext = path.extname(entry.name).substring(1).toLowerCase();
                 if (filters.includes(ext)) {
+                    const fileName = path.relative(outputPath, destFile)
+                        .split(path.sep)
+                        .join('/');
+                    allFiles.push(this.joinUrlUnix(localPath, fileName));
                     await fs.copyFile(srcFile, destFile);
                 }
             }
@@ -63,6 +69,10 @@ export class AssetsPlugin implements MiniBundlerPostTransformPlugin {
         return [];
     }
 
+    private joinUrlUnix(a:string,b:string): string {
+        if (!a) return b;
+        return `${a}/${b}`;
+    }
 
 
 }
