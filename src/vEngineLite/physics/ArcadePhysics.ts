@@ -60,15 +60,17 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
 
     private nextId = 0;
     private readonly carried  = new Set<number>();
-    private readonly collisionEvents = new Set<string>();
+    private readonly collisionEvents = new Set<number>();
     private readonly uniformGrid = new UniformGrid(128);
     private readonly allRigidBodies: ArcadeRigidBody[] = [];
+    private readonly bodyGridStates = new Map<number, { minCellX: number; minCellY: number; maxCellX: number; maxCellY: number; type: ArcadeRigidBodyType; collisionGroup: number; collideWithGroup: number; ignoreCollisionWithGroup: number; nonBlockingCollisionWithGroup: number; }>();
+    private pairCacheDirty = true;
 
     public createRigidBody(params: ArcadeRigidBodyParams): ArcadeRigidBody {
         return new ArcadeRigidBody(params,this.nextId++);
     }
 
-    public updateBody(body: RigidBody, _dt: number): void {
+    public updateBody(body: RigidBody, dt: number): void {
         const arcadeRigidBody = body as ArcadeRigidBody;
         this.allRigidBodies.push(arcadeRigidBody);
     }
@@ -78,69 +80,17 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
     }
 
     public updateWorld(dt: number): void {
-
-        const carried = this.carried;
-        this.collisionEvents.clear();
         const bodies = this.allRigidBodies;
+        if (bodies.length === 0) {
+            return;
+        }
+
         const substepCount = this.getSubstepCount(bodies, dt);
         const substepDt = dt / substepCount;
 
         for (let substep = 0; substep < substepCount; substep++) {
-            for (const body of bodies) {
-                this.integratePhysics(body, substepDt);
-            }
-
-            // Carry bodies by their supports before rebuilding support contacts.
-            carried.clear();
-            for (const body of bodies) {
-                this.applySupportMovement(body, carried);
-            }
-
-            for (const body of bodies) {
-                body.support = undefined;
-            }
-
-
-            const SOLVER_ITERATIONS = 4;
-            let pairs = this.uniformGrid.getPotentialPairs(bodies);
-
-            for (
-                let iteration = 0;
-                iteration < SOLVER_ITERATIONS;
-                iteration++
-            ) {
-                if (
-                    iteration > 0 &&
-                    this.uniformGrid.havePotentialPairsChanged(bodies)
-                ) {
-                    pairs = this.uniformGrid.getPotentialPairs(bodies);
-                }
-
-                let solverChanged = false;
-                for (const body of bodies) {
-                    body.support = undefined;
-                }
-
-                for (const [a, b] of pairs) {
-                    const collision = this.detectCollision(a, b);
-                    if (!collision) continue;
-
-                    solverChanged = this.resolveCollision(a,b,collision) || solverChanged;
-                    const pairKey = this.getCollisionPairKey(a, b);
-                    if (!this.collisionEvents.has(pairKey)) {
-                        this.collisionEvents.add(pairKey);
-                        a.onCollided?.(b);
-                        b.onCollided?.(a);
-                        solverChanged = true;
-                    }
-
-                    this.resolveSupport(a,b,collision);
-                }
-
-                if (!solverChanged) {
-                    break;
-                }
-            }
+            this.integrateSubstep(bodies, substepDt);
+            this.solveSupportAndCollisions(bodies);
         }
 
         for (const body of bodies) {
@@ -148,8 +98,139 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
         }
     }
 
+    private integrateSubstep(bodies: ArcadeRigidBody[], dt: number): void {
+        for (const body of bodies) {
+            this.integratePhysics(body, dt);
+        }
+
+        this.carried.clear();
+        for (const body of bodies) {
+            this.applySupportMovement(body, this.carried);
+        }
+
+        for (const body of bodies) {
+            body.support = undefined;
+        }
+    }
+
+    private solveSupportAndCollisions(bodies: ArcadeRigidBody[]): void {
+        const solverIterations = this.getSolverIterations(bodies);
+        let pairs = this.getPotentialPairsForBodies(bodies);
+
+        for (let iteration = 0; iteration < solverIterations; iteration++) {
+            if (
+                iteration > 0 &&
+                this.shouldRebuildPairCache(bodies)
+            ) {
+                pairs = this.getPotentialPairsForBodies(bodies);
+            }
+
+            let solverChanged = false;
+            for (const body of bodies) {
+                body.support = undefined;
+            }
+
+            for (const [a, b] of pairs) {
+                const collision = this.detectCollision(a, b);
+                if (!collision) continue;
+
+                solverChanged = this.resolveCollision(a, b, collision) || solverChanged;
+                const pairKey = this.getCollisionPairKey(a, b);
+                if (!this.collisionEvents.has(pairKey)) {
+                    this.collisionEvents.add(pairKey);
+                    a.onCollided?.(b);
+                    b.onCollided?.(a);
+                    solverChanged = true;
+                }
+
+                this.resolveSupport(a, b, collision);
+            }
+
+            if (!solverChanged) {
+                break;
+            }
+        }
+    }
+
+    private getPotentialPairsForBodies(bodies: ArcadeRigidBody[]) {
+        if (this.pairCacheDirty || this.bodyGridStates.size !== bodies.length) {
+            this.bodyGridStates.clear();
+            for (const body of bodies) {
+                this.bodyGridStates.set(body.id, this.getBodyGridState(body));
+            }
+            this.pairCacheDirty = false;
+            return this.uniformGrid.getPotentialPairs(bodies);
+        }
+
+        return this.uniformGrid.getPotentialPairs(bodies);
+    }
+
+    private shouldRebuildPairCache(bodies: ArcadeRigidBody[]) {
+        if (bodies.length !== this.bodyGridStates.size) {
+            this.pairCacheDirty = true;
+            return true;
+        }
+
+        let changed = false;
+        for (const body of bodies) {
+            const nextState = this.getBodyGridState(body);
+            const previousState = this.bodyGridStates.get(body.id);
+
+            if (!previousState ||
+                previousState.minCellX !== nextState.minCellX ||
+                previousState.minCellY !== nextState.minCellY ||
+                previousState.maxCellX !== nextState.maxCellX ||
+                previousState.maxCellY !== nextState.maxCellY ||
+                previousState.type !== nextState.type ||
+                previousState.collisionGroup !== nextState.collisionGroup ||
+                previousState.collideWithGroup !== nextState.collideWithGroup ||
+                previousState.ignoreCollisionWithGroup !== nextState.ignoreCollisionWithGroup ||
+                previousState.nonBlockingCollisionWithGroup !== nextState.nonBlockingCollisionWithGroup
+            ) {
+                changed = true;
+            }
+
+            this.bodyGridStates.set(body.id, nextState);
+        }
+
+        if (changed) {
+            this.pairCacheDirty = true;
+            return true;
+        }
+
+        return false;
+    }
+
+    private getBodyGridState(body: ArcadeRigidBody) {
+        const posX = body.target.position.x + body.rect.x;
+        const posY = body.target.position.y + body.rect.y;
+        const inverseCellSize = 1 / 128;
+
+        return {
+            minCellX: Math.floor(posX * inverseCellSize),
+            minCellY: Math.floor(posY * inverseCellSize),
+            maxCellX: Math.floor((posX + body.rect.width) * inverseCellSize),
+            maxCellY: Math.floor((posY + body.rect.height) * inverseCellSize),
+            type: body.type,
+            collisionGroup: body.collisionGroup.bitMask,
+            collideWithGroup: body.collideWithGroup.bitMask,
+            ignoreCollisionWithGroup: body.ignoreCollisionWithGroup.bitMask,
+            nonBlockingCollisionWithGroup: body.nonBlockingCollisionWithGroup.bitMask
+        };
+    }
+
+    private getSolverIterations(bodies: ArcadeRigidBody[]): number {
+        if (bodies.length >= 250) {
+            return 2;
+        }
+
+        return 4;
+    }
+
     private getCollisionPairKey(a: ArcadeRigidBody, b: ArcadeRigidBody) {
-        return a.id < b.id ? `${a.id}:${b.id}` : `${b.id}:${a.id}`;
+        const minId = a.id < b.id ? a.id : b.id;
+        const maxId = a.id < b.id ? b.id : a.id;
+        return minId * 0x1000000 + maxId;
     }
 
     private getSubstepCount(bodies: ArcadeRigidBody[], dt: number) {
@@ -187,7 +268,11 @@ export class ArcadePhysics implements IPhysics<ArcadeRigidBodyParams, ArcadeRigi
             return 1;
         }
 
-        return Math.max(1, Math.ceil(maximumMovement / (minimumExtent * 0.5)));
+        const desiredSubsteps = Math.ceil(
+            maximumMovement / (minimumExtent * 0.5)
+        );
+
+        return Math.max(1, Math.min(8, desiredSubsteps));
     }
 
     private detectCollision(a: ArcadeRigidBody, b: ArcadeRigidBody): Collision | null {
