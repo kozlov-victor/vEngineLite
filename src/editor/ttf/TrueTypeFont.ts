@@ -95,11 +95,6 @@ export interface GlyphSegment {
 }
 
 export interface BitmapGlyph {
-    codePoint: number;
-
-    // Номер сторінки атласу.
-    page: number;
-
     // Позиція та розмір у сторінці.
     x: number;
     y: number;
@@ -919,7 +914,6 @@ export class TrueTypeFont {
             return {
                 bitmap: new Bitmap(0, 0),
                 glyph: {
-                    codePoint,
                     x: 0,
                     y: 0,
                     width: 0,
@@ -927,7 +921,6 @@ export class TrueTypeFont {
                     offsetX: 0,
                     offsetY: 0,
                     advanceWidth,
-                    page: -1, // todo
                 }
             };
         }
@@ -940,7 +933,6 @@ export class TrueTypeFont {
             return {
                 bitmap: new Bitmap(0, 0),
                 glyph: {
-                    codePoint,
                     x: 0,
                     y: 0,
                     width: 0,
@@ -948,7 +940,6 @@ export class TrueTypeFont {
                     offsetX: 0,
                     offsetY: 0,
                     advanceWidth,
-                    page: -1 //todo
                 }
             };
         }
@@ -991,7 +982,6 @@ export class TrueTypeFont {
         return {
             bitmap,
             glyph: {
-                codePoint,
                 x: 0,
                 y: 0,
                 width,
@@ -999,7 +989,6 @@ export class TrueTypeFont {
                 offsetX: xMin,
                 offsetY: yMin,
                 advanceWidth,
-                page: -1 //todo
             }
         };
     }

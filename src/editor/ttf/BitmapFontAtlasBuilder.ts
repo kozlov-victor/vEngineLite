@@ -54,8 +54,6 @@ export class BitmapFontAtlasBuilder {
 
             if (bitmap.width === 0 || bitmap.height === 0) {
                 glyphs.set(source.codePoint, {
-                    codePoint: source.codePoint,
-                    page: -1,
                     x: 0,
                     y: 0,
                     width: 0,
@@ -141,8 +139,6 @@ export class BitmapFontAtlasBuilder {
                 }
 
                 glyphs.set(source.codePoint, {
-                    codePoint: source.codePoint,
-                    page: pageIndex,
                     x,
                     y,
                     width: glyphBitmap.width,

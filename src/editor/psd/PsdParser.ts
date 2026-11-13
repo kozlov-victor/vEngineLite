@@ -1,4 +1,5 @@
 import { BinaryReader } from "../services/BinaryReader";
+import {Files} from "../services/files";
 
 export interface PsdHeader {
     version: number;
@@ -77,7 +78,7 @@ export class PsdParser {
 
         // Layer and Mask Information
         const layers = this.readLayerAndMaskInfo().filter(l=>l.pixels.buffer.byteLength > 0);
-        const name = this.name.replace('.psd','');
+        const name = Files.getFileNameNoExt(this.name);
         return {name, header, layers};
     }
 

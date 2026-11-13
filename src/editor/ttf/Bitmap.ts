@@ -1,3 +1,4 @@
+import {Files} from "../services/files";
 
 export class Bitmap {
     readonly pixels: Uint8Array;
@@ -29,36 +30,50 @@ export class Bitmap {
         this.pixels.fill(0);
     }
 
-}
+    public drawToCanvas(canvas: HTMLCanvasElement) {
+        canvas.width = this.width;
+        canvas.height = this.height;
 
-export function drawBitmapToCanvas(
-    bitmap: Bitmap,
-    canvas: HTMLCanvasElement
-): void {
-    canvas.width = bitmap.width;
-    canvas.height = bitmap.height;
+        const ctx = canvas.getContext("2d");
 
-    const ctx = canvas.getContext("2d");
+        if (!ctx) {
+            throw new Error("Canvas 2D context is unavailable");
+        }
 
-    if (!ctx) {
-        throw new Error("Canvas 2D context is unavailable");
+        ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+        const imageData = ctx.createImageData(
+            this.width,
+            this.height
+        );
+
+        for (let i = 0; i < this.pixels.length; i++) {
+            const offset = i * 4;
+
+            imageData.data[offset] = 0;
+            imageData.data[offset + 1] = 0;
+            imageData.data[offset + 2] = 0;
+            imageData.data[offset + 3] = this.pixels[i];
+        }
+
+        ctx.putImageData(imageData, 0, 0);
     }
 
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    public async saveAsPng(fileName: string): Promise<void> {
+        const canvas = document.createElement("canvas");
+        this.drawToCanvas(canvas);
 
-    const imageData = ctx.createImageData(
-        bitmap.width,
-        bitmap.height
-    );
+        const blob = await new Promise<Blob>((resolve, reject) => {
+            canvas.toBlob(result => {
+                if (!result) {
+                    reject(new Error("Failed to encode bitmap as PNG"));
+                    return;
+                }
+                resolve(result);
+            }, "image/png");
+        });
 
-    for (let i = 0; i < bitmap.pixels.length; i++) {
-        const offset = i * 4;
-
-        imageData.data[offset] = 0;
-        imageData.data[offset + 1] = 0;
-        imageData.data[offset + 2] = 0;
-        imageData.data[offset + 3] = bitmap.pixels[i];
+        await Files.saveToFile(blob, fileName, undefined, "image/png");
     }
 
-    ctx.putImageData(imageData, 0, 0);
 }

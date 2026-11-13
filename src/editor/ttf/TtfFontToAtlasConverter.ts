@@ -22,6 +22,10 @@ export class TtfFontToAtlasConverter {
         return builder.build(sources);
     }
 
+    public saveAsFontJson(fileName: string, atlas: BitmapFontAtlas) {
+
+    }
+
     private getCodePointsFromChars(charset: string): number[] {
         return [...new Set(
             Array.from(charset, char => char.codePointAt(0)!)
