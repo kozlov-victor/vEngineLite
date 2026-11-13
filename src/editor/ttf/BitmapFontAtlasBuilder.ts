@@ -1,28 +1,16 @@
 import {Bitmap} from "./Bitmap";
 import { IFrame } from "@vEngineLite/types";
 import {TexturePacker} from "../spritesheet/TexturePacker";
-import {BitmapGlyph} from "./TrueTypeFont";
+import {BitmapGlyph, RasterizedGlyph} from "./TrueTypeFont";
 
-export interface BitmapFontPage {
-    index: number;
-    bitmap: Bitmap;
-}
 
 export interface BitmapFontAtlas {
-    pages: BitmapFontPage[];
-    glyphs: Map<number, BitmapGlyph>;
+    pages: Bitmap[];
+    glyphs: (BitmapGlyph & {pageIndex:number})[];
 }
 
-export interface GlyphSource {
-    codePoint: number;
-    bitmap: Bitmap;
-    offsetX: number;
-    offsetY: number;
-    advanceWidth: number;
-}
-
-interface GlyphFrame extends IFrame {
-    source: GlyphSource;
+export interface GlyphFrame extends IFrame {
+    source: RasterizedGlyph;
 }
 
 interface PackedPage {
@@ -39,11 +27,11 @@ export class BitmapFontAtlasBuilder {
     ) {}
 
     public build(
-        sources: GlyphSource[]
+        sources: RasterizedGlyph[]
     ): BitmapFontAtlas {
 
-        const glyphs = new Map<number, BitmapGlyph>();
-        const pages: BitmapFontPage[] = [];
+        const glyphs: (BitmapGlyph & {pageIndex:number})[] = [];
+        const pages: Bitmap[] = [];
 
         // Порожні гліфи одразу додаємо в метадані.
         const frames: GlyphFrame[] = [];
@@ -53,14 +41,16 @@ export class BitmapFontAtlasBuilder {
             const { bitmap } = source;
 
             if (bitmap.width === 0 || bitmap.height === 0) {
-                glyphs.set(source.codePoint, {
+                glyphs.push({
+                    pageIndex: 0,
+                    charCode: source.glyph.charCode,
                     x: 0,
                     y: 0,
                     width: 0,
                     height: 0,
-                    offsetX: source.offsetX,
-                    offsetY: source.offsetY,
-                    advanceWidth: source.advanceWidth
+                    offsetX: source.glyph.offsetX,
+                    offsetY: source.glyph.offsetY,
+                    advanceWidth: source.glyph.advanceWidth
                 });
 
                 continue;
@@ -118,41 +108,38 @@ export class BitmapFontAtlasBuilder {
             for (const rect of packed.rects) {
 
                 const source = rect.source;
-                const glyphBitmap = source.bitmap;
 
                 const x = rect.x + this.padding;
                 const y = rect.y + this.padding;
 
                 // Копіюємо рядки bitmap без зайвих циклів по пікселях.
-                for (let row = 0; row < glyphBitmap.height; row++) {
+                for (let row = 0; row < source.bitmap.height; row++) {
 
-                    const srcStart = row * glyphBitmap.width;
+                    const srcStart = row * source.bitmap.width;
                     const dstStart = (y + row) * bitmap.width + x;
 
                     bitmap.pixels.set(
-                        glyphBitmap.pixels.subarray(
+                        source.bitmap.pixels.subarray(
                             srcStart,
-                            srcStart + glyphBitmap.width
+                            srcStart + source.bitmap.width
                         ),
                         dstStart
                     );
                 }
 
-                glyphs.set(source.codePoint, {
+                glyphs.push({
+                    pageIndex,
+                    charCode: source.glyph.charCode,
                     x,
                     y,
-                    width: glyphBitmap.width,
-                    height: glyphBitmap.height,
-                    offsetX: source.offsetX,
-                    offsetY: source.offsetY,
-                    advanceWidth: source.advanceWidth
+                    width: source.bitmap.width,
+                    height: source.bitmap.height,
+                    offsetX: source.glyph.offsetX,
+                    offsetY: source.glyph.offsetY,
+                    advanceWidth: source.glyph.advanceWidth
                 });
             }
-
-            pages.push({
-                index: pageIndex,
-                bitmap
-            });
+            pages.push(bitmap);
         };
 
         // Розподіляємо гліфи між сторінками.
@@ -174,7 +161,7 @@ export class BitmapFontAtlasBuilder {
 
             if (!fits(singlePack)) {
                 throw new Error(
-                    `Glyph U+${frame.source.codePoint.toString(16).toUpperCase()} ` +
+                    `Glyph U+${frame.source.glyph.charCode} ` +
                     `exceeds maximum atlas page size`
                 );
             }

@@ -1,25 +1,19 @@
-import {TrueTypeFont} from "./TrueTypeFont";
-import {BitmapFontAtlas, BitmapFontAtlasBuilder, GlyphSource} from "./BitmapFontAtlasBuilder";
+import {RasterizedGlyph, TrueTypeFont} from "./TrueTypeFont";
+import {BitmapFontAtlas, BitmapFontAtlasBuilder, GlyphFrame} from "./BitmapFontAtlasBuilder";
 
 export class TtfFontToAtlasConverter {
 
     public convert(ttfFont: ArrayBuffer, fontSize: number, padding: number, maxPageSize: number, charSource: string): BitmapFontAtlas {
 
         const font = new TrueTypeFont(new Uint8Array(ttfFont));
-        const sources: GlyphSource[] = [];
+        const rasterizedGlyphs: RasterizedGlyph[] = [];
 
         for (const codePoint of this.getCodePointsFromChars(charSource)) {
-            const result = font.getGlyphBitmap(codePoint, fontSize);
-            sources.push({
-                codePoint,
-                bitmap: result.bitmap,
-                offsetX: result.glyph.offsetX,
-                offsetY: result.glyph.offsetY,
-                advanceWidth: result.glyph.advanceWidth
-            });
+            const rasterizedGlyph = font.getGlyphBitmap(codePoint, fontSize);
+            rasterizedGlyphs.push(rasterizedGlyph);
         }
-        const builder = new BitmapFontAtlasBuilder(maxPageSize, padding);
-        return builder.build(sources);
+        const fontAtlasBuilder = new BitmapFontAtlasBuilder(maxPageSize, padding);
+        return fontAtlasBuilder.build(rasterizedGlyphs);
     }
 
     public saveAsFontJson(fileName: string, atlas: BitmapFontAtlas) {

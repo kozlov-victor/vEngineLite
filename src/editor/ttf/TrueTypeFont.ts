@@ -95,6 +95,7 @@ export interface GlyphSegment {
 }
 
 export interface BitmapGlyph {
+    charCode: number;
     // Позиція та розмір у сторінці.
     x: number;
     y: number;
@@ -914,6 +915,7 @@ export class TrueTypeFont {
             return {
                 bitmap: new Bitmap(0, 0),
                 glyph: {
+                    charCode: codePoint,
                     x: 0,
                     y: 0,
                     width: 0,
@@ -933,6 +935,7 @@ export class TrueTypeFont {
             return {
                 bitmap: new Bitmap(0, 0),
                 glyph: {
+                    charCode: codePoint,
                     x: 0,
                     y: 0,
                     width: 0,
@@ -982,6 +985,7 @@ export class TrueTypeFont {
         return {
             bitmap,
             glyph: {
+                charCode: codePoint,
                 x: 0,
                 y: 0,
                 width,

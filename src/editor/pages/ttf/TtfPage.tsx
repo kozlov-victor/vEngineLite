@@ -3,11 +3,12 @@ import {DI} from "@engine/core/ioc";
 import {VEngineTsxFactory} from "@engine/renderable/tsx/_genetic/vEngineTsxFactory.h";
 import {Files} from "../../services/files";
 import {Reactive} from "@engine/renderable/tsx/decorator/reactive";
-import {BitmapFontAtlas, BitmapFontPage} from "../../ttf/BitmapFontAtlasBuilder";
+import {BitmapFontAtlas} from "../../ttf/BitmapFontAtlasBuilder";
 import {CYR_CHARS, LAT_CHARS, STANDARD_SYMBOLS} from "@vEngineLite/gameObject/text/font-factory/create-font-from-css";
 import {TtfFontToAtlasConverter} from "../../ttf/TtfFontToAtlasConverter";
 import {ReactiveForm} from "@engine/renderable/tsx/dom/forms/reactive.form";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
+import {Bitmap} from "../../ttf/Bitmap";
 
 @DI.Injectable()
 export class TtfPage extends BaseTsxComponent {
@@ -44,7 +45,7 @@ export class TtfPage extends BaseTsxComponent {
                     <If condition={this.atlas!==undefined}>
                         {()=>
                             <Loop array={this.atlas.pages}>
-                                {(page:BitmapFontPage,i:number)=>
+                                {(_:Bitmap,i:number)=>
                                     <>
                                         <button onclick={() => this.activePageIndex = i}>Page {i+1}</button>
                                     </>
@@ -56,9 +57,9 @@ export class TtfPage extends BaseTsxComponent {
                         {()=>
                            <>
                                <div>
-                                   <canvas width={this.atlas.pages[this.activePageIndex].bitmap.width}
-                                           height={this.atlas.pages[this.activePageIndex].bitmap.height}
-                                           ref={canvas => this.atlas.pages[this.activePageIndex].bitmap.drawToCanvas(canvas)}/>
+                                   <canvas width={this.atlas.pages[this.activePageIndex].width}
+                                           height={this.atlas.pages[this.activePageIndex].height}
+                                           ref={canvas => this.atlas.pages[this.activePageIndex].drawToCanvas(canvas)}/>
                                </div>
                                <div>
                                    <button onclick={this.save}>Save</button>
@@ -114,14 +115,14 @@ export class TtfPage extends BaseTsxComponent {
         let  i = 0;
         const pages:string[] = [];
         const fileNameClean = Files.getFileNameNoExt(this.font.file.name);
-        for (const bitmap of this.atlas.pages.map(it=>it.bitmap)) {
+        for (const bitmap of this.atlas.pages) {
             const pageFileName = `${fileNameClean}_${i++}.png`;
             await bitmap.saveAsPng(pageFileName);
             pages.push(pageFileName);
         }
 
         const data = {pages,glyphs:this.atlas.glyphs};
-        await Files.saveToFile(JSON.stringify(data),`${fileNameClean}.json`);
+        await Files.saveToFile(JSON.stringify(data,undefined,4),`${fileNameClean}.json`);
     }
 
 }
