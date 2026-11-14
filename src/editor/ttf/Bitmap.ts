@@ -1,4 +1,5 @@
 import {Files} from "../services/files";
+import {Color} from "@vEngineLite/rendering/Color";
 
 export class Bitmap {
     readonly pixels: Uint8Array;
@@ -30,7 +31,7 @@ export class Bitmap {
         this.pixels.fill(0);
     }
 
-    public drawToCanvas(canvas: HTMLCanvasElement) {
+    public drawToCanvas(canvas: HTMLCanvasElement, fillColor: Color) {
         canvas.width = this.width;
         canvas.height = this.height;
 
@@ -47,21 +48,26 @@ export class Bitmap {
             this.height
         );
 
+        const normColor = fillColor.getNormalized();
+        const r = Math.floor(normColor[0] * normColor[3] * 255);
+        const g = Math.floor(normColor[1] * normColor[3] * 255);
+        const b = Math.floor(normColor[2] * normColor[3] * 255);
+
         for (let i = 0; i < this.pixels.length; i++) {
             const offset = i * 4;
 
-            imageData.data[offset] = 0;
-            imageData.data[offset + 1] = 0;
-            imageData.data[offset + 2] = 0;
+            imageData.data[offset    ] = r;
+            imageData.data[offset + 1] = g;
+            imageData.data[offset + 2] = b;
             imageData.data[offset + 3] = this.pixels[i];
         }
 
         ctx.putImageData(imageData, 0, 0);
     }
 
-    public async saveAsPng(fileName: string): Promise<void> {
+    public async saveAsPng(fileName: string, fillColor = Color.WHITE()): Promise<void> {
         const canvas = document.createElement("canvas");
-        this.drawToCanvas(canvas);
+        this.drawToCanvas(canvas, fillColor);
 
         const blob = await new Promise<Blob>((resolve, reject) => {
             canvas.toBlob(result => {

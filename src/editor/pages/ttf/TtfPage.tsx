@@ -9,6 +9,7 @@ import {TtfFontToAtlasConverter} from "../../ttf/TtfFontToAtlasConverter";
 import {ReactiveForm} from "@engine/renderable/tsx/dom/forms/reactive.form";
 import {If, Loop} from "@engine/renderable/tsx/base/base-flow";
 import {Bitmap} from "../../ttf/Bitmap";
+import {Color} from "@vEngineLite/rendering/Color";
 
 @DI.Injectable()
 export class TtfPage extends BaseTsxComponent {
@@ -36,7 +37,7 @@ export class TtfPage extends BaseTsxComponent {
                     </tr>
                 </table>
                 <div>
-                    <button onclick={this.openFile}>ttf</button>
+                    <button onclick={this.openFile}>TTF/OTF</button>
                 </div>
                 <div>
                     <button onclick={this.convert}>Convert</button>
@@ -59,7 +60,7 @@ export class TtfPage extends BaseTsxComponent {
                                <div>
                                    <canvas width={this.atlas.pages[this.activePageIndex].width}
                                            height={this.atlas.pages[this.activePageIndex].height}
-                                           ref={canvas => this.atlas.pages[this.activePageIndex].drawToCanvas(canvas)}/>
+                                           ref={canvas => this.atlas.pages[this.activePageIndex].drawToCanvas(canvas, Color.BLACK())}/>
                                </div>
                                <div>
                                    <button onclick={this.save}>Save</button>
@@ -75,7 +76,7 @@ export class TtfPage extends BaseTsxComponent {
     @Reactive.Method()
     private async openFile() {
         try {
-            const file = await Files.openFile(['ttf']);
+            const file = await Files.openFile(['ttf', 'otf']);
             if (!file || !file.file) {
                 console.error('No file opened');
                 return;

@@ -3,13 +3,7 @@ import { IFrame } from "@vEngineLite/types";
 import {TexturePacker} from "../spritesheet/TexturePacker";
 import {BitmapGlyph, RasterizedGlyph} from "./TrueTypeFont";
 
-
-export interface BitmapFontAtlas {
-    pages: Bitmap[];
-    glyphs: (BitmapGlyph & {pageIndex:number})[];
-}
-
-export interface GlyphFrame extends IFrame {
+interface GlyphFrame extends IFrame {
     source: RasterizedGlyph;
 }
 
@@ -17,6 +11,11 @@ interface PackedPage {
     width: number;
     height: number;
     rects: GlyphFrame[];
+}
+
+export interface BitmapFontAtlas {
+    pages: Bitmap[];
+    glyphs: (BitmapGlyph & {pageIndex:number})[];
 }
 
 export class BitmapFontAtlasBuilder {

@@ -131,7 +131,6 @@ export class TrueTypeFont {
     private readonly tables = new Map<string, FontTable>();
     private readonly head: FontHead;
 
-    private readonly version: number;
     private readonly numTables: number;
     private readonly maxp: FontMaxp;
     private readonly loca: FontLoca;
@@ -143,9 +142,9 @@ export class TrueTypeFont {
     constructor(private readonly data: Uint8Array) {
         this.reader = new BinaryReader(data);
 
-        this.version = this.reader.uint32();
+        const sfntVersion = this.reader.uint32();
 
-        if (this.version !== 0x00010000) {
+        if (sfntVersion !== 0x00010000 && sfntVersion !== 0x74727565 && sfntVersion !== 0x4F54544F) {
             throw new Error("Unsupported font format");
         }
 
@@ -155,6 +154,10 @@ export class TrueTypeFont {
         this.reader.skip(6);
 
         this.readTableDirectory();
+        if (!this.tables.has("glyf") || !this.tables.has("loca")) {
+            throw new Error("Unsupported font outlines: TrueType glyf/loca tables are required.");
+        }
+
         this.head = this.readHead();
         this.maxp = this.readMaxp();
         this.loca = this.readLoca();
@@ -164,12 +167,6 @@ export class TrueTypeFont {
         this.hhea = this.readHhea();
         this.hmtx = this.readHmtx();
         this.cmap = this.readCmap();
-
-        const glyphIndex = this.cmap.get(65)!;
-        const glyph = this.getSimpleGlyphData(glyphIndex);
-
-        console.log("Points:", glyph.points.length);
-
     }
 
     private readHead(): FontHead {

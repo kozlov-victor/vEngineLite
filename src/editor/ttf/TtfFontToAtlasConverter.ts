@@ -1,5 +1,5 @@
 import {RasterizedGlyph, TrueTypeFont} from "./TrueTypeFont";
-import {BitmapFontAtlas, BitmapFontAtlasBuilder, GlyphFrame} from "./BitmapFontAtlasBuilder";
+import {BitmapFontAtlas, BitmapFontAtlasBuilder} from "./BitmapFontAtlasBuilder";
 
 export class TtfFontToAtlasConverter {
 
@@ -14,10 +14,6 @@ export class TtfFontToAtlasConverter {
         }
         const fontAtlasBuilder = new BitmapFontAtlasBuilder(maxPageSize, padding);
         return fontAtlasBuilder.build(rasterizedGlyphs);
-    }
-
-    public saveAsFontJson(fileName: string, atlas: BitmapFontAtlas) {
-
     }
 
     private getCodePointsFromChars(charset: string): number[] {
