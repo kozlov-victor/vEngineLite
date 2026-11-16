@@ -88,7 +88,6 @@ export class TileMaps {
                 }
             }
         }
-
         return {
             layers,
             tileSet
