@@ -1,4 +1,4 @@
-import {ITileLayer} from "@vEngineLite/gameObject/TileMap";
+import {ITileLayer, ITileSet} from "@vEngineLite/gameObject/TileMap";
 
 export interface ITiledMapLayer {
     data: number[];
@@ -29,6 +29,7 @@ export interface ITiledMapTileSet {
     tilecount:number;
     tileheight:number;
     tilewidth:number;
+    tiles?: ({animation?:({tileId:number,duration:number})[],id:number})[]
 }
 
 export interface ITiledMapProperty {
@@ -58,7 +59,7 @@ export interface ITiledTileMap {
 
 export class TileMaps {
 
-    public static fromTiledTileMap(map:ITiledTileMap, layerNames: string[], tileSetName: string): {layers: ITileLayer[],mapWidthInTiles: number,tilesetCols: number,tilesetRows: number} {
+    public static fromTiledTileMap(map:ITiledTileMap, layerNames: string[], tileSetName: string): {tileSet: ITileSet, layers: ITileLayer[]} {
         const layers: ITileLayer[] = [];
         for (const layerName of layerNames) {
             const layer = map.layers.find(layer => layer.name == layerName);
@@ -69,13 +70,29 @@ export class TileMaps {
                 parallaxY: layer.parallaxy ?? 1,
             });
         }
-        const tileSet = map.tilesets.find(tileset => tileset.name == tileSetName);
-        if (!tileSet) throw new Error(`Tile set ${tileSetName} not found!`);
+        const tiledTileSet = map.tilesets.find(tileset => tileset.name == tileSetName);
+        if (!tiledTileSet) throw new Error(`Tile set ${tileSetName} not found!`);
+        const tileSet:ITileSet = {
+            mapWidthInTiles: map.width,
+            tilesetRows: tiledTileSet.imageheight / tiledTileSet.tileheight,
+            tilesetCols: tiledTileSet.columns
+        }
+
+        if (tiledTileSet.tiles) {
+            for (const tile of tiledTileSet.tiles) {
+                if (!tile.animation) continue;
+                if (!tileSet.aminatedTiles) tileSet.aminatedTiles = {};
+                const tileIndex = tile.id - 1;
+                if (!tileSet.aminatedTiles[tileIndex]) tileSet.aminatedTiles[tileIndex] = [];
+                for (const anim of tile.animation) {
+                    tileSet.aminatedTiles[tile.id].push({duration: anim.duration, tileId: anim.tileId - 1});
+                }
+            }
+        }
+
         return {
             layers,
-            mapWidthInTiles: map.width,
-            tilesetRows: tileSet.imageheight / tileSet.tileheight,
-            tilesetCols: tileSet.columns,
+            tileSet
         }
     }
 

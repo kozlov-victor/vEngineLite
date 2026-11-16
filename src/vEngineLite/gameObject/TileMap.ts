@@ -10,6 +10,18 @@ import {IRigidBodyParamsBase, RigidBody} from "../physics/IPhysics";
 import {ArcadeRigidBodyType} from "../physics/ArcadePhysics";
 import {IGeometry} from "../types";
 
+export interface ITileAnimationFrame {
+    tileId: number;
+    duration: number;
+}
+
+export interface ITileSet {
+    mapWidthInTiles: number,
+    tilesetCols: number,
+    tilesetRows: number,
+    aminatedTiles?: Record<number, ITileAnimationFrame[]>;
+}
+
 export interface ITileLayer {
     data: number[];
     parallax?: number;
@@ -18,9 +30,11 @@ export interface ITileLayer {
 }
 
 interface Tile extends IGeometry {
+    readonly tileIndex: number;
     readonly size: Size;
     readonly position: Vector2;
     readonly uv: Vector2;
+    readonly animated: boolean;
 }
 
 interface RenderableLayer {
@@ -41,19 +55,19 @@ export class TileMap extends RenderableContainer {
     private readonly bodies:RigidBody[] = [];
     private readonly mapHeightInTiles: number;
 
+    private time: number;
 
     constructor(
         scene: Scene,
         private readonly layers: ITileLayer[],
-        private readonly mapWidthInTiles: number,
-        tilesetCols: number,
-        tilesetRows: number,
+        private readonly tileSet: ITileSet,
         texture: Texture
     ) {
         super(scene);
-        const tileWidth = Math.floor(texture.width / tilesetCols);
-        const tileHeight = Math.floor(texture.height / tilesetRows);
-        this.mapHeightInTiles = Math.ceil(layers[0].data.length / this.mapWidthInTiles);
+        const tileWidth = Math.floor(texture.width / tileSet.tilesetCols);
+        const tileHeight = Math.floor(texture.height / tileSet.tilesetRows);
+        this.tileSize = new Size(tileWidth, tileHeight);
+        this.mapHeightInTiles = Math.ceil(layers[0].data.length / tileSet.mapWidthInTiles);
 
         this.spriteRenderer = {
             texture,
@@ -63,15 +77,11 @@ export class TileMap extends RenderableContainer {
             },
             color: Color.WHITE(),
         }
-        this.tileSize = new Size(tileWidth, tileHeight);
 
         for (const layer of layers) {
             const tiles = this.createTiles(
                 layer.data,
-                mapWidthInTiles,
-                tilesetCols,
-                tileWidth,
-                tileHeight
+                this.tileSet
             );
             this.renderableLayers.push({
                 tiles,
@@ -80,13 +90,13 @@ export class TileMap extends RenderableContainer {
             });
         }
 
-        this.size.wh(mapWidthInTiles * tileWidth, this.mapHeightInTiles * tileHeight)
+        this.size.wh(this.tileSet.mapWidthInTiles * tileWidth, this.mapHeightInTiles * tileHeight)
     }
 
     public createCollisionBodies(solidTiles: number[], params?: IRigidBodyParamsBase) {
         for (const layer of this.layers) {
             this.createMergedCollisionBodies(
-                layer.data, this.mapWidthInTiles,
+                layer.data, this.tileSet.mapWidthInTiles,
                 this.mapHeightInTiles,
                 this.tileSize.w,
                 this.tileSize.h,
@@ -111,6 +121,7 @@ export class TileMap extends RenderableContainer {
             const parallaxOffsetY =
                 this.scene.app.camera.position.y * (1 - layer.parallaxY);
             for (const tile of layer.tiles) {
+                if (tile.animated) this.updateAnimatedTileUV(tile);
                 this.spriteRenderer.rect.uv.from(tile.uv);
                 renderer.batchSprite(
                     this.tileSize,
@@ -126,10 +137,7 @@ export class TileMap extends RenderableContainer {
 
     private createTiles(
         data: number[],
-        mapWidthInTiles: number,
-        tilesetCols: number,
-        tileWidth: number,
-        tileHeight: number
+        tileSet: ITileSet,
     ) {
         const tiles: Tile[] = [];
         for (let i = 0; i < data.length; i++) {
@@ -138,19 +146,35 @@ export class TileMap extends RenderableContainer {
             tileIndex--; // рахунок саміх тайлів також починається з 0
 
             const tile:Tile = {
+                tileIndex,
                 position: new Vector2(
-                    (i % mapWidthInTiles) * tileWidth,
-                    Math.floor(i / mapWidthInTiles) * tileHeight
+                    (i % tileSet.mapWidthInTiles) * this.tileSize.w,
+                    Math.floor(i / tileSet.mapWidthInTiles) * this.tileSize.h
                 ),
-                uv: new Vector2(
-                    (tileIndex % tilesetCols) * tileWidth + 0.5,
-                    Math.floor(tileIndex / tilesetCols) * tileHeight + 0.5
-                ),
+                uv: new Vector2(),
                 size: this.tileSize,
+                animated: tileSet.aminatedTiles?.[i]!==undefined
             };
+            this.setTileUvByTileIndex(tile,tileIndex);
             tiles.push(tile);
         }
         return tiles;
+    }
+
+    private updateAnimatedTileUV(tile: Tile) {
+        const now = this.scene.app.getTime();
+        if (!this.time) this.time = now;
+        const delta = this.time - now;
+        // визначити поточний фрейм анімації
+        this.tileSet.aminatedTiles[tile.tileIndex]
+
+        this.time = now;
+    }
+
+    private setTileUvByTileIndex(tile: Tile, tileIndex: number) {
+        const u = (tileIndex % this.tileSet.tilesetCols) * tileIndex + 0.5;
+        const v = Math.floor(tileIndex / this.tileSet.tilesetCols) * this.tileSize.h + 0.5;
+        tile.uv.uv(u,v);
     }
 
     private createMergedCollisionBodies(

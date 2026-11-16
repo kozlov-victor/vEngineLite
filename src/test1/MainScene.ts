@@ -66,8 +66,7 @@ export class MainScene extends Scene {
                 ['backgroundLayer','foregroundLayer'],'tiles'
             );
             const tileMap = new TileMap(
-                this,tiledData.layers,tiledData.mapWidthInTiles,
-                tiledData.tilesetCols,tiledData.tilesetRows,
+                this,tiledData.layers,tiledData.tileSet,
                 tileTexture
             );
             const solidTiles = JSON.parse(TileMaps.getTiledMapCustomProperty(tiledFile, 'solidTiles')?.value as string ?? '') as number[];
