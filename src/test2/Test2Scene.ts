@@ -42,9 +42,11 @@ export class Test2Scene extends Scene {
                     parallax: 1
                 }
             ],
-            10, // map width in tiles
-            12,  // tileset columns
-            13,  // tileset rows
+            {
+               mapWidthInTiles: 10,
+               tilesetCols: 12,
+               tilesetRows: 13
+            },
             tileMapTexture
         );
 

@@ -29,7 +29,7 @@ export interface ITiledMapTileSet {
     tilecount:number;
     tileheight:number;
     tilewidth:number;
-    tiles?: ({animation?:({tileId:number,duration:number})[],id:number})[]
+    tiles?: ({animation?:({tileid:number,duration:number})[],id:number})[]
 }
 
 export interface ITiledMapProperty {
@@ -82,10 +82,9 @@ export class TileMaps {
             for (const tile of tiledTileSet.tiles) {
                 if (!tile.animation) continue;
                 if (!tileSet.aminatedTiles) tileSet.aminatedTiles = {};
-                const tileIndex = tile.id - 1;
-                if (!tileSet.aminatedTiles[tileIndex]) tileSet.aminatedTiles[tileIndex] = [];
+                if (!tileSet.aminatedTiles[tile.id]) tileSet.aminatedTiles[tile.id] = [];
                 for (const anim of tile.animation) {
-                    tileSet.aminatedTiles[tile.id].push({duration: anim.duration, tileId: anim.tileId - 1});
+                    tileSet.aminatedTiles[tile.id].push({tileId: anim.tileid, duration: anim.duration});
                 }
             }
         }

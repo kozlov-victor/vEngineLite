@@ -35,6 +35,9 @@ interface Tile extends IGeometry {
     readonly position: Vector2;
     readonly uv: Vector2;
     readonly animated: boolean;
+    animationElapsed: number;
+    animationLastUpdate: number;
+    animationFrameIndex: number;
 }
 
 interface RenderableLayer {
@@ -55,7 +58,6 @@ export class TileMap extends RenderableContainer {
     private readonly bodies:RigidBody[] = [];
     private readonly mapHeightInTiles: number;
 
-    private time: number;
 
     constructor(
         scene: Scene,
@@ -121,7 +123,9 @@ export class TileMap extends RenderableContainer {
             const parallaxOffsetY =
                 this.scene.app.camera.position.y * (1 - layer.parallaxY);
             for (const tile of layer.tiles) {
-                if (tile.animated) this.updateAnimatedTileUV(tile);
+                if (tile.animated) {
+                    this.updateAnimatedTileUV(tile);
+                }
                 this.spriteRenderer.rect.uv.from(tile.uv);
                 renderer.batchSprite(
                     this.tileSize,
@@ -153,7 +157,10 @@ export class TileMap extends RenderableContainer {
                 ),
                 uv: new Vector2(),
                 size: this.tileSize,
-                animated: tileSet.aminatedTiles?.[i]!==undefined
+                animated: tileSet.aminatedTiles?.[tileIndex]!==undefined,
+                animationElapsed: 0,
+                animationLastUpdate: this.scene.app.getTime(),
+                animationFrameIndex: -1,
             };
             this.setTileUvByTileIndex(tile,tileIndex);
             tiles.push(tile);
@@ -162,17 +169,33 @@ export class TileMap extends RenderableContainer {
     }
 
     private updateAnimatedTileUV(tile: Tile) {
-        const now = this.scene.app.getTime();
-        if (!this.time) this.time = now;
-        const delta = this.time - now;
-        // визначити поточний фрейм анімації
-        this.tileSet.aminatedTiles[tile.tileIndex]
+        const frames = this.tileSet.aminatedTiles?.[tile.tileIndex];
+        if (!frames?.length) return;
 
-        this.time = now;
+        const now = this.scene.app.getTime();
+        tile.animationElapsed += Math.max(0, now - tile.animationLastUpdate);
+        tile.animationLastUpdate = now;
+
+        const totalDuration = frames.reduce((total, frame) => total + frame.duration, 0);
+        if (totalDuration <= 0) return;
+
+        const elapsed = tile.animationElapsed % totalDuration;
+        let frameEnd = 0;
+
+        for (let i = 0; i < frames.length; i++) {
+            frameEnd += frames[i].duration;
+            if (elapsed < frameEnd) {
+                if (tile.animationFrameIndex !== i) {
+                    tile.animationFrameIndex = i;
+                    this.setTileUvByTileIndex(tile, frames[i].tileId);
+                }
+                return;
+            }
+        }
     }
 
     private setTileUvByTileIndex(tile: Tile, tileIndex: number) {
-        const u = (tileIndex % this.tileSet.tilesetCols) * tileIndex + 0.5;
+        const u = (tileIndex % this.tileSet.tilesetCols) * this.tileSize.w + 0.5;
         const v = Math.floor(tileIndex / this.tileSet.tilesetCols) * this.tileSize.h + 0.5;
         tile.uv.uv(u,v);
     }
