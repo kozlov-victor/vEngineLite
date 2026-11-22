@@ -7,7 +7,7 @@ import type {MiniBundlerTransformPlugin} from "../base/MiniBundlerTransformPlugi
 
 export class TsxIdTransformerPlugin implements MiniBundlerTransformPlugin {
 
-    private counter: number;
+    private counter = 0;
 
     async onBuildStarted(build: PluginBuild) {
         this.counter = 0;

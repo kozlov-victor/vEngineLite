@@ -51,37 +51,33 @@ export const DI = {
         };
     },
     Inject: <T = unknown>(token?:InjectionToken<T>)=>{
-        return <This,Value extends T>(value: undefined, context: ClassFieldDecoratorContext<This,Value>):void => {
-            context.addInitializer(function(){
+        return <This,Value extends T>(
+            _value: undefined,
+            context: ClassFieldDecoratorContext<This,Value>
+        ): ((this: This, value: Value) => NonNullable<Value>) => {
+            return function(this: This, _initialValue: Value): NonNullable<Value> {
                 const thisToken = (this as any).constructor.__injectable as string;
                 if (!thisToken) {
                     console.error(this);
                     throw new Error(`not injectable: ${(this as any).constructor.name}`);
                 }
-                Object.defineProperty(this, context.name, {
-                    get: () => {
-                        if (!token) {
-                            throw new Error(`can not inject ${String(context.name)}: no runtime type was provided; use the DI injection transformer`);
-                        }
-                        const clazz = isConstructor(token) ? token : token();
-                        const injectToken = (clazz as any).__injectable;
-                        if (!injectToken) {
-                            throw new Error(`not injectable: consider adding @Injectable() decorator to class ${clazz.name}`);
-                        }
-                        if (!DIContext[injectToken]) {
-                            const constructorArgumentsLength = (clazz as any).__constructorArgumentsLength as number;
-                            if (constructorArgumentsLength>0) {
-                                throw new Error(`can not inject ${injectToken}: no default constructor`);
-                            }
-                            DIContext[injectToken] = new clazz();
-                        }
-                        return DIContext[injectToken];
-                    },
-                    set: val => {
-                        // pass
+                if (!token) {
+                    throw new Error(`can not inject ${String(context.name)}: no runtime type was provided; use the DI injection transformer`);
+                }
+                const clazz = isConstructor(token) ? token : token();
+                const injectToken = (clazz as any).__injectable;
+                if (!injectToken) {
+                    throw new Error(`not injectable: consider adding @Injectable() decorator to class ${clazz.name}`);
+                }
+                if (!DIContext[injectToken]) {
+                    const constructorArgumentsLength = (clazz as any).__constructorArgumentsLength as number;
+                    if (constructorArgumentsLength>0) {
+                        throw new Error(`can not inject ${injectToken}: no default constructor`);
                     }
-                });
-            });
+                    DIContext[injectToken] = new clazz();
+                }
+                return DIContext[injectToken];
+            };
         };
     },
 }

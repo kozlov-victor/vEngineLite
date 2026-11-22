@@ -69,6 +69,7 @@ export class CustomTransformerPlugin {
                     transformer.configure?.(build);
                 }
 
+                //@ts-ignore
                 build.onStart(async () => {
                     console.log('Збірка розпочалася...');
                     for (const transformer of self.transformPlugins) {

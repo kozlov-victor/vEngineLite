@@ -5,6 +5,16 @@ import {getComponentUuid, VEngineTsxFactory} from "@engine/renderable/tsx/_genet
 import {BaseTsxComponent} from "@engine/renderable/tsx/base/baseTsxComponent";
 import {VirtualFragment} from "@engine/renderable/tsx/_genetic/virtualFragment";
 
+const getNodeIdentity = (node:VirtualNode):string|undefined => {
+    const {key, trackBy, __id} = node.props;
+    if (key!==undefined && key!==null) {
+        return JSON.stringify([__id, key]);
+    }
+    if (trackBy!==undefined || __id!==undefined) {
+        return JSON.stringify([__id, trackBy]);
+    }
+    return undefined;
+};
 
 export abstract class AbstractTsxDOMRenderer<T> {
 
@@ -77,7 +87,7 @@ export abstract class AbstractTsxDOMRenderer<T> {
 
     private reconcile(
         newVirtualNode:Optional<VirtualNode>,
-        oldVirtualNode:Optional<VirtualNode>,realNode:T,
+        oldVirtualNode:Optional<VirtualNode>,realNode:Optional<T>,
         parent:T,
         virtualParent:Optional<VirtualNode>
     ) {
@@ -109,21 +119,71 @@ export abstract class AbstractTsxDOMRenderer<T> {
         return newRealNode;
     }
 
+    //  діти тепер зіставляються за key, trackBy і згенерованим id, а не лише за позицією. При вставці чи видаленні renderer переміщує збережені вузли через insertChildAt, створює тільки нові, а onDestroyed викликає лише для справді видалених компонентів
     private reconcileChildren(newVirtualNode:Optional<VirtualNode>,oldVirtualNode:Optional<VirtualNode>,parent:T) {
-        const maxNumOfChild =
-            Math.max(
-                newVirtualNode?.children?.length ?? 0,
-                oldVirtualNode?.children?.length ?? 0
-            );
+        const newChildren = newVirtualNode?.children ?? [];
+        const oldChildren = oldVirtualNode?.children ?? [];
         const realChildren:T[] = [];
         for (let i=0,max=this.elementCreator.getChildrenCount(parent);i<max;++i) {
-            const ch = this.elementCreator.getChildAt(parent,i);
-            realChildren.push(ch);
+            realChildren.push(this.elementCreator.getChildAt(parent,i));
         }
-        for (let i = 0;i<maxNumOfChild;++i) {
-            const newVirtualChild = newVirtualNode?.children?.[i];
-            const oldVirtualChild = oldVirtualNode?.children?.[i];
-            this.reconcile(newVirtualChild,oldVirtualChild,realChildren[i] as T,parent,newVirtualNode);
+
+        const oldIndicesByIdentity = new Map<string, number[]>();
+        for (let oldIndex = 0;oldIndex<oldChildren.length;++oldIndex) {
+            const identity = getNodeIdentity(oldChildren[oldIndex]);
+            if (identity===undefined) continue;
+            const indices = oldIndicesByIdentity.get(identity) ?? [];
+            indices.push(oldIndex);
+            oldIndicesByIdentity.set(identity,indices);
+        }
+
+        const oldIndexForNewChild:number[] = new Array(newChildren.length).fill(-1);
+        const matchedOldIndices = new Set<number>();
+        const identityOffsets = new Map<string, number>();
+        for (let newIndex = 0;newIndex<newChildren.length;++newIndex) {
+            const newChild = newChildren[newIndex];
+            const identity = getNodeIdentity(newChild);
+            let oldIndex = -1;
+
+            if (identity!==undefined) {
+                const indices = oldIndicesByIdentity.get(identity);
+                const offset = identityOffsets.get(identity) ?? 0;
+                if (indices && offset<indices.length) {
+                    oldIndex = indices[offset];
+                    identityOffsets.set(identity,offset + 1);
+                }
+            } else if (
+                newIndex<oldChildren.length &&
+                !matchedOldIndices.has(newIndex) &&
+                getNodeIdentity(oldChildren[newIndex])===undefined
+            ) {
+                oldIndex = newIndex;
+            }
+
+            if (oldIndex!==-1) {
+                oldIndexForNewChild[newIndex] = oldIndex;
+                matchedOldIndices.add(oldIndex);
+            }
+        }
+
+        for (let oldIndex = 0;oldIndex<oldChildren.length;++oldIndex) {
+            if (matchedOldIndices.has(oldIndex)) continue;
+            this.elementCreator.removeElement(realChildren[oldIndex]);
+            this.destroyNode(oldChildren[oldIndex]);
+        }
+
+        for (let newIndex = 0;newIndex<newChildren.length;++newIndex) {
+            const oldIndex = oldIndexForNewChild[newIndex];
+            const oldChild = oldIndex===-1 ? undefined : oldChildren[oldIndex];
+            let realChild = oldIndex===-1 ? undefined : realChildren[oldIndex];
+
+            realChild = this.reconcile(newChildren[newIndex],oldChild,realChild,parent,newVirtualNode);
+            if (
+                realChild!==undefined &&
+                this.elementCreator.getChildAt(parent,newIndex)!==realChild
+            ) {
+                this.elementCreator.insertChildAt(parent,realChild,newIndex);
+            }
         }
     }
 
